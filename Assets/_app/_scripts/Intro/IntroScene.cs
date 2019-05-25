@@ -1,12 +1,13 @@
-﻿using System.Collections;
-using EA4S.Animation;
-using EA4S.CameraEffects;
-using EA4S.Core;
-using EA4S.MinigamesCommon;
-using EA4S.UI;
+using Antura.Animation;
+using Antura.Core;
+using Antura.CameraEffects;
+using Antura.Keeper;
+using Antura.Minigames;
+using Antura.UI;
+using System.Collections;
 using UnityEngine;
 
-namespace EA4S.Intro
+namespace Antura.Intro
 {
     /// <summary>
     /// Manages the Intro scene, which shows a non-interactive introduction to the game.
@@ -31,7 +32,9 @@ namespace EA4S.Intro
 
         public IntroRocketCharacter[] m_MazeCharacters;
         public float m_MazeCharactesVelocity = 0.1f;
+
         public AnimationCurve cameraAnimationCurve;
+
         //public UnityStandardAssets.ImageEffects.ForegroundCameraEffect foregroundEffect;
         public VignettingSimple vignetting;
 
@@ -44,13 +47,14 @@ namespace EA4S.Intro
         {
             base.Start();
             GlobalUI.ShowPauseMenu(false);
- 
+
             countDown = new CountdownTimer(m_EndDelay);
             m_CameraEndPosition = Camera.main.transform.position;
             m_CameraStartPosition = m_CameraEndPosition + cameraOffset;
             autoMoveObjects = environment.GetComponentsInChildren<AutoMove>();
 
-            foreach (var mazeCharacter in m_MazeCharacters) {
+            foreach (var mazeCharacter in m_MazeCharacters)
+            {
                 mazeCharacter.transform.position += new Vector3(0, 10f, 0);
                 mazeCharacter.m_Velocity = m_MazeCharactesVelocity;
             }
@@ -70,10 +74,11 @@ namespace EA4S.Intro
         {
             Debugging.DebugManager.OnSkipCurrentScene -= SkipScene;
 
-            if (countDown != null) {
+            if (countDown != null)
+            {
                 countDown.onTimesUp -= CountDown_onTimesUp;
             }
-            Debug.Log("OnDisable() Intro scene");
+            //Debug.Log("OnDisable() Intro scene");
         }
 
         void SkipScene()
@@ -93,15 +98,20 @@ namespace EA4S.Intro
             for (int i = 0; i < autoMoveObjects.Length; ++i)
                 autoMoveObjects[i].SetTime(t);
 
-            if (m_Start) {
+            if (m_Start)
+            {
                 m_Start = false;
                 Debug.Log("Start Introduction");
-                foreach (var mazeCharacter in m_MazeCharacters) {
+                foreach (var mazeCharacter in m_MazeCharacters)
+                {
                     mazeCharacter.SetDestination();
                 }
                 StartCoroutine(DoIntroduction());
-            } else {
-                if (m_End) {
+            }
+            else
+            {
+                if (m_End)
+                {
                     countDown.Update(Time.deltaTime);
                 }
             }
@@ -120,8 +130,10 @@ namespace EA4S.Intro
         IEnumerator DoIntroduction()
         {
             bool completed = false;
-            System.Func<bool> CheckIfCompleted = () => {
-                if (completed) {
+            System.Func<bool> CheckIfCompleted = () =>
+            {
+                if (completed)
+                {
                     // Reset it
                     completed = false;
                     return true;
@@ -133,7 +145,7 @@ namespace EA4S.Intro
 
             yield return new WaitForSeconds(m_StateDelay);
 
-            KeeperManager.I.PlayDialog(Database.LocalizationDataId.Intro_welcome, true, true, OnCompleted);
+            KeeperManager.I.PlayDialog(Database.LocalizationDataId.Intro_Welcome, true, true, OnCompleted);
 
             yield return new WaitUntil(CheckIfCompleted);
             yield return new WaitForSeconds(m_StateDelay);
@@ -166,7 +178,6 @@ namespace EA4S.Intro
             yield return new WaitUntil(CheckIfCompleted);
 
             m_End = true;
-
         }
     }
 }

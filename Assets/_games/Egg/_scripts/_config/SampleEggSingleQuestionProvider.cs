@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
-using EA4S.Core;
-using EA4S.MinigamesAPI;
-using EA4S.MinigamesAPI.Sample;
+﻿using Antura.LivingLetters;
+using Antura.LivingLetters.Sample;
+using Antura.Core;
+using System.Collections.Generic;
 
-namespace EA4S.Minigames.Egg
+namespace Antura.Minigames.Egg
 {
     public class SampleEggSingleQuestionProvider : IQuestionProvider
     {
@@ -15,17 +15,15 @@ namespace EA4S.Minigames.Egg
         {
             ILivingLetterData questionSentence = null;
 
-            List<ILivingLetterData> correctAnswers = new List<ILivingLetterData>();
-            List<ILivingLetterData> wrongAnswers = new List<ILivingLetterData>();
+            var correctAnswers = new List<ILivingLetterData>();
+            var wrongAnswers = new List<ILivingLetterData>();
 
             correctAnswers.Add(AppManager.I.Teacher.GetRandomTestLetterLL());
 
-            while (wrongAnswers.Count < 8)
-            {
+            while (wrongAnswers.Count < 8) {
                 var letter = AppManager.I.Teacher.GetRandomTestLetterLL();
 
-                if (!CheckIfContains(correctAnswers, letter) && !CheckIfContains(wrongAnswers, letter))
-                {
+                if (!CheckIfContains(correctAnswers, letter) && !CheckIfContains(wrongAnswers, letter)) {
                     wrongAnswers.Add(letter);
                 }
             }
@@ -35,9 +33,11 @@ namespace EA4S.Minigames.Egg
 
         static bool CheckIfContains(List<ILivingLetterData> list, ILivingLetterData letter)
         {
-            for (int i = 0, count = list.Count; i < count; ++i)
-                if (list[i].Id == letter.Id)
+            for (int i = 0, count = list.Count; i < count; ++i) {
+                if (list[i].Id == letter.Id) {
                     return true;
+                }
+            }
             return false;
         }
     }

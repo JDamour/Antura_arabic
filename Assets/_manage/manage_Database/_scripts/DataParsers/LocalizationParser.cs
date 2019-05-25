@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace EA4S.Database.Management
+namespace Antura.Database.Management
 {
     /// <summary>
     /// Custom JSON parser for LocalizationData
@@ -17,9 +17,11 @@ namespace EA4S.Database.Management
             data.When = ToString(dict["When"]);
             data.Context = ToString(dict["Context"]);
             data.English = ToString(dict["English"]);
+            data.Italian = ToString(dict["Italian"]);
             data.Arabic = ToString(dict["Arabic"]);
             data.ArabicFemale = ToString(dict["ArabicFemale"]);
             data.AudioFile = ToString(dict["AudioFile"]);
+            //data.HasF = (ToString(dict["ArabicFemale"]) == "1") ? (data.Arabic + "_F") : "";
 
             return data;
         }

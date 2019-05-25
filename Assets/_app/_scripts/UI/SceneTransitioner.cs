@@ -1,12 +1,12 @@
 ﻿using System;
+using Antura.Audio;
+using Antura.Database;
 using DG.Tweening;
-using EA4S.Audio;
-using EA4S.Core;
-using EA4S.Database;
+using Antura.Core;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace EA4S.UI
+namespace Antura.UI
 {
     /// <summary>
     /// Controls the transition animation between two scenes.
@@ -15,8 +15,10 @@ namespace EA4S.UI
     {
         [Header("Options")]
         public float AnimationDuration = 0.75f;
+
         [Header("References")]
         public Image MaskCover;
+
         public Image Icon, Logo, BadgeIcon;
         public RectTransform Badge;
 
@@ -68,13 +70,6 @@ namespace EA4S.UI
             GlobalUI.SceneTransitioner.DoShow(_doShow, _onComplete);
         }
 
-        public static void Close()
-        {
-            if (IsShown) {
-                Show(false);
-            }
-        }
-
         void DoShow(bool _doShow, Action _onComplete = null)
         {
             IsShown = _doShow;
@@ -93,8 +88,9 @@ namespace EA4S.UI
                 if (tween.Elapsed() <= 0) {
                     tween.Pause();
                     OnRewind();
-                } else
+                } else {
                     tween.PlayBackwards();
+                }
             }
         }
 
@@ -117,8 +113,9 @@ namespace EA4S.UI
                 MiniGameData mgData = AppManager.I.NavigationManager.CurrentMiniGameData;
                 Icon.sprite = Resources.Load<Sprite>(mgData.GetIconResourcePath());
                 Sprite badgeSprite = Resources.Load<Sprite>(mgData.GetBadgeIconResourcePath());
-                if (badgeSprite == null) Badge.gameObject.SetActive(false);
-                else {
+                if (badgeSprite == null) {
+                    Badge.gameObject.SetActive(false);
+                } else {
                     Badge.gameObject.SetActive(true);
                     BadgeIcon.sprite = badgeSprite;
                 }
@@ -132,16 +129,18 @@ namespace EA4S.UI
         {
             IsPlaying = false;
             this.gameObject.SetActive(false);
-            if (onRewindCallback != null)
+            if (onRewindCallback != null) {
                 onRewindCallback();
+            }
         }
 
         void OnComplete()
         {
             Time.timeScale = 1;
             GlobalUI.Clear(false);
-            if (onCompleteCallback != null)
+            if (onCompleteCallback != null) {
                 onCompleteCallback();
+            }
         }
 
         #endregion

@@ -1,11 +1,8 @@
-﻿using EA4S.Audio;
-using EA4S.MinigamesCommon;
-
-namespace EA4S.Minigames.HideAndSeek
+namespace Antura.Minigames.HideAndSeek
 {
-    public class PlayGameState : IState
+    public class PlayGameState : FSM.IState
     {
-		HideAndSeekGame game;
+        HideAndSeekGame game;
 
         public CountdownTimer gameTime = new CountdownTimer(60.0f);
 
@@ -30,13 +27,12 @@ namespace EA4S.Minigames.HideAndSeek
             gameTime.Reset();
             game.ResetScore();
 
-            //game.Context.GetAudioManager().PlayMusic(Music.MainTheme);
-            AudioManager.I.PlayMusic(Music.MainTheme);
+            game.Context.GetAudioManager().PlayMusic(Music.MainTheme);
 
             game.Context.GetOverlayWidget().SetClockDuration(gameTime.Duration);
             game.Context.GetOverlayWidget().SetClockTime(gameTime.Time);
 
-            game.Context.GetOverlayWidget().SetMaxLives(3); 
+            game.Context.GetOverlayWidget().SetMaxLives(3);
 
             game.inGame = true;
             game.GameManager.SetTime();

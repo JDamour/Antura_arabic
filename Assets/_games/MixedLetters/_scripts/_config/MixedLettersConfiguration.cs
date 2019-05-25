@@ -1,25 +1,27 @@
-﻿using EA4S.MinigamesAPI;
-using EA4S.MinigamesAPI.Sample;
-using EA4S.MinigamesCommon;
-using EA4S.Teacher;
+using System;
+using Antura.Database;
+using Antura.LivingLetters;
+using Antura.LivingLetters.Sample;
+using Antura.Minigames.FastCrowd;
+using Antura.Teacher;
 
-namespace EA4S.Minigames.MixedLetters
+namespace Antura.Minigames.MixedLetters
 {
-    public class MixedLettersConfiguration : IGameConfiguration
+    public enum MixedLettersVariation
     {
-        public enum MixedLettersVariation : int {
-            Alphabet = 1,
-            Spelling = 2,
+        Alphabet = MiniGameCode.MixedLetters_alphabet,
+        BuildWord = MiniGameCode.MixedLetters_buildword
+    }
+
+    public class MixedLettersConfiguration : AbstractGameConfiguration
+    {
+        public MixedLettersVariation Variation { get; private set; }
+
+        public override void SetMiniGameCode(MiniGameCode code)
+        {
+            Variation = (MixedLettersVariation)code;
         }
 
-        // Game configuration
-        public IGameContext Context { get; set; }
-        public IQuestionProvider Questions { get; set; }
-        public float Difficulty { get; set; }
-        public bool TutorialEnabled { get; set; }
-        public MixedLettersVariation Variation { get; set; }
-
-        /////////////////
         // Singleton Pattern
         static MixedLettersConfiguration instance;
         public static MixedLettersConfiguration Instance
@@ -31,47 +33,63 @@ namespace EA4S.Minigames.MixedLetters
                 return instance;
             }
         }
-        /////////////////
 
         private MixedLettersConfiguration()
         {
             // Default values
-            // THESE SETTINGS ARE FOR SAMPLE PURPOSES, THESE VALUES MUST BE SET BY GAME CORE
             Questions = new SampleQuestionProvider();
             Variation = MixedLettersVariation.Alphabet;
-            Context = new MinigamesGameContext(MiniGameCode.MixedLetters_alphabet, System.DateTime.Now.Ticks.ToString());
+            Context = new MinigamesGameContext(MiniGameCode.MixedLetters_alphabet, DateTime.Now.Ticks.ToString());
             Difficulty = 0.5f;
             TutorialEnabled = true;
         }
 
-        public IQuestionBuilder SetupBuilder() {
+        public override IQuestionBuilder SetupBuilder()
+        {
             IQuestionBuilder builder = null;
 
             int nPacks = 10;
 
-            var builderParams = new Teacher.QuestionBuilderParameters();
+            var builderParams = new QuestionBuilderParameters();
             switch (Variation)
             {
                 case MixedLettersVariation.Alphabet:
                     builderParams.useJourneyForCorrect = false; // Force no journey, or the minigame will block
                     builder = new AlphabetQuestionBuilder(parameters: builderParams);
                     break;
-                case MixedLettersVariation.Spelling:
+                case MixedLettersVariation.BuildWord:
+                    builderParams.wordFilters.excludeDipthongs = true;
                     builder = new LettersInWordQuestionBuilder(nPacks, maximumWordLength: 6, useAllCorrectLetters: true, parameters: builderParams);
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
-
-            UnityEngine.Debug.Log("Chosen variation: " + Variation);
 
             return builder;
         }
 
-        public MiniGameLearnRules SetupLearnRules()
+        public override MiniGameLearnRules SetupLearnRules()
         {
             var rules = new MiniGameLearnRules();
             // example: a.minigameVoteSkewOffset = 1f;
             return rules;
         }
 
+        public override bool IsDataMatching(ILivingLetterData data1, ILivingLetterData data2)
+        {
+            LetterEqualityStrictness strictness;
+            switch (Variation)
+            {
+                case MixedLettersVariation.Alphabet:
+                    strictness = LetterEqualityStrictness.WithVisualForm;
+                    break;
+                case MixedLettersVariation.BuildWord:
+                    strictness = LetterEqualityStrictness.WithVisualForm;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+            return DataMatchingHelper.IsDataMatching(data1, data2, strictness);
+        }
     }
 }

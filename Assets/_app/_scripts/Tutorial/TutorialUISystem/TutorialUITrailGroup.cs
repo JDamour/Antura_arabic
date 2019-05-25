@@ -1,8 +1,8 @@
-﻿using DG.Tweening;
-using EA4S.EditorUtilities;
+﻿using Antura.EditorUtilities;
+using DG.Tweening;
 using UnityEngine;
 
-namespace EA4S.Tutorial
+namespace Antura.Tutorial
 {
     /// <summary>
     /// Can be a single trail, or a collection of multiple trails
@@ -22,7 +22,7 @@ namespace EA4S.Tutorial
 
         void Init()
         {
-            if (initialized) return;
+            if (initialized) { return; }
 
             initialized = true;
 
@@ -31,14 +31,15 @@ namespace EA4S.Tutorial
             defStartWidths = new float[count];
             defEndWidths = new float[count];
             defSortingOrder = new int[count];
-            for (int i = 0; i < count; ++i) {
+            for (int i = 0; i < count; ++i)
+            {
                 TrailRenderer tr = Trails[i];
-                if (Time < tr.time) Time = tr.time;
+                if (Time < tr.time) { Time = tr.time; }
                 defStartWidths[i] = tr.startWidth;
                 defEndWidths[i] = tr.endWidth;
                 SortingOrder3D sort = tr.GetComponent<SortingOrder3D>();
-                if (sort != null) defSortingOrder[i] = sort.SortingOrder;
-                else defSortingOrder[i] = tr.GetComponent<Renderer>().sortingOrder;
+                if (sort != null) { defSortingOrder[i] = sort.SortingOrder; }
+                else { defSortingOrder[i] = tr.GetComponent<Renderer>().sortingOrder; }
             }
         }
 
@@ -54,12 +55,17 @@ namespace EA4S.Tutorial
 
         void LateUpdate()
         {
-            if (isWaitingToDespawn) return;
+            if (isWaitingToDespawn) { return; }
 
-            if (lastPos - this.transform.position == Vector3.zero) {
+            if (lastPos - this.transform.position == Vector3.zero)
+            {
                 isWaitingToDespawn = true;
                 waitingTween = DOVirtual.DelayedCall(Time, Despawn, false);
-            } else lastPos = this.transform.position;
+            }
+            else
+            {
+                lastPos = this.transform.position;
+            }
         }
 
         #endregion
@@ -73,13 +79,13 @@ namespace EA4S.Tutorial
             this.transform.position = _position;
             this.transform.rotation = Quaternion.identity;
             lastPos = _position - Vector3.one;
-            for (int i = 0; i < Trails.Length; ++i) {
+            for (int i = 0; i < Trails.Length; ++i)
+            {
                 TrailRenderer tr = Trails[i];
                 tr.startWidth = defStartWidths[i] * TutorialUI.GetCameraBasedScaleMultiplier(_position);
-//                tr.startWidth = TutorialUI.I.Cam.fieldOfView * defStartWidths[i] / 45f;
                 tr.endWidth = defEndWidths[i] * TutorialUI.GetCameraBasedScaleMultiplier(_position);
-//                tr.endWidth = TutorialUI.I.Cam.fieldOfView * defEndWidths[i] / 45f;
                 tr.sortingOrder = _overlayed ? defSortingOrder[i] : 0;
+                tr.Clear();
             }
         }
 
@@ -87,7 +93,7 @@ namespace EA4S.Tutorial
         {
             isWaitingToDespawn = false;
             waitingTween.Kill();
-            foreach (TrailRenderer tr in Trails) tr.Clear();
+            foreach (TrailRenderer tr in Trails) { tr.Clear(); }
             this.gameObject.SetActive(false);
         }
 

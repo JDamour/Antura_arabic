@@ -1,10 +1,10 @@
-﻿using UnityEngine;
+﻿using Antura.Audio;
+using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using DG.Tweening;
-using EA4S.Audio;
 
-namespace EA4S.UI
+namespace Antura.UI
 {
     // TODO refactor: not clear where this is used
     public class PopupMissionComponent : MonoBehaviour
@@ -21,6 +21,7 @@ namespace EA4S.UI
             public string MainTextToDisplay;
             public Sprite DrawSprite;
             public PopupType Type;
+
             /// <summary>
             /// Auto close popup after seconds indicated. If -1 autoclose is disabled and appear close button for that.
             /// </summary>
@@ -33,12 +34,12 @@ namespace EA4S.UI
             Mission_Completed
         }
 
-        Vector2 HidePosition;
-        Vector2 ShowPosition;
+        private Vector2 HidePosition;
+        private Vector2 ShowPosition;
 
-        Sequence sequence;
-        TweenParams tParms;
-        TweenCallback pendingCallback = null;
+        private Sequence sequence;
+        private TweenParams tParms;
+        private TweenCallback pendingCallback = null;
 
         //float timeScaleAtMenuOpen = 1;
 
@@ -86,13 +87,12 @@ namespace EA4S.UI
             }
             // Autoclose
             if (_data.AutoCloseTime >= 0) {
-                sequence.InsertCallback(_data.AutoCloseTime, delegate {
-                    Close(sequence, tParms, _callback);
-                });
+                sequence.InsertCallback(_data.AutoCloseTime, delegate { Close(sequence, tParms, _callback); });
             } else {
                 pendingCallback = null; // reset
-                if (_callback != null)
+                if (_callback != null) {
                     pendingCallback = _callback;
+                }
             }
         }
 
@@ -111,14 +111,14 @@ namespace EA4S.UI
         {
             Time.timeScale = 1;
             _sequence.Append(GetComponent<RectTransform>().DOAnchorPos(HidePosition, 0.15f).SetAs(_tParms));
-            if (_callback != null)
+            if (_callback != null) {
                 _callback();
+            }
         }
 
         void OnDestroy()
         {
             sequence.Kill();
         }
-
     }
 }

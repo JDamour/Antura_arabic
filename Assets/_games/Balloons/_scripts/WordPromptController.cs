@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-using EA4S.MinigamesAPI;
+using Antura.LivingLetters;
 
-namespace EA4S.Minigames.Balloons
+namespace Antura.Minigames.Balloons
 {
     public class WordPromptController : MonoBehaviour
     {
@@ -11,7 +11,11 @@ namespace EA4S.Minigames.Balloons
         [HideInInspector]
         public List<LetterPromptController> IdleLetterPrompts
         {
-            get { return new List<LetterPromptController>(letterPrompts).FindAll(prompt => prompt.isActiveAndEnabled && prompt.State == LetterPromptController.PromptState.IDLE); }
+            get
+            {
+                return new List<LetterPromptController>(letterPrompts).FindAll(
+                prompt => prompt.isActiveAndEnabled && prompt.State == LetterPromptController.PromptState.IDLE);
+            }
         }
         [HideInInspector]
         public int activePromptsCount;

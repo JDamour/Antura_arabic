@@ -1,10 +1,12 @@
-using EA4S.MinigamesAPI;
-using EA4S.MinigamesCommon;
-using EA4S.Teacher;
+using Antura.Core;
+using Antura.LivingLetters;
+using Antura.Minigames;
+using Antura.Teacher;
 using System;
+using Antura.Database;
 using UnityEngine;
 
-namespace EA4S.Assessment
+namespace Antura.Assessment
 {
     public class AssessmentConfiguration : IAssessmentConfiguration
     {
@@ -16,7 +18,7 @@ namespace EA4S.Assessment
         /// <summary>
         /// Configured externally: which assessment we need to start.
         /// </summary>
-        public AssessmentCode assessmentType = AssessmentCode.Unsetted;
+        public AssessmentVariation Variation = AssessmentVariation.Unsetted;
 
         /// <summary>
         /// Externally provided Question provider
@@ -24,12 +26,10 @@ namespace EA4S.Assessment
         private IQuestionProvider questionProvider;
         public IQuestionProvider Questions
         {
-            get
-            {
+            get {
                 return GetQuestionProvider();
             }
-            set
-            {
+            set {
                 questionProvider = value;
             }
         }
@@ -37,6 +37,11 @@ namespace EA4S.Assessment
         private IQuestionProvider GetQuestionProvider()
         {
             return questionProvider;
+        }
+
+        public void SetMiniGameCode(MiniGameCode code)
+        {
+            Variation = (AssessmentVariation)code;
         }
 
         /// <summary>
@@ -68,7 +73,7 @@ namespace EA4S.Assessment
         /// <summary>
         /// Number of rounds, mostly fixed for each game, this value is provided externally
         /// </summary>
-        public int NumberOfRounds { get { return _rounds; }  set { _rounds = value; } }
+        public int NumberOfRounds { get { return _rounds; } set { _rounds = value; } }
         private int _rounds = 0;
 
         /////////////////
@@ -76,10 +81,10 @@ namespace EA4S.Assessment
         static AssessmentConfiguration instance;
         public static AssessmentConfiguration Instance
         {
-            get
-            {
-                if (instance == null)
+            get {
+                if (instance == null) {
                     instance = new AssessmentConfiguration();
+                }
                 return instance;
             }
         }
@@ -92,52 +97,56 @@ namespace EA4S.Assessment
         /// <returns>Custom question data for the assessment</returns>
         public IQuestionBuilder SetupBuilder()
         {
-            switch (assessmentType)
-            {
-                case AssessmentCode.LetterForm:
-                    return Setup_LetterForm_Builder();
+            switch (Variation) {
+                case AssessmentVariation.LetterName:
+                    return Setup_LetterName_Builder();
 
-                case AssessmentCode.MatchLettersToWord:
+                case AssessmentVariation.LetterAny:
+                    return Setup_LetterAny_Builder();
+
+                case AssessmentVariation.MatchLettersToWord:
                     return Setup_MatchLettersToWord_Builder();
 
-                case AssessmentCode.WordsWithLetter:
+                case AssessmentVariation.WordsWithLetter:
                     return Setup_WordsWithLetter_Builder();
 
-                case AssessmentCode.SunMoonWord:
+                case AssessmentVariation.SunMoonWord:
                     return Setup_SunMoonWords_Builder();
 
-                case AssessmentCode.SunMoonLetter:
+                case AssessmentVariation.SunMoonLetter:
                     return Setup_SunMoonLetter_Builder();
 
-                case AssessmentCode.QuestionAndReply:
+                case AssessmentVariation.QuestionAndReply:
                     return Setup_QuestionAnReply_Builder();
 
-                case AssessmentCode.SelectPronouncedWord:
+                case AssessmentVariation.SelectPronouncedWord:
                     return Setup_SelectPronuncedWord_Builder();
 
-                case AssessmentCode.SingularDualPlural:
+                case AssessmentVariation.SingularDualPlural:
                     return Setup_SingularDualPlural_Builder();
 
-                case AssessmentCode.WordArticle:
+                case AssessmentVariation.WordArticle:
                     return Setup_WordArticle_Builder();
 
-                case AssessmentCode.MatchWordToImage:
+                case AssessmentVariation.MatchWordToImage:
                     return Setup_MatchWordToImage_Builder();
 
-                case AssessmentCode.CompleteWord:
+                case AssessmentVariation.CompleteWord:
                     return Setup_CompleteWord_Builder();
 
-                case AssessmentCode.OrderLettersOfWord:
+                case AssessmentVariation.OrderLettersOfWord:
                     return Setup_OrderLettersOfWord_Builder();
 
-                case AssessmentCode.CompleteWord_Form:
+                case AssessmentVariation.CompleteWord_Form:
                     return Setup_CompleteWord_Form_Builder();
 
-                case AssessmentCode.MatchLettersToWord_Form:
+                case AssessmentVariation.MatchLettersToWord_Form:
                     return Setup_MatchLettersToWord_Form_Builder();
 
+                case AssessmentVariation.Unsetted:
+                case AssessmentVariation.VowelOrConsonant:
                 default:
-                    throw new NotImplementedException( "NotImplemented Yet!");
+                    throw new NotImplementedException("NotImplemented Yet!");
             }
         }
 
@@ -148,10 +157,10 @@ namespace EA4S.Assessment
             builderParams.correctChoicesHistory = PackListHistory.RepeatWhenFull;
             builderParams.sortPacksByDifficulty = false;
 
+            // TODO: handle forms using the returned letters instead
             return new LetterFormsInWordsQuestionBuilder(
                 nPacksPerRound: SimultaneosQuestions,
                 nRounds: NumberOfRounds,
-                forceUnseparatedLetters: true,
                 parameters: builderParams);
         }
 
@@ -162,10 +171,10 @@ namespace EA4S.Assessment
             builderParams.correctChoicesHistory = PackListHistory.RepeatWhenFull;
             builderParams.sortPacksByDifficulty = false;
 
+            // TODO: handle forms using the returned letters instead
             return new LetterFormsInWordsQuestionBuilder(
                 nPacksPerRound: SimultaneosQuestions,
                 nRounds: NumberOfRounds,
-                forceUnseparatedLetters: true,
                 parameters: builderParams);
         }
 
@@ -181,15 +190,17 @@ namespace EA4S.Assessment
             float screenRatio = Screen.width / Screen.height;
             int maxLetters = 7;
 
-            if (screenRatio > 1.4999f)
+            if (screenRatio > 1.4999f) {
                 maxLetters = 8;
+            }
 
-            if (screenRatio > 1.7777f)
+            if (screenRatio > 1.7777f) {
                 maxLetters = 9;
+            }
 
             return new LettersInWordQuestionBuilder(
                 NumberOfRounds,
-                nCorrect:2,
+                nCorrect: 2,
                 useAllCorrectLetters: true,
                 parameters: builderParams,
                 maximumWordLength: maxLetters
@@ -204,17 +215,15 @@ namespace EA4S.Assessment
             builderParams.correctChoicesHistory = PackListHistory.RepeatWhenFull;
             builderParams.wrongChoicesHistory = PackListHistory.RepeatWhenFull;
             builderParams.wrongSeverity = SelectionSeverity.MayRepeatIfNotEnough;
-            builderParams.useJourneyForWrong = true;
             builderParams.wordFilters.requireDrawings = true;
             builderParams.sortPacksByDifficulty = false;
 
             return new LettersInWordQuestionBuilder(
 
                 SimultaneosQuestions * NumberOfRounds,  // Total Answers
-                nCorrect:1,            // Always one!
-                nWrong:4,            // WrongAnswers
+                nCorrect: 1,            // Always one!
+                nWrong: 4,            // WrongAnswers
                 useAllCorrectLetters: false,
-                forceUnseparatedLetters: true,
                 parameters: builderParams);
         }
 
@@ -224,7 +233,6 @@ namespace EA4S.Assessment
             builderParams.correctChoicesHistory = PackListHistory.RepeatWhenFull;
             builderParams.wrongChoicesHistory = PackListHistory.RepeatWhenFull;
             builderParams.wrongSeverity = SelectionSeverity.MayRepeatIfNotEnough;
-            builderParams.useJourneyForWrong = false;
             builderParams.wordFilters.requireDrawings = true;
             builderParams.sortPacksByDifficulty = false;
             SimultaneosQuestions = 1;
@@ -266,7 +274,7 @@ namespace EA4S.Assessment
             builderParams.sortPacksByDifficulty = false;
 
             return new WordsByFormQuestionBuilder(
-                SimultaneosQuestions* NumberOfRounds * 4,
+                SimultaneosQuestions * NumberOfRounds * 4,
                 builderParams);
         }
 
@@ -276,14 +284,13 @@ namespace EA4S.Assessment
             builderParams.correctChoicesHistory = PackListHistory.RepeatWhenFull;
             builderParams.wrongChoicesHistory = PackListHistory.RepeatWhenFull;
             builderParams.wrongSeverity = SelectionSeverity.MayRepeatIfNotEnough;
-            builderParams.useJourneyForWrong = false;
             builderParams.sortPacksByDifficulty = false;
 
             SimultaneosQuestions = 1;
             int nCorrect = 1;
             int nWrong = 3;
             return new RandomWordsQuestionBuilder(
-                SimultaneosQuestions* NumberOfRounds,
+                SimultaneosQuestions * NumberOfRounds,
                 nCorrect,
                 nWrong,
                 firstCorrectIsQuestion: true,
@@ -298,10 +305,10 @@ namespace EA4S.Assessment
             SimultaneosQuestions = 1;
             int nWrongs = 4;
 
-            return new  PhraseQuestionsQuestionBuilder(
+            return new PhraseQuestionsQuestionBuilder(
                         SimultaneosQuestions * NumberOfRounds, // totale questions
                         nWrongs,     // wrong additional answers
-                parameters:builderParams);
+                parameters: builderParams);
         }
 
         private IQuestionBuilder Setup_SunMoonLetter_Builder()
@@ -313,7 +320,7 @@ namespace EA4S.Assessment
             builderParams.correctChoicesHistory = PackListHistory.RepeatWhenFull;
             builderParams.sortPacksByDifficulty = false;
 
-            return new LettersBySunMoonQuestionBuilder( 
+            return new LettersBySunMoonQuestionBuilder(
                         SimultaneosQuestions * NumberOfRounds * 2,
                         builderParams
             );
@@ -323,8 +330,7 @@ namespace EA4S.Assessment
         {
             // This assessment changes behaviour based on the current stage
             var jp = AppManager.I.Player.CurrentJourneyPosition;
-            switch (jp.Stage)
-            {
+            switch (jp.Stage) {
                 case 1:
                     SimultaneosQuestions = 1;
                     break;
@@ -345,8 +351,8 @@ namespace EA4S.Assessment
             builderParams.correctChoicesHistory = PackListHistory.RepeatWhenFull;
             builderParams.wrongChoicesHistory = PackListHistory.RepeatWhenFull;
             builderParams.wrongSeverity = SelectionSeverity.MayRepeatIfNotEnough;
-            builderParams.useJourneyForWrong = false;
             builderParams.sortPacksByDifficulty = false;
+            builderParams.letterEqualityStrictness = LetterEqualityStrictness.WithVisualForm;
 
             return new WordsWithLetterQuestionBuilder(
                 NumberOfRounds,
@@ -354,7 +360,7 @@ namespace EA4S.Assessment
                 1,                  // Correct Answers
                 nWrong,             // Wrong Answers
                 parameters: builderParams
-                );     
+                );
 
         }
 
@@ -366,15 +372,14 @@ namespace EA4S.Assessment
             SimultaneosQuestions = 2;
             Answers = 2;
 
-            return new WordsBySunMoonQuestionBuilder( SimultaneosQuestions * NumberOfRounds * 2, parameters: builderParams);
+            return new WordsBySunMoonQuestionBuilder(SimultaneosQuestions * NumberOfRounds * 2, parameters: builderParams);
         }
 
         private IQuestionBuilder Setup_MatchLettersToWord_Builder()
         {
             // This assessment changes behaviour based on the current stage
             var jp = AppManager.I.Player.CurrentJourneyPosition;
-            switch (jp.Stage)
-            {
+            switch (jp.Stage) {
                 case 1:
                     SimultaneosQuestions = 1;
                     break;
@@ -395,20 +400,18 @@ namespace EA4S.Assessment
             builderParams.correctChoicesHistory = PackListHistory.RepeatWhenFull;
             builderParams.wrongChoicesHistory = PackListHistory.RepeatWhenFull;
             builderParams.wrongSeverity = SelectionSeverity.MayRepeatIfNotEnough;
-            builderParams.useJourneyForWrong = false;
             builderParams.sortPacksByDifficulty = false;
 
             return new LettersInWordQuestionBuilder(
                 NumberOfRounds,
                 SimultaneosQuestions,
-                nCorrect:1,   
-                nWrong:nWrong,
+                nCorrect: 1,
+                nWrong: nWrong,
                 useAllCorrectLetters: false,
-                forceUnseparatedLetters: true,
                 parameters: builderParams);
         }
 
-        private IQuestionBuilder Setup_LetterForm_Builder()
+        private IQuestionBuilder Setup_LetterName_Builder()
         {
             SimultaneosQuestions = 1;
 
@@ -416,59 +419,78 @@ namespace EA4S.Assessment
             builderParams.correctChoicesHistory = PackListHistory.RepeatWhenFull;
             builderParams.wrongChoicesHistory = PackListHistory.RepeatWhenFull;
             builderParams.wrongSeverity = SelectionSeverity.MayRepeatIfNotEnough;
-            builderParams.useJourneyForWrong = false;
             builderParams.sortPacksByDifficulty = false;
+            builderParams.letterFilters.excludeDiacritics = LetterFilters.ExcludeDiacritics.All;
 
             return new RandomLettersQuestionBuilder(
                 SimultaneosQuestions * NumberOfRounds,  // Total Answers
                 1,                              // CorrectAnswers
                 4,                              // WrongAnswers
-                firstCorrectIsQuestion:true,
-                parameters:builderParams);
+                firstCorrectIsQuestion: true,
+                parameters: builderParams);
+        }
+
+        private IQuestionBuilder Setup_LetterAny_Builder()
+        {
+            SimultaneosQuestions = 1;
+
+            var builderParams = new QuestionBuilderParameters();
+            builderParams.correctChoicesHistory = PackListHistory.RepeatWhenFull;
+            builderParams.wrongChoicesHistory = PackListHistory.RepeatWhenFull;
+            builderParams.wrongSeverity = SelectionSeverity.MayRepeatIfNotEnough;
+            builderParams.sortPacksByDifficulty = false;
+
+            return new RandomLetterAlterationsQuestionBuilder(
+                SimultaneosQuestions * NumberOfRounds,  // Total Answers
+                1,                              // CorrectAnswers
+                4,                              // WrongAnswers
+                letterAlterationFilters: LetterAlterationFilters.FormsAndPhonemesOfMultipleLetters_OneForm,
+                avoidWrongLettersWithSameSound: true,
+                parameters: builderParams);
         }
 
         public MiniGameLearnRules SetupLearnRules()
         {
-            switch (assessmentType)
-            {
-                case AssessmentCode.LetterForm:
-                    return Setup_LetterForm_LearnRules();
+            switch (Variation) {
+                case AssessmentVariation.LetterName:
+                case AssessmentVariation.LetterAny:
+                    return Setup_LetterAny_LearnRules();
 
-                case AssessmentCode.MatchLettersToWord:
+                case AssessmentVariation.MatchLettersToWord:
                     return Setup_MatchLettersToWord_LearnRules();
 
-                case AssessmentCode.WordsWithLetter:
+                case AssessmentVariation.WordsWithLetter:
                     return Setup_WordsWithLetter_LearnRules();
 
-                case AssessmentCode.SunMoonWord:
+                case AssessmentVariation.SunMoonWord:
                     return Setup_SunMoonWords_LearnRules();
 
-                case AssessmentCode.SunMoonLetter:
+                case AssessmentVariation.SunMoonLetter:
                     return Setup_SunMoonLetter_LearnRules();
 
-                case AssessmentCode.QuestionAndReply:
+                case AssessmentVariation.QuestionAndReply:
                     return Setup_QuestionAnReply_LearnRules();
 
-                case AssessmentCode.SelectPronouncedWord:
+                case AssessmentVariation.SelectPronouncedWord:
                     return Setup_SelectPronuncedWord_LearnRules();
 
-                case AssessmentCode.SingularDualPlural:
+                case AssessmentVariation.SingularDualPlural:
                     return Setup_SingularDualPlural_LearnRules();
 
-                case AssessmentCode.WordArticle:
+                case AssessmentVariation.WordArticle:
                     return Setup_WordArticle_LearnRules();
 
-                case AssessmentCode.MatchWordToImage:
+                case AssessmentVariation.MatchWordToImage:
                     return Setup_MatchWordToImage_LearnRules();
 
-                case AssessmentCode.CompleteWord:
+                case AssessmentVariation.CompleteWord:
                     return Setup_CompleteWord_LearnRules();
 
-                case AssessmentCode.OrderLettersOfWord:
+                case AssessmentVariation.OrderLettersOfWord:
                     return Setup_OrderLettersOfWord_LearnRules();
 
                 default:
-                    throw new NotImplementedException( "NotImplemented Yet!");
+                    throw new NotImplementedException("NotImplemented Yet!");
             }
         }
 
@@ -527,9 +549,47 @@ namespace EA4S.Assessment
             return new MiniGameLearnRules();
         }
 
-        private MiniGameLearnRules Setup_LetterForm_LearnRules()
+        private MiniGameLearnRules Setup_LetterAny_LearnRules()
         {
             return new MiniGameLearnRules();
+        }
+
+        public LetterDataSoundType GetVocabularySoundType()
+        {
+            LetterDataSoundType soundType;
+            switch (Variation) {
+                case AssessmentVariation.LetterName:
+                    soundType = LetterDataSoundType.Name;
+                    break;
+                default:
+                    soundType = LetterDataSoundType.Phoneme;
+                    break;
+            }
+            return soundType;
+        }
+
+        public bool IsDataMatching(ILivingLetterData data1, ILivingLetterData data2)
+        {
+            LetterEqualityStrictness strictness;
+            switch (Variation)
+            {
+                case AssessmentVariation.LetterName:
+                    strictness = LetterEqualityStrictness.LetterOnly;
+                    break;
+                case AssessmentVariation.LetterAny:
+                case AssessmentVariation.MatchLettersToWord:
+                case AssessmentVariation.WordsWithLetter:
+                case AssessmentVariation.CompleteWord:
+                case AssessmentVariation.OrderLettersOfWord:
+                case AssessmentVariation.CompleteWord_Form:
+                case AssessmentVariation.MatchLettersToWord_Form:
+                    strictness = LetterEqualityStrictness.WithVisualForm;
+                    break;
+                default:
+                    strictness = LetterEqualityStrictness.WithVisualForm;
+                    break;
+            }
+            return DataMatchingHelper.IsDataMatching(data1, data2, strictness);
         }
 
     }

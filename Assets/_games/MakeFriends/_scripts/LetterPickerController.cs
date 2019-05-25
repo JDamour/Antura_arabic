@@ -1,9 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using EA4S.MinigamesAPI;
+using Antura.LivingLetters;
 
-namespace EA4S.Minigames.MakeFriends
+namespace Antura.Minigames.MakeFriends
 {
     public class LetterPickerController : MonoBehaviour
     {
@@ -90,6 +90,9 @@ namespace EA4S.Minigames.MakeFriends
 
         private IEnumerator ShowAndUnblockDelayed_Coroutine(float delay)
         {
+            while (MakeFriendsGame.Instance.SpokenWords < 2)
+                yield return null;
+
             yield return new WaitForSeconds(delay);
             Show();
             Unblock();

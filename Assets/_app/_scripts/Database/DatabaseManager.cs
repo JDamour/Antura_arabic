@@ -1,12 +1,11 @@
-﻿using UnityEngine;
+using Antura.Core;
+using Antura.Helpers;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using EA4S.Core;
-using EA4S.Helpers;
-using EA4S.Teacher;
+using UnityEngine;
 
-namespace EA4S.Database
+namespace Antura.Database
 {
     /// <summary>
     /// Entry point for the rest of the application to access database entries.
@@ -19,6 +18,7 @@ namespace EA4S.Database
 
         // DB references
         private DatabaseObject staticDb;
+
         private DBService dynamicDb;
 
         public List<Type> staticDataTypes = new List<Type>()
@@ -50,10 +50,9 @@ namespace EA4S.Database
             typeof(RewardPackUnlockData)
         };
 
-        public DatabaseObject StaticDatabase {
-            get {
-                return staticDb;
-            }
+        public DatabaseObject StaticDatabase
+        {
+            get { return staticDb; }
         }
 
         public bool HasLoadedPlayerProfile()
@@ -62,6 +61,7 @@ namespace EA4S.Database
         }
 
         #region Player assignment
+
         public void CreateDatabaseForPlayer(PlayerProfileData playerProfileData)
         {
             SetPlayerProfile(playerProfileData.Uuid);
@@ -86,7 +86,8 @@ namespace EA4S.Database
         {
             // SAFE MODE: we need to make sure that the static db has some entires, otherwise there is something wrong
             if (staticDb.GetPlaySessionTable().GetDataCount() == 0) {
-                throw new System.Exception("Database is empty, it was probably not setup correctly. Make sure it has been statically loaded by the management scene.");
+                throw new System.Exception(
+                    "Database is empty, it was probably not setup correctly. Make sure it has been statically loaded by the management scene.");
             }
 
             // We load the selected player profile
@@ -139,12 +140,14 @@ namespace EA4S.Database
 
         public void UpdatePlayerProfileData(PlayerProfileData playerProfileData)
         {
+            //Debug.Log("UPDATING " + playerProfileData.ToString());
             dynamicDb.InsertOrReplace(playerProfileData);
         }
 
         public PlayerProfileData GetPlayerProfileData()
         {
             var data = dynamicDb.GetPlayerProfileData();
+            //Debug.Log("LOADING " + data.ToString());
             return data;
         }
 
@@ -186,6 +189,7 @@ namespace EA4S.Database
         #endregion
 
         #region Letter
+
         public LetterData GetLetterDataById(string id)
         {
             return staticDb.GetById(staticDb.GetLetterTable(), id);
@@ -204,6 +208,7 @@ namespace EA4S.Database
         #endregion
 
         #region Word
+
         public WordData GetWordDataById(string id)
         {
             return staticDb.GetById(staticDb.GetWordTable(), id);
@@ -226,13 +231,20 @@ namespace EA4S.Database
             return staticDb.FindAll(staticDb.GetWordTable(), predicate);
         }
 
+        public IEnumerable<WordData> FindWordDataOptimized(Predicate<WordData> predicate)
+        {
+            return staticDb.FindAllOptimized(staticDb.GetWordTable(), predicate);
+        }
+
         public List<WordData> FindWordDataByCategory(WordDataCategory wordCategory)
         {
             return staticDb.FindAll(staticDb.GetWordTable(), (x) => (x.Category == wordCategory));
         }
+
         #endregion
 
         #region MiniGame
+
         public MiniGameData GetMiniGameDataByCode(MiniGameCode code)
         {
             return GetMiniGameDataById(code.ToString());
@@ -245,7 +257,7 @@ namespace EA4S.Database
 
         public List<MiniGameData> GetActiveMinigames()
         {
-            return FindMiniGameData((x) => (x.Available && x.Type == MiniGameDataType.MiniGame));
+            return FindMiniGameData((x) => (x.Active && x.Type == MiniGameDataType.MiniGame));
         }
 
         public List<MiniGameData> GetAllMiniGameData()
@@ -257,9 +269,11 @@ namespace EA4S.Database
         {
             return staticDb.FindAll(staticDb.GetMiniGameTable(), predicate);
         }
+
         #endregion
 
         #region LearningBlock
+
         public LearningBlockData GetLearningBlockDataById(string id)
         {
             return staticDb.GetById(staticDb.GetLearningBlockTable(), id);
@@ -284,6 +298,7 @@ namespace EA4S.Database
         #endregion
 
         #region PlaySession
+
         public bool HasPlaySessionDataById(string id)
         {
             return staticDb.HasById(staticDb.GetPlaySessionTable(), id);
@@ -308,9 +323,11 @@ namespace EA4S.Database
         {
             return new List<PlaySessionData>(staticDb.GetPlaySessionTable().GetValuesTyped());
         }
+
         #endregion
 
         #region Phrase
+
         public PhraseData GetPhraseDataById(string id)
         {
             return staticDb.GetById(staticDb.GetPhraseTable(), id);
@@ -325,9 +342,11 @@ namespace EA4S.Database
         {
             return new List<PhraseData>(staticDb.GetPhraseTable().GetValuesTyped());
         }
+
         #endregion
 
         #region Localization
+
         public LocalizationData GetLocalizationDataById(string id)
         {
             var locData = staticDb.GetById(staticDb.GetLocalizationTable(), id);
@@ -346,9 +365,11 @@ namespace EA4S.Database
         {
             return staticDb.FindAll(staticDb.GetLocalizationTable(), predicate);
         }
+
         #endregion
 
         #region Stage
+
         public StageData GetStageDataById(string id)
         {
             return staticDb.GetById(staticDb.GetStageTable(), id);
@@ -363,9 +384,11 @@ namespace EA4S.Database
         {
             return staticDb.FindAll(staticDb.GetStageTable(), predicate);
         }
+
         #endregion
 
         #region Reward
+
         public RewardData GetRewardDataById(string id)
         {
             return staticDb.GetById(staticDb.GetRewardTable(), id);
@@ -380,9 +403,11 @@ namespace EA4S.Database
         {
             return staticDb.FindAll(staticDb.GetRewardTable(), predicate);
         }
+
         #endregion
 
         #region Log
+
         public List<LogInfoData> GetAllLogInfoData()
         {
             return dynamicDb.FindAll<LogInfoData>();
@@ -445,6 +470,7 @@ namespace EA4S.Database
         {
             return dynamicDb.Query<T>(query);
         }
+
         public List<object> Query(Type t, string query)
         {
             return dynamicDb.Query(t, query);
@@ -454,6 +480,7 @@ namespace EA4S.Database
         {
             return dynamicDb.FindByQueryCustom(mapping, query);
         }
+
         #endregion
 
 
@@ -461,6 +488,12 @@ namespace EA4S.Database
 
         public List<RewardPackUnlockData> GetAllRewardPackUnlockData()
         {
+            /*
+            Debug.Log("DB getting data list: " + GetAllDynamicData<RewardPackUnlockData>().Count);
+            foreach (var rewardPackUnlockData in GetAllDynamicData<RewardPackUnlockData>())
+                Debug.Log("LOAD PACK: " + rewardPackUnlockData.ToString());
+                */
+            
             return GetAllDynamicData<RewardPackUnlockData>();
         }
 
@@ -471,6 +504,11 @@ namespace EA4S.Database
 
         public void UpdateRewardPackUnlockDataAll(List<RewardPackUnlockData> updatedDataList)
         {
+            /*Debug.Log("DB updating data list: " + updatedDataList.Count);
+            foreach (var rewardPackUnlockData in updatedDataList)
+                Debug.Log("INSERT PACK: " + rewardPackUnlockData.ToString());
+            */
+
             dynamicDb.InsertOrReplaceAll(updatedDataList);
         }
 
@@ -478,11 +516,11 @@ namespace EA4S.Database
 
         #region Export
 
-        public bool ExportDatabaseOfPlayer(string playerUuid)
+        public bool ExportPlayerDb(string playerUuid)
         {
             // Create a new service for the copied database
             // This will copy the current database
-            var exportDbService = DBService.ExportAndOpenFromPlayerUUID(playerUuid);
+            var exportDbService = DBService.ExportFromPlayerUUIDAndReopen(playerUuid);
 
             InjectUUID(playerUuid, exportDbService);
             InjectStaticData(exportDbService);
@@ -493,42 +531,45 @@ namespace EA4S.Database
             return true;
         }
 
-        public bool ExportJoinedDatabase(out string errorString)
+        /// <summary>
+        /// Exports the players joined db reading them from the import directory
+        /// </summary>
+        /// <returns><c>true</c>, if players joined db was exported, <c>false</c> otherwise.</returns>
+        /// <param name="errorString">Error string.</param>
+        public bool ExportPlayersJoinedDb(out string errorString)
         {
             // Load all the databases we can find and get the player UUIDs
-            List<string> allUUIDs = new List<string>();
+            var allUUIDs = new List<string>();
             var filePaths = GetImportFilePaths();
-            if (filePaths != null)
-            {
-                foreach (var filePath in filePaths)
-                {
+            if (filePaths != null) {
+                foreach (var filePath in filePaths) {
                     // Check whether that is a DB and load it
-                    if (filePath.Contains(".sqlite3"))
-                    {
+                    if (IsValidDatabasePath(filePath)) {
                         var importDbService = DBService.OpenFromFilePath(false, filePath);
                         var playerProfileData = importDbService.GetPlayerProfileData();
+                        if (playerProfileData == null) {
+                            // skip no-player DBs, they are wrong
+                            continue;
+                        }
                         allUUIDs.Add(playerProfileData.Uuid);
                         importDbService.CloseConnection();
                     }
                 }
-            }
-            else
-            {
-                errorString = "Could not find the import folder.";
+            } else {
+                errorString = "Could not find the import folder: " + AppConfig.DbImportFolder;
                 Debug.LogError(errorString);
                 return false;
             }
-            
+
             // Create the joined DB
-            var joinedDbService = DBService.OpenFromFileName(true, AppConstants.GetJoinedDatabaseFilename(), AppConstants.DbJoinedFolder);
+            var joinedDbService = DBService.OpenFromDirectoryAndFilename(true, AppConfig.GetJoinedDatabaseFilename(), AppConfig.DbJoinedFolder);
             InjectStaticData(joinedDbService);
             InjectEnums(joinedDbService);
 
             // Export and inject all the DBs
-            foreach (var uuid in allUUIDs)
-            {
+            foreach (var uuid in allUUIDs) {
                 // Export
-                var exportDbService = DBService.ExportAndOpenFromPlayerUUID(uuid,  dirName: AppConstants.DbImportFolder);
+                var exportDbService = DBService.ExportFromPlayerUUIDAndReopen(uuid, dirName: AppConfig.DbImportFolder);
                 InjectUUID(uuid, exportDbService);
 
                 // Inject
@@ -544,33 +585,37 @@ namespace EA4S.Database
 
         public string[] GetImportFilePaths()
         {
-            var importDirectory = DBService.GetDatabaseDirectoryPath(AppConstants.DbImportFolder);
-            if (Directory.Exists(importDirectory))
-            {
+            var importDirectory = DBService.GetDatabaseDirectoryPath(AppConfig.DbImportFolder);
+            if (Directory.Exists(importDirectory)) {
                 string[] filePaths = Directory.GetFiles(importDirectory);
                 return filePaths;
             }
             return null;
         }
 
+        public bool IsValidDatabasePath(string dbpath)
+        {
+            return (dbpath.Contains(AppConfig.DbFileExtension));
+
+        }
+
         public PlayerProfileData ImportDynamicDatabase(string importFilePath)
         {
-            if (!File.Exists(importFilePath))
-            {
+            if (!File.Exists(importFilePath)) {
                 Debug.LogError("Cannot find database file for import: " + importFilePath);
                 return null;
             }
 
             // Copy the file
             string fileName = Path.GetFileName(importFilePath);
-            string newFilePath = DBService.GetDatabaseFilePath(fileName, AppConstants.DbPlayersFolder);
-            if (File.Exists(newFilePath))
-            {
+            string newFilePath = DBService.GetDatabaseFilePath(fileName, AppConfig.DbPlayersFolder);
+            /* @note: we overwrite it
+                if (File.Exists(newFilePath)) {
                 Debug.LogError("Database already exists. Cannot import: " + importFilePath);
                 return null;
-            }
+            }*/
 
-            File.Copy(importFilePath, newFilePath);
+            File.Copy(importFilePath, newFilePath, true);
 
             // Load the new DB and get its player profile data
             var importDbService = DBService.OpenFromFilePath(false, newFilePath);
@@ -581,16 +626,13 @@ namespace EA4S.Database
 
         private void InjectExportedDB(string uuid, DBService exportDbService, DBService joinedDbService)
         {
-            foreach (Type dynamicDataType in dynamicDataTypes)
-            {
+            foreach (Type dynamicDataType in dynamicDataTypes) {
                 string query = "SELECT * FROM " + dynamicDataType.Name;
-                List<object> objectList = exportDbService.Query(dynamicDataType, query);
-                List<IData> iDataList = objectList.ConvertAll(x => (IData) x);
+                var objectList = exportDbService.Query(dynamicDataType, query);
+                var iDataList = objectList.ConvertAll(x => (IData)x);
 
-                foreach (var element in iDataList)
-                {
-                    if (element is IDataEditable)
-                    {
+                foreach (var element in iDataList) {
+                    if (element is IDataEditable) {
                         (element as IDataEditable).SetId(element.GetId() + "_" + uuid);
                     }
                 }
@@ -614,7 +656,7 @@ namespace EA4S.Database
             exportDbService.ExportEnum<PlaySkill>();
             exportDbService.ExportEnum<PlayEvent>();
             exportDbService.ExportEnum<PlaySessionDataOrder>();
-            exportDbService.ExportEnum<RewardDataCategory>();
+            //exportDbService.ExportEnum<RewardDataCategory>();
             exportDbService.ExportEnum<VocabularyDataGender>();
             exportDbService.ExportEnum<VocabularyDataType>();
             exportDbService.ExportEnum<WordDataArticle>();
@@ -625,8 +667,7 @@ namespace EA4S.Database
 
         private void InjectStaticData(DBService dbService)
         {
-            try
-            {
+            try {
                 dbService.GenerateStaticExportTables();
                 dbService.InsertAll(StaticDatabase.GetStageTable().GetValuesTyped());
                 dbService.InsertAll(StaticDatabase.GetPlaySessionTable().GetValuesTyped());
@@ -637,17 +678,14 @@ namespace EA4S.Database
                 dbService.InsertAll(StaticDatabase.GetPhraseTable().GetValuesTyped());
                 dbService.InsertAll(StaticDatabase.GetLocalizationTable().GetValuesTyped());
                 dbService.InsertAll(StaticDatabase.GetRewardTable().GetValuesTyped());
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
                 Debug.LogError(e);
             }
         }
 
         private void InjectUUID(string playerUuid, DBService exportDbService)
         {
-            foreach (var type in dynamicDataTypes)
-            {
+            foreach (var type in dynamicDataTypes) {
                 PopulateUUID(type, playerUuid, exportDbService);
             }
         }

@@ -1,15 +1,13 @@
-﻿using EA4S.Audio;
-
-namespace EA4S.Minigames.HideAndSeek
+﻿namespace Antura.Minigames.HideAndSeek
 {
-    public class ResultGameState : IState
+    public class ResultGameState : FSM.IState
     {
-		HideAndSeekGame game;
+        HideAndSeekGame game;
 
         bool goToEndGame;
 
         float timer = 2;
-		public ResultGameState(HideAndSeekGame game)
+        public ResultGameState(HideAndSeekGame game)
         {
             this.game = game;
         }
@@ -18,8 +16,7 @@ namespace EA4S.Minigames.HideAndSeek
         {
             goToEndGame = false;
 
-           if (game.isTimesUp)
-            {
+            if (game.isTimesUp) {
                 game.Context.GetPopupWidget().Hide();
                 timer = 0;
                 goToEndGame = true;
@@ -32,11 +29,13 @@ namespace EA4S.Minigames.HideAndSeek
 
         public void Update(float delta)
         {
-            if (!game.isTimesUp || goToEndGame)
+            if (!game.isTimesUp || goToEndGame) {
                 timer -= delta;
+            }
 
-            if (timer < 0)
-                 game.EndGame(game.CurrentStars, game.CurrentScore);
+            if (timer < 0) {
+                game.EndGame(game.CurrentStars, game.CurrentScore);
+            }
         }
 
         public void UpdatePhysics(float delta) { }

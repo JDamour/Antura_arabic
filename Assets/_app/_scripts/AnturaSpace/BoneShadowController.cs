@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace EA4S.AnturaSpace
+namespace Antura.AnturaSpace
 {
     /// <summary>
     /// Controls the shadows of bones thrown to Antura in AnturaSpace.
@@ -10,6 +10,7 @@ namespace EA4S.AnturaSpace
     {
         [SerializeField]
         private float m_fWorldY;
+
         [SerializeField]
         private Transform m_oTarget;
 
@@ -24,10 +25,9 @@ namespace EA4S.AnturaSpace
         {
             //restore rotation to default
             gameObject.transform.rotation = m_oOriginalRotation;
-            
+
             // position under the target at the given height
             gameObject.transform.position = new Vector3(m_oTarget.position.x, m_fWorldY, m_oTarget.position.z);
-            }
-
+        }
     }
 }

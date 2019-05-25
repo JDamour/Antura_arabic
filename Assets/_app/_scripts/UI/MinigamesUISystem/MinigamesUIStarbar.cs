@@ -1,7 +1,7 @@
 ﻿using DG.Tweening;
 using UnityEngine;
 
-namespace EA4S.UI
+namespace Antura.UI
 {
     /// <summary>
     /// Shows the number of obtained stars available in a minigame.
@@ -10,10 +10,10 @@ namespace EA4S.UI
     {
         public RectTransform ProgressBar;
 
-        MinigamesUISingleStar[] stars;
-        float[] starPercentages = new [] { 0.333f, 0.666f, 1 };
-        Vector2 progressBarFullSize;
-        Tween gotoTween;
+        private MinigamesUISingleStar[] stars;
+        private float[] starPercentages = new[] { 0.333f, 0.666f, 1 };
+        private Vector2 progressBarFullSize;
+        private Tween gotoTween;
 
         #region Unity
 
@@ -46,8 +46,11 @@ namespace EA4S.UI
                     for (int i = 0; i < stars.Length; ++i) {
                         float starPercent = starPercentages[i];
                         float progressPercent = ProgressBar.sizeDelta.y / progressBarFullSize.y;
-                        if (progressPercent >= starPercent || Mathf.Approximately(progressPercent, starPercent)) stars[i].Gain();
-                        else stars[i].Lose();
+                        if (progressPercent >= starPercent || Mathf.Approximately(progressPercent, starPercent)) {
+                            stars[i].Gain();
+                        } else {
+                            stars[i].Lose();
+                        }
                     }
                 });
         }

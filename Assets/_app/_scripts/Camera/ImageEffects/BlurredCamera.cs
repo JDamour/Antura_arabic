@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace EA4S.CameraEffects
+namespace Antura.CameraEffects
 {
     public class BlurredCamera : PostEffectsBase
     {
@@ -8,7 +8,7 @@ namespace EA4S.CameraEffects
 
         [Range(1, 4)]
         public int blurIterations = 1;
-    
+
         public int textureSize = 512;
 
         [Range(0.0f, 10.0f)]
@@ -23,24 +23,26 @@ namespace EA4S.CameraEffects
 
             blurMaterial = CheckShaderAndCreateMaterial(blurShader, blurMaterial);
 
-            if (!isSupported)
+            if (!isSupported) {
                 ReportAutoDisable();
+            }
             return isSupported;
         }
 
         void OnDisable()
         {
-            if (blurMaterial)
+            if (blurMaterial) {
                 DestroyImmediate(blurMaterial);
+            }
         }
 
         void OnRenderImage(RenderTexture source, RenderTexture destination)
         {
-            if (normalTextureOutput != null)
+            if (normalTextureOutput != null) {
+                normalTextureOutput.DiscardContents();
                 Graphics.Blit(source, normalTextureOutput);
-
-            if (CheckResources() == false)
-            {
+            }
+            if (CheckResources() == false) {
                 Graphics.Blit(source, destination);
                 return;
             }
@@ -48,21 +50,19 @@ namespace EA4S.CameraEffects
             int rtW = textureSize;
             int rtH = textureSize >> 1;
 
-            float widthMod = 1;
-
-            blurMaterial.SetVector("_Parameter", new Vector4(blurSize * widthMod, -blurSize * widthMod, 0.0f, 0.0f));
+            blurMaterial.SetVector("_Parameter", new Vector4(blurSize, -blurSize, 0.0f, 0.0f));
             source.filterMode = FilterMode.Bilinear;
-        
+
             // downsample
             RenderTexture rt = RenderTexture.GetTemporary(rtW, rtH, 0, source.format);
 
             rt.filterMode = FilterMode.Bilinear;
             Graphics.Blit(source, rt, blurMaterial, 0);
-        
-            for (int i = 0; i < blurIterations; i++)
-            {
+
+            for (int i = 0; i < blurIterations; i++) {
                 float iterationOffs = (i * 1.0f);
-                blurMaterial.SetVector("_Parameter", new Vector4(blurSize * widthMod + iterationOffs, -blurSize * widthMod - iterationOffs, 0.0f, 0.0f));
+                blurMaterial.SetVector("_Parameter",
+                    new Vector4(blurSize + iterationOffs, -blurSize - iterationOffs, 0.0f, 0.0f));
 
                 // vertical blur
                 RenderTexture rt2 = RenderTexture.GetTemporary(rtW, rtH, 0, source.format);

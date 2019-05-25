@@ -1,31 +1,37 @@
-﻿using System.Collections;
+using System.Collections;
+using Antura.Audio;
+using Antura.UI;
 using DG.Tweening;
-using EA4S.Audio;
-using EA4S.Core;
-using EA4S.UI;
+using Antura.Core;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace EA4S.Rewards
+namespace Antura.Rewards
 {
     /// <summary>
     /// Controls the panel that shows information on the results after a minigame ends.
     /// </summary>
     public class EndgameResultPanel : MonoBehaviour
     {
+
         public RectTransform ContentRT;
         public Image Rays;
         public EndgameStar[] Stars;
+
         [Header("Audio")]
         public Sfx SfxGainStar = Sfx.UIPopup;
+
         public Sfx SfxCompleteWithStars = Sfx.Win;
         public Sfx SfxCompleteNoStars = Sfx.Lose;
 
         public static EndgameResultPanel I { get; private set; }
         bool setupDone;
+
         int numStars;
+
         //RectTransform raysRT;
         Sequence showTween;
+
         Tween bgTween;
 
         #region Unity + Setup
@@ -45,7 +51,7 @@ namespace EA4S.Rewards
                     this.gameObject.SetActive(false);
                     bgTween.Rewind();
                 })
-                .OnComplete(()=> this.StartCoroutine(CO_ShowComplete()));
+                .OnComplete(() => this.StartCoroutine(CO_ShowComplete()));
             for (int i = 0; i < Stars.Length; ++i) {
                 EndgameStar star = Stars[i];
                 star.Setup();
@@ -87,17 +93,23 @@ namespace EA4S.Rewards
             showTween.Restart();
             this.gameObject.SetActive(true);
             GameResultUI.I.BonesCounter.Show();
-            GameResultUI.I.BonesCounter.DecreaseBy(_numStars);
+
+
+            // NOT NEEDED ANYMORE: bones are added only AFTER we Continue after the game
+            // GameResultUI.I.BonesCounter.DecreaseBy(_numStars);
         }
 
         public void Hide(bool _immediate)
         {
-            if (!setupDone) return;
+            if (!setupDone) { return; }
 
             this.StopAllCoroutines();
             ContinueScreen.Close(true);
-            if (_immediate) showTween.Rewind();
-            else showTween.PlayBackwards();
+            if (_immediate) {
+                showTween.Rewind();
+            } else {
+                showTween.PlayBackwards();
+            }
         }
 
         #endregion
@@ -114,16 +126,29 @@ namespace EA4S.Rewards
                 id++;
             }
 
-            if (numStars > 0) bgTween.Restart();
+            if (numStars > 0) { bgTween.Restart(); }
 
             AudioManager.I.PlaySound(numStars > 0 ? SfxCompleteWithStars : SfxCompleteNoStars);
-            ContinueScreen.Show(Continue, ContinueScreenMode.Button);
+            ContinueScreen.Show(Continue, ContinueScreenMode.Button, numStars > 0);
+            ContinueScreen.SetRetryAction(Retry, numStars <= 0);
+
+            // We add the bones regardless of where we played this game from
+            AppManager.I.Player.AddBones(numStars);
         }
 
-        void Continue()
+        public void Continue()
         {
-            //          GameManager.Instance.Modules.SceneModule.LoadSceneWithTransition(AppManager.I.MiniGameDone());
+            // We acknowledge the end of the minigame. Add stars.
+            AppManager.I.NavigationManager.EndMinigame(numStars);
+
+            // Go to the next scene
             AppManager.I.NavigationManager.GoToNextScene();
+        }
+
+        void Retry()
+        {
+            // We retry the current game. No bones are added.
+            AppManager.I.NavigationManager.RepeatCurrentGameOfPlaySession();
         }
 
         #endregion

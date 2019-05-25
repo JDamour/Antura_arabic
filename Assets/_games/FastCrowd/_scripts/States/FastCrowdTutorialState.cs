@@ -1,13 +1,13 @@
-﻿using System.Collections.Generic;
-using EA4S.LivingLetters;
-using EA4S.MinigamesAPI;
-using EA4S.MinigamesCommon;
-using EA4S.Tutorial;
+﻿using Antura.Core;
+using Antura.Keeper;
+using Antura.LivingLetters;
+using Antura.Tutorial;
+using System.Collections.Generic;
 using UnityEngine;
 
-namespace EA4S.Minigames.FastCrowd
+namespace Antura.Minigames.FastCrowd
 {
-    public class FastCrowdTutorialState : IState
+    public class FastCrowdTutorialState : FSM.IState
     {
         FastCrowdGame game;
 
@@ -16,6 +16,16 @@ namespace EA4S.Minigames.FastCrowd
 
         bool tutorialStarted;
 
+        bool MustTrunk
+        {
+            get {
+                return FastCrowdConfiguration.Instance.Variation == FastCrowdVariation.Alphabet ||
+                        FastCrowdConfiguration.Instance.Variation == FastCrowdVariation.Counting ||
+                        FastCrowdConfiguration.Instance.Variation == FastCrowdVariation.Word ||
+                        FastCrowdConfiguration.Instance.Variation == FastCrowdVariation.LetterName;
+            }
+        }
+
         public FastCrowdTutorialState(FastCrowdGame game)
         {
             this.game = game;
@@ -23,41 +33,28 @@ namespace EA4S.Minigames.FastCrowd
 
         public void EnterState()
         {
-            answerCounter = 2;
             game.QuestionManager.OnCompleted += OnQuestionCompleted;
             game.QuestionManager.OnDropped += OnAnswerDropped;
 
-            if (game.CurrentChallenge != null)
+            if (game.CurrentChallenge != null) {
+                if (MustTrunk) {
+                    game.CurrentChallenge.RemoveRange(2, game.CurrentChallenge.Count - 2);
+                }
                 game.QuestionManager.StartQuestion(game.CurrentChallenge, game.NoiseData);
-            else
+            } else {
                 game.QuestionManager.Clean();
-
+            }
             tutorialStarted = false;
 
-            if (FastCrowdConfiguration.Instance.Variation == FastCrowdVariation.Alphabet)
-            {
-                game.Context.GetAudioManager().PlayDialogue(Database.LocalizationDataId.FastCrowd_alphabet_Tuto, () => { StartTutorial(); });
+            // TODO: make this more robust to variations
+
+            if (AppManager.I.AppSettings.EnglishSubtitles) {
+                KeeperManager.I.PlayDialog(FastCrowdConfiguration.Instance.TutorialLocalizationId, false, true, () => { StartTutorial(); });
+            } else {
+                game.Context.GetAudioManager().PlayDialogue(FastCrowdConfiguration.Instance.TutorialLocalizationId, () => { StartTutorial(); });
             }
-            else if (FastCrowdConfiguration.Instance.Variation == FastCrowdVariation.Counting)
-            {
-                game.Context.GetAudioManager().PlayDialogue(Database.LocalizationDataId.FastCrowd_counting_Tuto, () => { StartTutorial(); });
-            }
-            else if (FastCrowdConfiguration.Instance.Variation == FastCrowdVariation.Letter)
-            {
-                game.Context.GetAudioManager().PlayDialogue(Database.LocalizationDataId.FastCrowd_letter_Tuto, () => { StartTutorial(); });
-            }
-            else if (FastCrowdConfiguration.Instance.Variation == FastCrowdVariation.Spelling)
-            {
-                game.Context.GetAudioManager().PlayDialogue(Database.LocalizationDataId.FastCrowd_spelling_Tuto, () => { StartTutorial(); });
-            }
-            else if (FastCrowdConfiguration.Instance.Variation == FastCrowdVariation.Words)
-            {
-                game.Context.GetAudioManager().PlayDialogue(Database.LocalizationDataId.FastCrowd_words_Tuto, () => { StartTutorial(); });
-            }
-            else
-            {
-                StartTutorial();
-            }
+
+            game.QuestionManager.wordComposer.gameObject.SetActive(FastCrowdConfiguration.Instance.NeedsWordComposer);
         }
 
         public void ExitState()
@@ -67,6 +64,7 @@ namespace EA4S.Minigames.FastCrowd
             game.QuestionManager.Clean();
 
             game.showTutorial = false;
+            game.QuestionManager.wordComposer.gameObject.SetActive(false);
         }
 
         void StartTutorial()
@@ -80,39 +78,27 @@ namespace EA4S.Minigames.FastCrowd
 
         void OnQuestionCompleted()
         {
-            game.SetCurrentState(game.QuestionState);
+            game.SetCurrentState(game.ResultState);
         }
 
         void OnAnswerDropped(ILivingLetterData data, bool result)
         {
-            if (result)
-            {
-                --answerCounter;
-
-                if (answerCounter <= 0 &&
-                    (FastCrowdConfiguration.Instance.Variation == FastCrowdVariation.Alphabet ||
-                    FastCrowdConfiguration.Instance.Variation == FastCrowdVariation.Counting ||
-                    FastCrowdConfiguration.Instance.Variation == FastCrowdVariation.Words)
-                    )
-                {
-                    game.SetCurrentState(game.QuestionState);
-                    return;
-                }
-            }
-
             tutorialStartTimer = 3f;
             game.Context.GetCheckmarkWidget().Show(result);
             game.Context.GetAudioManager().PlaySound(result ? Sfx.OK : Sfx.KO);
+
+            if (result && (FastCrowdConfiguration.Instance.Variation == FastCrowdVariation.Counting || FastCrowdConfiguration.Instance.Variation == FastCrowdVariation.Word)) {
+                game.Context.GetAudioManager().PlayVocabularyData(data);
+            }
+
         }
 
         public void Update(float delta)
         {
-            if(tutorialStarted)
-            {
+            if (tutorialStarted) {
                 tutorialStartTimer += -delta;
 
-                if (tutorialStartTimer <= 0f)
-                {
+                if (tutorialStartTimer <= 0f) {
                     tutorialStartTimer = 3f;
 
                     DrawTutorial();
@@ -122,8 +108,9 @@ namespace EA4S.Minigames.FastCrowd
 
         void DrawTutorial()
         {
-            if (game.QuestionManager.crowd.GetLetter(game.QuestionManager.dropContainer.GetActiveData()) == null)
+            if (game.QuestionManager.crowd.GetLetter(game.QuestionManager.dropContainer.GetActiveData()) == null) {
                 return;
+            }
 
             StrollingLivingLetter tutorialLetter = game.QuestionManager.crowd.GetLetter(game.QuestionManager.dropContainer.GetActiveData());
 
@@ -134,10 +121,8 @@ namespace EA4S.Minigames.FastCrowd
 
             game.QuestionManager.crowd.GetNearLetters(nearLetters, startLine, 10f);
 
-            for (int i = 0; i < nearLetters.Count; i++)
-            {
-                if (nearLetters[i] != tutorialLetter)
-                {
+            for (int i = 0; i < nearLetters.Count; i++) {
+                if (nearLetters[i] != tutorialLetter) {
                     nearLetters[i].Scare(startLine, 3f);
                 }
             }

@@ -1,19 +1,19 @@
-﻿using UnityEngine;
+﻿using Antura.Database;
+using Antura.LivingLetters;
+using Antura.Tutorial;
+using Antura.UI;
+using ArabicSupport;
+using Antura.Core;
+using Antura.Helpers;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using ArabicSupport;
-using EA4S.Core;
-using EA4S.Helpers;
-using EA4S.MinigamesAPI;
-using EA4S.MinigamesCommon;
-using EA4S.Tutorial;
-using EA4S.UI;
+using UnityEngine;
 
-namespace EA4S.Minigames.MakeFriends
+namespace Antura.Minigames.MakeFriends
 {
-    public class MakeFriendsGame : MiniGame
+    public class MakeFriendsGame : MiniGameController
     {
         public LivingLetterArea leftArea;
         public LivingLetterArea rightArea;
@@ -21,7 +21,7 @@ namespace EA4S.Minigames.MakeFriends
         public Canvas endGameCanvas;
         public GameObject sceneCamera;
         public const int numberOfRounds = 6;
-        public float uiDelay;
+        //public float uiDelay;
         public float feedbackDuration;
         public float loseDuration;
         public Vector3 endCameraPosition;
@@ -38,8 +38,11 @@ namespace EA4S.Minigames.MakeFriends
         public Camera uiCamera;
         [Header("Difficulty Override")]
         public bool overrideDifficulty;
-        public MakeFriendsVariation difficultySetting;
-        public static MakeFriendsGame Instance {  get { return I as MakeFriendsGame; } }
+        public MakeFriendsDifficulty difficultySetting;
+        public static MakeFriendsGame Instance { get { return I as MakeFriendsGame; } }
+
+        public bool IsIntroducingLetter = false;
+        public int SpokenWords = 0;
 
         [HideInInspector]
         public MakeFriendsConfiguration Configuration { get { return MakeFriendsConfiguration.Instance; } }
@@ -57,6 +60,9 @@ namespace EA4S.Minigames.MakeFriends
         private int _currentScore = 0;
         private bool isTutorialRound;
 
+        MakeFriendsLivingLetter livingLetter1;
+        MakeFriendsLivingLetter livingLetter2;
+
         public bool TutorialEnabled
         {
             get { return GetConfiguration().TutorialEnabled; }
@@ -65,21 +71,9 @@ namespace EA4S.Minigames.MakeFriends
         public int CurrentScore
         {
             get { return _currentScore; }
-            set
-            {
+            set {
                 _currentScore = value;
-                if (CurrentScore == STARS_1_THRESHOLD)
-                {
-                    MinigamesUI.Starbar.GotoStar(0);
-                }
-                else if (CurrentScore == STARS_2_THRESHOLD)
-                {
-                    MinigamesUI.Starbar.GotoStar(1);
-                }
-                else if (CurrentScore == STARS_3_THRESHOLD)
-                {
-                    MinigamesUI.Starbar.GotoStar(2);
-                }
+                Context.GetOverlayWidget().SetStarsScore(CurrentScore);
             }
         }
 
@@ -101,8 +95,7 @@ namespace EA4S.Minigames.MakeFriends
 
         public int CurrentStars
         {
-            get
-            {
+            get {
                 if (CurrentScore < STARS_1_THRESHOLD)
                     return 0;
                 if (CurrentScore < STARS_2_THRESHOLD)
@@ -121,7 +114,13 @@ namespace EA4S.Minigames.MakeFriends
             ResultState = new MakeFriendsResultState(this);
         }
 
-        protected override IState GetInitialState()
+        public void InitializeMinigameUI()
+        {
+            Context.GetOverlayWidget().Initialize(true, false, false);
+            Context.GetOverlayWidget().SetStarsThresholds(STARS_1_THRESHOLD, STARS_2_THRESHOLD, STARS_3_THRESHOLD);
+        }
+
+        protected override FSM.IState GetInitialState()
         {
             return IntroductionState;
         }
@@ -131,23 +130,9 @@ namespace EA4S.Minigames.MakeFriends
             return MakeFriendsConfiguration.Instance;
         }
 
-        protected override void Awake()
-        {
-            base.Awake();
-            //Instance = this;
-        }
-
         protected override void Start()
         {
             base.Start();
-
-            //AppManager.I.InitDataAI();
-            //AppManager.I.CurrentGameManagerGO = gameObject;
-            //SceneTransitioner.Close();
-            //Random.seed = System.DateTime.Now.GetHashCode();
-            //LoggerEA4S.Log("minigame", "template", "start", "");
-            //LoggerEA4S.Save();
-
             PlayIdleMusic();
         }
 
@@ -163,34 +148,33 @@ namespace EA4S.Minigames.MakeFriends
 
         public void PlayTitleVoiceOver()
         {
-            StartCoroutine(PlayDialog_Coroutine(EA4S.Database.LocalizationDataId.MakeFriends_Title, 0f));
+            AudioManager.PlayDialogue(LocalizationDataId.MakeFriends_letterinword_Title);
         }
 
-        public void PlayTutorialVoiceOver(float delay = 3.8f)
+        public void PlayTutorialVoiceOver()
         {
-            StartCoroutine(PlayDialog_Coroutine(EA4S.Database.LocalizationDataId.MakeFriends_Tuto, delay));
+            StartCoroutine(PlayDialog_Coroutine(LocalizationDataId.MakeFriends_letterinword_Tuto));
         }
 
-        public void PlayIntroVoiceOver(float delay = 3.75f)
+        public void PlayIntroVoiceOver()
         {
-            StartCoroutine(PlayDialog_Coroutine(EA4S.Database.LocalizationDataId.MakeFriends_Intro, delay));
+            StartCoroutine(PlayDialog_Coroutine(LocalizationDataId.MakeFriends_letterinword_Intro));
         }
 
-        private IEnumerator PlayDialog_Coroutine(EA4S.Database.LocalizationDataId dialog, float delay)
+        private IEnumerator PlayDialog_Coroutine(LocalizationDataId dialog)
         {
-            yield return new WaitForSeconds(delay);
+            while (MakeFriendsGame.Instance.SpokenWords < 2)
+                yield return null;
+            
             AudioManager.PlayDialogue(dialog);
         }
 
         public void Play()
         {
             currentRound++;
-            if (currentRound <= numberOfRounds)
-            {
+            if (currentRound <= numberOfRounds) {
                 StartNewRound();
-            }
-            else
-            {
+            } else {
                 EndGame();
             }
         }
@@ -225,16 +209,16 @@ namespace EA4S.Minigames.MakeFriends
 
         private IEnumerator ShowTutorialUI_Coroutine()
         {
-            yield return new WaitForSeconds(uiDelay + 0.5f);
+            while (MakeFriendsGame.Instance.SpokenWords < 2)
+                yield return null;
 
-            while (isTutorialRound)
-            {
-                for (int i = 0; i < letterPicker.CorrectLetterChoices.Count; i++)
-                {
+            yield return new WaitForSeconds(0.5f);
+
+            while (isTutorialRound) {
+                for (int i = 0; i < letterPicker.CorrectLetterChoices.Count; i++) {
                     var choice = letterPicker.CorrectLetterChoices[i];
 
-                    if (choice.isCorrectChoice && !choice.IsDisabled && !letterPicker.IsBlocked)
-                    {
+                    if (choice.isCorrectChoice && !choice.IsDisabled && !letterPicker.IsBlocked) {
                         var from = choice.transform.position;
                         var to = dropZone.transform.position;
                         TutorialUI.SetCamera(uiCamera);
@@ -276,8 +260,7 @@ namespace EA4S.Minigames.MakeFriends
         private void SetLetterChoices()
         {
             choiceLetters.AddRange(commonLetters);
-            if (choiceLetters.Count > letterPicker.letterChoices.Length)
-            {
+            if (choiceLetters.Count > letterPicker.letterChoices.Length) {
                 choiceLetters = choiceLetters.GetRange(0, letterPicker.letterChoices.Length);
             }
             //Debug.Log("Added " + choiceLetters.Count + " common letters to choices");
@@ -285,23 +268,17 @@ namespace EA4S.Minigames.MakeFriends
             int vacantChoiceLettersCount = letterPicker.letterChoices.Length - choiceLetters.Count;
 
             // Get other random letters (without repetition)
-            for (int i = 0; i < vacantChoiceLettersCount; i++)
-            {
+            for (int i = 0; i < vacantChoiceLettersCount; i++) {
                 LL_LetterData letter;
-                do
-                {
-                    if (i < uncommonLetters.Count)
-                    {
+                do {
+                    if (i < uncommonLetters.Count) {
                         letter = uncommonLetters[i] as LL_LetterData;
                         //Debug.Log("Considering as choice: " + letter.TextForLivingLetter);
-                        if (choiceLetters.Exists(x => x.Id == letter.Id))
-                        {
+                        if (choiceLetters.Exists(x => x.Id == letter.Id)) {
                             letter = AppManager.I.Teacher.GetAllTestLetterDataLL().GetRandom();
                             //Debug.Log("Using random choice instead: " + letter);
                         }
-                    }
-                    else
-                    {
+                    } else {
                         letter = AppManager.I.Teacher.GetAllTestLetterDataLL().GetRandom();
                         //Debug.Log("No more word letters, using random: " + letter.TextForLivingLetter);
                     }
@@ -312,16 +289,15 @@ namespace EA4S.Minigames.MakeFriends
             choiceLetters.Shuffle();
 
             letterPicker.DisplayLetters(choiceLetters);
-            if (isTutorialRound)
-            {
+            if (isTutorialRound) {
                 letterPicker.SetCorrectChoices(commonLetters);
             }
         }
 
         private void SpawnLivingLetters()
         {
-            leftArea.SpawnLivingLetter(wordData1);
-            rightArea.SpawnLivingLetter(wordData2);
+            livingLetter1 = leftArea.SpawnLivingLetter(wordData1);
+            livingLetter2 = rightArea.SpawnLivingLetter(wordData2);
 
             leftArea.MakeEntrance();
             rightArea.MakeEntrance();
@@ -329,7 +305,7 @@ namespace EA4S.Minigames.MakeFriends
 
         private void ShowDropZone()
         {
-            dropZone.Appear(uiDelay);
+            dropZone.Appear();
         }
 
         private void HideDropZone()
@@ -337,9 +313,8 @@ namespace EA4S.Minigames.MakeFriends
             dropZone.Disappear();
         }
 
-        private void ShowLetterPicker(float delay = -1f)
+        private void ShowLetterPicker(float delay = 0)
         {
-            delay = delay == -1f ? uiDelay : delay;
             letterPicker.Block();
             letterPicker.ShowAndUnblockDelayed(delay);
         }
@@ -367,8 +342,7 @@ namespace EA4S.Minigames.MakeFriends
             HideLetterPicker();
             ShowLetterPicker(feedbackDuration + 0.75f);
 
-            if (commonLetters.Exists(x => x.Id == letterChoice.letterData.Id))
-            {
+            if (commonLetters.Exists(x => x.Id == letterChoice.letterData.Id)) {
                 letterChoice.State = LetterChoiceController.ChoiceState.CORRECT;
                 //letterChoice.SpawnBalloon(true);
                 GetConfiguration().Context.GetAudioManager().PlaySound(Sfx.LetterHappy);
@@ -376,23 +350,17 @@ namespace EA4S.Minigames.MakeFriends
                 TutorialUI.MarkYes(correctChoiceIndicatorPosition, TutorialUI.MarkSize.Normal);
                 MakeFriendsConfiguration.Instance.Context.GetAudioManager().PlaySound(Sfx.StampOK);
 
-                if (!correctChoices.Exists(x => x.Id == letterChoice.letterData.Id))
-                {
+                if (!correctChoices.Exists(x => x.Id == letterChoice.letterData.Id)) {
                     correctChoices.Add(letterChoice.letterData);
                 }
 
-                if (correctChoices.Count >= commonLetters.Count)
-                {
+                if (correctChoices.Count >= commonLetters.Count) {
                     EndRound(true);
-                }
-                else
-                {
+                } else {
                     dropZone.ResetLetter(feedbackDuration);
                 }
                 antura.ReactPositively();
-            }
-            else
-            {
+            } else {
                 letterChoice.State = LetterChoiceController.ChoiceState.WRONG;
                 //letterChoice.SpawnBalloon(false);
                 GetConfiguration().Context.GetAudioManager().PlaySound(Sfx.LetterSad);
@@ -402,17 +370,13 @@ namespace EA4S.Minigames.MakeFriends
                 dropZone.ResetLetter(feedbackDuration);
                 incorrectChoices.Add(letterChoice.letterData);
                 antura.ReactNegatively();
-                if (!isTutorialRound)
-                {
+                if (!isTutorialRound) {
                     leftArea.MoveAwayAngrily();
                     rightArea.MoveAwayAngrily();
-                    if (incorrectChoices.Count >= 3)
-                    {
+                    if (incorrectChoices.Count >= 3) {
                         EndRound(false);
                     }
-                }
-                else
-                {
+                } else {
                     leftArea.livingLetter.LookAngry();
                     rightArea.livingLetter.LookAngry();
                 }
@@ -433,15 +397,26 @@ namespace EA4S.Minigames.MakeFriends
 
             HideLetterPicker();
 
-            if (win)
-            {
+            if (win) {
                 Debug.Log("Win");
 
-                if (isTutorialRound)
-                {
+                if (isTutorialRound) {
                     Debug.Log("Cleared tutorial");
                     HideTutorialUI();
                 }
+
+                List<LL_LetterData> letters = new List<LL_LetterData>();
+
+                foreach (var l in commonLetters)
+                {
+                    LL_LetterData data = l as LL_LetterData;
+
+                    if (data != null)
+                        letters.Add(data);
+                }
+
+                livingLetter1.MarkLetters(letters, Color.green);
+                livingLetter2.MarkLetters(letters, Color.green);
 
                 GetConfiguration().Context.GetAudioManager().PlaySound(Sfx.Win);
                 leftArea.Celebrate();
@@ -449,8 +424,7 @@ namespace EA4S.Minigames.MakeFriends
                 leftArea.HighFive(leftArea.celebrationDuration);
                 rightArea.HighFive(rightArea.celebrationDuration);
                 roundResultAnimator.ShowWin();
-                if (!isTutorialRound)
-                {
+                if (!isTutorialRound) {
                     CurrentScore++;
                     Context.GetLogManager().OnAnswered(wordData1, true);
                     Context.GetLogManager().OnAnswered(wordData2, true);
@@ -463,8 +437,7 @@ namespace EA4S.Minigames.MakeFriends
                 rightArea.MakeFriendlyExit();
 
                 // Go to Friends Zone
-                if (!isTutorialRound)
-                {
+                if (!isTutorialRound) {
                     yield return new WaitForSeconds(friendlyExitDelay);
                     leftArea.GoToFriendsZone(FriendsZonesManager.instance.currentZone);
                     rightArea.GoToFriendsZone(FriendsZonesManager.instance.currentZone);
@@ -475,18 +448,13 @@ namespace EA4S.Minigames.MakeFriends
                 yield return new WaitForSeconds(winDelay2);
                 HideDropZone();
 
-                if (isTutorialRound)
-                {
+                if (isTutorialRound) {
                     isTutorialRound = false;
                     IntroductionState.OnFinishedTutorial();
-                }
-                else
-                {
+                } else {
                     NextRound();
                 }
-            }
-            else
-            {
+            } else {
                 Debug.Log("Lose");
 
                 Context.GetLogManager().OnAnswered(wordData1, false);
@@ -501,8 +469,11 @@ namespace EA4S.Minigames.MakeFriends
             }
         }
 
-        private void Reset()
+        public void Reset()
         {
+            IsIntroducingLetter = false;
+            SpokenWords = 0;
+
             commonLetters.Clear();
             choiceLetters.Clear();
             correctChoices.Clear();
@@ -525,7 +496,7 @@ namespace EA4S.Minigames.MakeFriends
 
         private IEnumerator EndGame_Coroutine()
         {
-            var delay1 = 1f;
+            var delay1 = 0.25f;
             yield return new WaitForSeconds(delay1);
 
             PlayIdleMusic();
@@ -535,6 +506,12 @@ namespace EA4S.Minigames.MakeFriends
             FriendsZonesManager.instance.EverybodyDance();
             antura.ReactToEndGame();
 
+            yield return new WaitForSeconds(1.0f);
+
+            antura.animationController.DoShout();
+            Context.GetAudioManager().PlaySound(Sfx.DogBarking);
+
+            /*
             // Zoom out camera
             var fromPosition = sceneCamera.transform.localPosition;
             var toPosition = endCameraPosition;
@@ -544,8 +521,7 @@ namespace EA4S.Minigames.MakeFriends
             var lerpProgress = 0f;
             var lerpLength = 2f;
 
-            while (lerpProgress < lerpLength)
-            {
+            while (lerpProgress < lerpLength) {
                 sceneCamera.transform.localPosition = Vector3.Lerp(fromPosition, toPosition, interpolant);
                 sceneCamera.transform.localRotation = Quaternion.Euler(Vector3.Lerp(fromRotation, toRotation, interpolant));
                 lerpProgress += Time.deltaTime;
@@ -553,6 +529,7 @@ namespace EA4S.Minigames.MakeFriends
                 interpolant = Mathf.Sin(interpolant * Mathf.PI * 0.5f);
                 yield return new WaitForFixedUpdate();
             }
+            */
 
             //            endGameCanvas.gameObject.SetActive(true);
             //

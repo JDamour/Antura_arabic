@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using EA4S.Helpers;
+﻿using Antura.Core;
+using Antura.Helpers;
+using System;
 using SQLite;
 using UnityEngine;
 
-namespace EA4S.Database
+namespace Antura.Database
 {
     /// <summary>
     /// Data defining a Minigame.
@@ -18,19 +18,15 @@ namespace EA4S.Database
 
         public string Title_En
         {
-            get { return _Title_En; }
-            set { _Title_En = value; }
+            get { return LocalizationManager.GetLocalizationData(Code.ToString() + "_Title").English; }
+            set { }
         }
-        [SerializeField]
-        private string _Title_En;
 
         public string Title_Ar
         {
-            get { return _Title_Ar; }
-            set { _Title_Ar = value; }
+            get { return LocalizationManager.GetLocalizationData(Code.ToString() + "_Title").Arabic; }
+            set { }
         }
-        [SerializeField]
-        private string _Title_Ar;
 
         [PrimaryKey]
         public MiniGameCode Code
@@ -41,13 +37,13 @@ namespace EA4S.Database
         [SerializeField]
         private MiniGameCode _Code;
 
-        public bool Available
+        public bool Active
         {
-            get { return _Available; }
-            set { _Available = value; }
+            get { return _Active; }
+            set { _Active = value; }
         }
         [SerializeField]
-        private bool _Available;
+        private bool _Active;
 
         /// <summary>
         /// a Minigame can be a normal game or an assessment
@@ -118,7 +114,7 @@ namespace EA4S.Database
 
         public override string ToString()
         {
-            return string.Format("[Minigame: id={0}, type={4}, available={1},  title_en={2}, title_ar={3}]", GetId(), Available, Title_En, Title_Ar, Type.ToString());
+            return string.Format("[Minigame: id={0}, type={4}, available={1},  title_en={2}, title_ar={3}]", GetId(), Active, Title_En, Title_Ar, Type.ToString());
         }
 
         public string GetTitleSoundFilename()
@@ -154,5 +150,4 @@ namespace EA4S.Database
             return Skill.ToString() + ":" + Weight;
         }
     }
-
 }

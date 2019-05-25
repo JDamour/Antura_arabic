@@ -1,8 +1,8 @@
-﻿using DG.Tweening;
-using EA4S.Audio;
+﻿using Antura.Audio;
+using DG.Tweening;
 using UnityEngine;
 
-namespace EA4S.UI
+namespace Antura.UI
 {
     /// <summary>
     /// Shows the WalkieTalkie that the Keeper uses to communicate with the player.
@@ -10,8 +10,8 @@ namespace EA4S.UI
     public class WalkieTalkie : MonoBehaviour
     {
         public bool IsShown { get; private set; }
-        bool shouldPulse;
-        Tween showTween, pulseTween;
+        private bool shouldPulse;
+        private Tween showTween, pulseTween;
 
         public void Setup()
         {
@@ -25,9 +25,10 @@ namespace EA4S.UI
                     })
                 );
             pulseTween.ForceInit();
+
             showTween = this.transform.DOScale(0.0001f, 0.45f).From().SetEase(Ease.OutBack).SetAutoKill(false).Pause()
-                .OnRewind(()=> this.gameObject.SetActive(false))
-                .OnComplete(()=> pulseTween.Goto(pulseShakeDuration, true));
+                .OnRewind(() => this.gameObject.SetActive(false))
+                .OnComplete(() => pulseTween.Goto(pulseShakeDuration, true));
 
             this.gameObject.SetActive(false);
         }
@@ -45,12 +46,18 @@ namespace EA4S.UI
                 this.gameObject.SetActive(true);
                 AudioManager.I.PlaySound(Sfx.WalkieTalkie);
                 StopPulse(true);
-                if (_immediate) showTween.Complete();
-                else showTween.PlayForward();
+                if (_immediate) {
+                    showTween.Complete();
+                } else {
+                    showTween.PlayForward();
+                }
             } else {
                 StopPulse(true);
-                if (_immediate) showTween.Rewind();
-                else showTween.PlayBackwards();
+                if (_immediate) {
+                    showTween.Rewind();
+                } else {
+                    showTween.PlayBackwards();
+                }
             }
         }
 
@@ -63,7 +70,7 @@ namespace EA4S.UI
         public void StopPulse(bool _immediate = false)
         {
             shouldPulse = false;
-            if (_immediate) pulseTween.Rewind();
+            if (_immediate) { pulseTween.Rewind(); }
         }
     }
 }

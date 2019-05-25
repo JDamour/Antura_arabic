@@ -1,10 +1,10 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
 using System.Collections;
-using EA4S.MinigamesAPI;
+using Antura.LivingLetters;
 using TMPro;
 
-namespace EA4S.Minigames.MakeFriends
+namespace Antura.Minigames.MakeFriends
 {
     public class DropZoneController : MonoBehaviour, IDropHandler, IPointerEnterHandler
     {
@@ -43,22 +43,17 @@ namespace EA4S.Minigames.MakeFriends
         }
 
 
-        public void Appear(float delay = 0f)
+        public void Appear()
         {
-            if (delay > 0f)
-            {
-                StartCoroutine(Appear_Coroutine(delay));
-            }
-            else
-            {
-                animator.SetTrigger("Appear");
-            }
+            StartCoroutine(Appear_Coroutine());
         }
 
-        private IEnumerator Appear_Coroutine(float delay)
+        private IEnumerator Appear_Coroutine()
         {
-            yield return new WaitForSeconds(delay);
-            Appear();
+            while (MakeFriendsGame.Instance.SpokenWords < 2)
+                yield return null;
+
+            animator.SetTrigger("Appear");
         }
 
         public void Disappear(float delay = 0f)

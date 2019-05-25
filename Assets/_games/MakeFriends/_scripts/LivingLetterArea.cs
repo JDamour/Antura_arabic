@@ -1,7 +1,7 @@
-﻿using EA4S.MinigamesAPI;
+﻿using Antura.LivingLetters;
 using UnityEngine;
 
-namespace EA4S.Minigames.MakeFriends
+namespace Antura.Minigames.MakeFriends
 {
     public class LivingLetterArea : MonoBehaviour
     {
@@ -18,7 +18,6 @@ namespace EA4S.Minigames.MakeFriends
         public float entranceDuration;
         public float celebrationDuration;
         public float friendlyExitDuration;
-        public float speakDelay;
         public float movingAwayDuration;
 
         [HideInInspector]
@@ -51,18 +50,18 @@ namespace EA4S.Minigames.MakeFriends
         {
             exitRotation = exitRotation_readable;
 
-            if (MakeFriendsGame.Instance.Configuration.Variation != MakeFriendsVariation.EASY)
+            if (MakeFriendsGame.Instance.Configuration.DifficultyChoice != MakeFriendsDifficulty.EASY)
             {
                 exitRotation = exitRotation_unreadable;    
             }
 
             if (livingLetter != null)
             {
-                livingLetter.focusOnTouch = MakeFriendsGame.Instance.Configuration.Variation == MakeFriendsVariation.HARD ? false : true;
+                livingLetter.focusOnTouch = MakeFriendsGame.Instance.Configuration.DifficultyChoice == MakeFriendsDifficulty.HARD ? false : true;
             }
         }
 
-        public void SpawnLivingLetter(LL_WordData wordData)
+        public MakeFriendsLivingLetter SpawnLivingLetter(LL_WordData wordData)
         {
             AdjustForDifficulty();
 
@@ -71,14 +70,16 @@ namespace EA4S.Minigames.MakeFriends
             livingLetter = instance.GetComponent<MakeFriendsLivingLetter>();
             livingLetter.Init(wordData);
             livingLetter.container = this.gameObject;
-            livingLetter.focusOnTouch = MakeFriendsGame.Instance.Configuration.Variation == MakeFriendsVariation.HARD ? false : true;
+            livingLetter.focusOnTouch = MakeFriendsGame.Instance.Configuration.DifficultyChoice == MakeFriendsDifficulty.HARD ? false : true;
 
             AdjustForDifficulty();
+
+            return livingLetter;
         }
 
         public void MakeEntrance()
         {
-            livingLetter.MakeEntrance(offscreenPosition, startingPosition, entranceRotation, entranceDuration, speakDelay, exitRotation);
+            livingLetter.MakeEntrance(offscreenPosition, startingPosition, entranceRotation, entranceDuration, exitRotation);
         }
 
         public void MakeFriendlyExit()

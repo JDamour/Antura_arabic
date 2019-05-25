@@ -1,7 +1,8 @@
-﻿using System.Collections.Generic;
-using EA4S.Core;
+using System.Collections.Generic;
+using Antura.Core;
+using Antura.Database;
 
-namespace EA4S.Teacher
+namespace Antura.Teacher
 {
     /// <summary>
     /// Selects words at random
@@ -26,10 +27,13 @@ namespace EA4S.Teacher
         {
             get { return this.parameters; }
         }
-        public RandomWordsQuestionBuilder(int nPacks, int nCorrect = 1, int nWrong = 0, 
+        public RandomWordsQuestionBuilder(int nPacks, int nCorrect = 1, int nWrong = 0,
             bool firstCorrectIsQuestion = false, Database.WordDataCategory category = Database.WordDataCategory.None, QuestionBuilderParameters parameters = null)
         {
-            if (parameters == null) parameters = new QuestionBuilderParameters();
+            if (parameters == null)
+            {
+                parameters = new QuestionBuilderParameters();
+            }
 
             this.nPacks = nPacks;
             this.nCorrect = nCorrect;
@@ -45,7 +49,11 @@ namespace EA4S.Teacher
         {
             previousPacksIDs.Clear();
 
-            List<QuestionPackData> packs = new List<QuestionPackData>();
+            var vocabularyHelper = AppManager.I.VocabularyHelper;
+            words_cache.Clear();
+            words_cache.AddRange(vocabularyHelper.GetWordsByCategory(category, parameters.wordFilters));
+
+            var packs = new List<QuestionPackData>();
             for (int pack_i = 0; pack_i < nPacks; pack_i++)
             {
                 var pack = CreateSingleQuestionPackData();
@@ -55,27 +63,33 @@ namespace EA4S.Teacher
             return packs;
         }
 
+        private List<WordData> words_cache = new List<WordData>();
+        private List<WordData> wrongWords_cache = new List<WordData>();
+
         private QuestionPackData CreateSingleQuestionPackData()
         {
             var teacher = AppManager.I.Teacher;
             var vocabularyHelper = AppManager.I.VocabularyHelper;
 
             var correctWords = teacher.VocabularyAi.SelectData(
-                () => vocabularyHelper.GetWordsByCategory(category, parameters.wordFilters), 
-                    new SelectionParameters(parameters.correctSeverity, nCorrect, useJourney: parameters.useJourneyForCorrect,
-                        packListHistory: parameters.correctChoicesHistory, filteringIds:previousPacksIDs)
+                () => words_cache,
+                   new SelectionParameters(parameters.correctSeverity, nCorrect, useJourney: parameters.useJourneyForCorrect,
+                      packListHistory: parameters.correctChoicesHistory, filteringIds: previousPacksIDs)
                 );
 
+            
+            wrongWords_cache.Clear();
+            wrongWords_cache.AddRange(vocabularyHelper.GetWordsNotInOptimized(parameters.wordFilters, correctWords));
             var wrongWords = teacher.VocabularyAi.SelectData(
-                () => vocabularyHelper.GetWordsNotIn(parameters.wordFilters, correctWords.ToArray()), 
+                () => wrongWords_cache,
                     new SelectionParameters(parameters.wrongSeverity, nWrong, useJourney: parameters.useJourneyForWrong,
-                        packListHistory: parameters.wrongChoicesHistory, filteringIds: previousPacksIDs,
-                        journeyFilter: SelectionParameters.JourneyFilter.UpToFullCurrentStage)
+                        packListHistory: PackListHistory.NoFilter,
+                        journeyFilter: SelectionParameters.JourneyFilter.CurrentJourney)
                 );
 
             var question = firstCorrectIsQuestion ? correctWords[0] : null;
 
-            if (ConfigAI.verboseQuestionPacks)
+            if (ConfigAI.VerboseQuestionPacks)
             {
                 string debugString = "--------- TEACHER: question pack result ---------";
                 debugString += "\nCorrect Words: " + correctWords.Count;

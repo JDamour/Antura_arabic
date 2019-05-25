@@ -1,9 +1,8 @@
-﻿using System.Collections.Generic;
-using EA4S.Core;
-using EA4S.UI;
+using Antura.UI;
+using System.Collections.Generic;
 using UnityEngine;
 
-namespace EA4S.Rewards
+namespace Antura.Rewards
 {
     /// <summary>
     /// Controls the UI that shows the end results of a minigame or play session.
@@ -13,21 +12,21 @@ namespace EA4S.Rewards
     public class GameResultUI : MonoBehaviour
     {
         public static GameResultUI I;
-        
+
         public EndgameResultPanel EndgameResultPanel;
         public EndsessionResultPanel EndsessionResultPanel;
         public BonesCounter BonesCounter;
         public Vector2 BonesCounterEndgamePos, BonesCounterEndsessionPos;
 
-        const string ResourcesPath = "Prefabs/UI/GameResultUI";
+        const string GameResultUIResourcesPath = "Prefabs/UI/GameResultUI";
 
         #region Unity + Init
 
         static void Init()
         {
-            if (I != null) return;
+            if (I != null) { return; }
 
-            I = Instantiate(Resources.Load<GameResultUI>(ResourcesPath));
+            I = Instantiate(Resources.Load<GameResultUI>(GameResultUIResourcesPath));
             I.BonesCounter.Hide();
         }
 
@@ -38,7 +37,7 @@ namespace EA4S.Rewards
 
         void OnDestroy()
         {
-            if (I == this) I = null;
+            if (I == this) { I = null; }
         }
 
         #endregion
@@ -52,7 +51,7 @@ namespace EA4S.Rewards
         {
             Init();
             GlobalUI.ShowPauseMenu(false);
-            AppManager.I.Player.AddBones(_numStars);
+
             I.BonesCounter.GetComponent<RectTransform>().anchoredPosition = I.BonesCounterEndgamePos;
             I.BonesCounter.Hide();
             I.EndgameResultPanel.Show(_numStars);
@@ -66,12 +65,13 @@ namespace EA4S.Rewards
         /// <param name="_alreadyUnlockedRewards">Total rewards unlocked in previous sessions (0 to 2)</param>
         /// <param name="_immediate">If TRUE shows the screen immediately with no animations. You can ignore this</param>
         /// <returns></returns>
-        public static GameObject[] ShowEndsessionResult(List<EndsessionResultData> _sessionData, int _alreadyUnlockedRewards, bool _immediate = false)
+        public static GameObject[] ShowEndsessionResult(List<EndsessionResultData> _sessionData, int _alreadyUnlockedRewards,
+            bool _immediate = false)
         {
             Init();
             GlobalUI.ShowPauseMenu(false);
-            I.BonesCounter.GetComponent<RectTransform>().anchoredPosition = I.BonesCounterEndsessionPos;
-            I.BonesCounter.Hide();
+            //I.BonesCounter.GetComponent<RectTransform>().anchoredPosition = I.BonesCounterEndsessionPos;
+            //I.BonesCounter.Hide();
             I.EndsessionResultPanel.Show(_sessionData, _alreadyUnlockedRewards, _immediate);
             return I.EndsessionResultPanel.RewardsGos;
         }
@@ -81,7 +81,7 @@ namespace EA4S.Rewards
         /// </summary>
         public static void HideEndgameResult(bool _immediate = false)
         {
-            if (I == null) return;
+            //if (I == null) return;
             GlobalUI.ShowPauseMenu(true);
             I.BonesCounter.Hide();
             I.EndgameResultPanel.Hide(_immediate);
@@ -92,9 +92,9 @@ namespace EA4S.Rewards
         /// </summary>
         public static void HideEndsessionResult(bool _immediate = false)
         {
-            if (I == null) return;
+            if (I == null) { return; }
             GlobalUI.ShowPauseMenu(true);
-            I.BonesCounter.Hide();
+            //I.BonesCounter.Hide();
             I.EndsessionResultPanel.Hide(_immediate);
         }
 

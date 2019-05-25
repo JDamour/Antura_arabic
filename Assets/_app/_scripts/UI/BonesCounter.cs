@@ -1,9 +1,10 @@
-﻿using DG.Tweening;
-using EA4S.Core;
+﻿using Antura.Audio;
+using Antura.Core;
+using DG.Tweening;
 using TMPro;
 using UnityEngine;
 
-namespace EA4S.UI
+namespace Antura.UI
 {
     /// <summary>
     /// Shows the number of bones obtained.
@@ -11,13 +12,22 @@ namespace EA4S.UI
     /// </summary>
     public class BonesCounter : MonoBehaviour
     {
+        [Header("Setup")]
+        public bool AutoSetup;
+
+        [Header("References")]
         public TextMeshProUGUI TfCount;
         public RectTransform BoneImg;
 
-        int totBones {
+        int totBones
+        {
             get { return fooTotBones; }
-            set { fooTotBones = value; TfCount.text = value.ToString(); }
+            set {
+                fooTotBones = value;
+                TfCount.text = value.ToString();
+            }
         }
+
         int fooTotBones;
         bool setupDone;
         Tween showTween, increaseTween;
@@ -26,18 +36,23 @@ namespace EA4S.UI
 
         void Start()
         {
-            Setup();
+            if (AutoSetup) {
+                Show(true);
+            } else {
+                // this should be called.. left here for rtetrocompatibility
+                Setup();
+            }
         }
 
         void Setup()
         {
-            if (setupDone) return;
+            if (setupDone) { return; }
 
             setupDone = true;
 
             SetValue(0);
             showTween = this.transform.DOScale(0.001f, 0.35f).From().SetEase(Ease.OutBack).SetAutoKill(false).Pause()
-                .OnRewind(()=> this.gameObject.SetActive(false));
+                .OnRewind(() => this.gameObject.SetActive(false));
             showTween.Complete();
             increaseTween = BoneImg.transform.DOPunchScale(Vector3.one * 0.15f, 0.35f).SetAutoKill(false).Pause();
         }
@@ -55,7 +70,7 @@ namespace EA4S.UI
         public void Show(bool _setValueAuto = true)
         {
             Setup();
-            if (_setValueAuto) SetValueAuto();
+            if (_setValueAuto) { SetValueAuto(); }
             this.gameObject.SetActive(true);
             showTween.PlayForward();
         }
@@ -63,7 +78,7 @@ namespace EA4S.UI
         public void Hide()
         {
             Setup();
-            if (increaseTween != null) increaseTween.Complete();
+            if (increaseTween != null) { increaseTween.Complete(); }
             showTween.Rewind();
         }
 
@@ -85,15 +100,16 @@ namespace EA4S.UI
         public void IncreaseByOne(bool _animate = true)
         {
             increaseTween.Restart();
+            AudioManager.I.PlaySound(Sfx.Blip);
             totBones++;
         }
 
-//        public void AnimateIncreaseToCurrent(int _by)
-//        {
-//            increaseTween = DOVirtual.Float(totBones, totBones + _by, 0.35f, x => {
-//                totBones = Mathf.RoundToInt(x);
-//            }).SetEase(Ease.Linear).OnKill(()=> increaseTween = null);
-//        }
+        //        public void AnimateIncreaseToCurrent(int _by)
+        //        {
+        //            increaseTween = DOVirtual.Float(totBones, totBones + _by, 0.35f, x => {
+        //                totBones = Mathf.RoundToInt(x);
+        //            }).SetEase(Ease.Linear).OnKill(()=> increaseTween = null);
+        //        }
 
         #endregion
     }

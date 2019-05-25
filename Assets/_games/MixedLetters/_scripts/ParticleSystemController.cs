@@ -1,16 +1,17 @@
 ﻿using UnityEngine;
 
-namespace EA4S.Minigames.MixedLetters
+namespace Antura.Minigames.MixedLetters
 {
     public class ParticleSystemController : MonoBehaviour
     {
         public static ParticleSystemController instance;
 
-        new public ParticleSystem particleSystem;
+        public ParticleSystem MyParticleSystem;
 
         void Awake()
         {
             instance = this;
+            Debug.Log("ParticleSystemController");
         }
 
         public void Enable()
@@ -25,7 +26,7 @@ namespace EA4S.Minigames.MixedLetters
 
         public void Reset()
         {
-            particleSystem.time = 0;
+            MyParticleSystem.time = 0;
         }
 
         public void SetPosition(Vector3 position)

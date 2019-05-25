@@ -1,8 +1,9 @@
-﻿using EA4S.Rewards;
+using Antura.Rewards;
+using Antura.UI;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace EA4S.UI
+namespace Antura.AnturaSpace.UI
 {
     /// <summary>
     /// Button for an item in a category in the Antura Space scene.
@@ -15,10 +16,21 @@ namespace EA4S.UI
         public Camera RewardCamera;
         public Transform RewardContainer;
 
-        [System.NonSerialized] public RewardItem Data;
-        public bool IsNew { get { return isNew && !isNewForceHidden; } }
-        RenderTexture renderTexture;
-        bool isNew, isNewForceHidden;
+        [System.NonSerialized]
+        public RewardBaseItem Data;
+
+        public bool IsNew
+        {
+            get { return isNew && !isNewForceHidden; }
+        }
+
+        public bool IsItemLocked
+        {
+            get { return _isItemLocked; }
+        }
+
+        private RenderTexture renderTexture;
+        private bool isNew, isNewForceHidden, _isItemLocked;
 
         #region Unity
 
@@ -41,23 +53,29 @@ namespace EA4S.UI
             // Create and assing new RenderTexture
             renderTexture = new RenderTexture(256, 256, 16, RenderTextureFormat.ARGB32);
             renderTexture.Create();
-            this.GetComponentInChildren<Camera>(true).targetTexture = renderTexture;
-            this.GetComponentInChildren<RawImage>(true).texture = renderTexture;
+            GetComponentInChildren<Camera>(true).targetTexture = renderTexture;
+            GetComponentInChildren<RawImage>(true).texture = renderTexture;
         }
 
         public override void Lock(bool _doLock)
         {
             base.Lock(_doLock);
 
+            _isItemLocked = _doLock;
+
             IcoLock.SetActive(_doLock);
             RewardImage.gameObject.SetActive(!_doLock);
-            if (_doLock) IcoNew.SetActive(false);
+            if (_doLock) {
+                IcoNew.SetActive(false);
+            }
         }
 
         public void SetAsNew(bool _isNew)
         {
             isNew = _isNew;
-            if (!isNewForceHidden) IcoNew.SetActive(_isNew);
+            if (!isNewForceHidden) {
+                IcoNew.SetActive(_isNew);
+            }
         }
 
         public void SetImage(bool _isRenderTexture)

@@ -1,7 +1,7 @@
-﻿using UnityEngine;
-using EA4S.LivingLetters;
+﻿using Antura.LivingLetters;
+using UnityEngine;
 
-namespace EA4S.Minigames.SickLetters
+namespace Antura.Minigames.SickLetters
 {
     public class SickLettersLLCollider : MonoBehaviour
     {
@@ -28,7 +28,7 @@ namespace EA4S.Minigames.SickLetters
 
         void OnMouseDown()
         {
-            SickLettersConfiguration.Instance.Context.GetAudioManager().PlayLetterData(letterView.Data, true);
+            SickLettersConfiguration.Instance.Context.GetAudioManager().PlayVocabularyData(letterView.Data, true, soundType: SickLettersConfiguration.Instance.GetVocabularySoundType());
         }
     }
 }

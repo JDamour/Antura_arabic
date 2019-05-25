@@ -1,8 +1,9 @@
-﻿using EA4S.Audio;
-using EA4S.Scenes;
+﻿using Antura.Audio;
+using Antura.Core;
+using Antura.Scenes;
 using UnityEngine;
 
-namespace EA4S.UI
+namespace Antura.UI
 {
     /// <summary>
     /// Control buttons for the (_Start) scene.
@@ -29,8 +30,9 @@ namespace EA4S.UI
 
         void OnDestroy()
         {
-            foreach (MenuButton bt in menuBts)
+            foreach (MenuButton bt in menuBts) {
                 bt.Bt.onClick.RemoveAllListeners();
+            }
         }
 
         void OnClick(MenuButton bt)
@@ -41,7 +43,7 @@ namespace EA4S.UI
                     BtMusic.Toggle(AudioManager.I.MusicEnabled);
                     break;
                 case MenuButtonType.FxToggle: // FX on/off
-                    AppManager.I.ToggleQualitygfx();
+                    AppManager.I.AppSettingsManager.ToggleQualitygfx();
                     BtFx.Toggle(AppManager.I.AppSettings.HighQualityGfx);
                     break;
                 case MenuButtonType.Continue:

@@ -1,50 +1,49 @@
-﻿using UnityEngine;
+﻿using Antura.Audio;
+using Antura.LivingLetters;
+using Antura.Helpers;
+using DG.Tweening;
 using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
-using DG.Tweening;
-using EA4S.Antura;
-using EA4S.Audio;
-using EA4S.LivingLetters;
-using EA4S.MinigamesAPI;
-using EA4S.Helpers;
+using UnityEngine;
 
-namespace EA4S.Minigames.HideAndSeek
+namespace Antura.Minigames.HideAndSeek
 {
     public class HideAndSeekGameManager : MonoBehaviour
     {
         void OnEnable()
         {
-            foreach (var a in ArrayLetters)
-            {
+            foreach (var a in ArrayLetters) {
                 a.GetComponent<HideAndSeekLetterController>().onLetterTouched += CheckResult;
                 a.GetComponent<HideAndSeekLetterController>().onLetterReturned += OnLetterReturned;
             }
 
-            foreach (var a in ArrayTrees)
+            foreach (var a in ArrayTrees) {
                 a.GetComponent<HideAndSeekTreeController>().onTreeTouched += MoveObject;
+            }
         }
 
         void OnDisable()
         {
-            foreach (var a in ArrayLetters)
-            {
-                if (a == null)
+            foreach (var a in ArrayLetters) {
+                if (a == null) {
                     continue;
+                }
 
                 a.GetComponent<HideAndSeekLetterController>().onLetterTouched -= CheckResult;
                 a.GetComponent<HideAndSeekLetterController>().onLetterReturned -= OnLetterReturned;
             }
 
-            foreach (var a in ArrayTrees)
-                if (a != null)
+            foreach (var a in ArrayTrees) {
+                if (a != null) {
                     a.GetComponent<HideAndSeekTreeController>().onTreeTouched -= MoveObject;
+                }
+            }
         }
 
         void Start()
         {
-            for (int i = 0; i < MAX_OBJECT; ++i)
-            {
+            for (int i = 0; i < MAX_OBJECT; ++i) {
                 UsedPlaceholder[i] = false;
             }
             AnturaEnterScene();
@@ -53,17 +52,14 @@ namespace EA4S.Minigames.HideAndSeek
         float anturaEnterTimer = 5;
         void Update()
         {
-            if (StartNewRound && game.inGame && Time.time > time + timeToWait)
-            {
+            if (StartNewRound && game.inGame && Time.time > time + timeToWait) {
                 NewRound();
             }
 
-            if (game.inGame && !Antura.IsFollowing)
-            {
+            if (game.inGame && !Antura.IsFollowing) {
                 anturaEnterTimer -= Time.deltaTime;
 
-                if (anturaEnterTimer < 0)
-                {
+                if (anturaEnterTimer < 0) {
                     anturaEnterTimer = Random.Range(5, 10);
                     AnturaEnterScene();
                 }
@@ -72,12 +68,10 @@ namespace EA4S.Minigames.HideAndSeek
 
         void MoveObject(int id)
         {
-            if (ArrayLetters.Length > 0)
-            {
+            if (ArrayLetters.Length > 0) {
                 HideAndSeekConfiguration.Instance.Context.GetAudioManager().PlaySound(Sfx.BushRustlingOut);
                 script = ArrayLetters[GetIdFromPosition(id)].GetComponent<HideAndSeekLetterController>();
-                if (script.Move())
-                {
+                if (script.Move()) {
                     LockTree(id, true);
                 }
             }
@@ -85,8 +79,7 @@ namespace EA4S.Minigames.HideAndSeek
 
         int GetIdFromPosition(int index)
         {
-            for (int i = 0; i < ArrayLetters.Length; ++i)
-            {
+            for (int i = 0; i < ArrayLetters.Length; ++i) {
                 if (ArrayLetters[i].GetComponent<HideAndSeekLetterController>().id == index)
                     return i;
             }
@@ -101,7 +94,7 @@ namespace EA4S.Minigames.HideAndSeek
 
         public void RepeatAudio()
         {
-            game.Context.GetAudioManager().PlayLetterData(GetCorrectAnswer());
+            game.Context.GetAudioManager().PlayVocabularyData(GetCorrectAnswer());
         }
 
 
@@ -112,8 +105,7 @@ namespace EA4S.Minigames.HideAndSeek
             var initialDelay = 3f;
             yield return new WaitForSeconds(initialDelay);
 
-            foreach (GameObject x in ArrayLetters)
-            {
+            foreach (GameObject x in ArrayLetters) {
                 x.GetComponent<LivingLetterController>().Poof();
                 AudioManager.I.PlaySound(Sfx.Poof);
                 x.SetActive(false);
@@ -139,8 +131,7 @@ namespace EA4S.Minigames.HideAndSeek
 
             letterInAnimation = GetIdFromPosition(id);
             HideAndSeekLetterController script = ArrayLetters[letterInAnimation].GetComponent<HideAndSeekLetterController>();
-            if (script.view.Data.Id == GetCorrectAnswer().Id)
-            {
+            if (script.view.Data.Id == GetCorrectAnswer().Id) {
                 isRoundRunning = false;
                 LockTrees();
                 LockLetters(true);
@@ -151,16 +142,13 @@ namespace EA4S.Minigames.HideAndSeek
                 buttonRepeater.SetActive(false);
                 AudioManager.I.PlaySound(Sfx.Win);
                 AudioManager.I.PlaySound(Sfx.OK);
-            }
-            else
-            {
+            } else {
                 AudioManager.I.PlaySound(Sfx.KO);
                 game.OnResult(GetCorrectAnswer(), false);
                 RemoveLife();
                 script.PlayResultAnimation(false);
                 script.GetComponent<EmoticonsAnimator>().DoWrong();
-                if (lifes == 0)
-                {
+                if (lifes == 0) {
                     isRoundRunning = false;
                     LockTrees();
                     LockLetters(true);
@@ -173,8 +161,7 @@ namespace EA4S.Minigames.HideAndSeek
 
         void RemoveLife()
         {
-            switch (--lifes)
-            {
+            switch (--lifes) {
                 case 2:
                     game.Context.GetOverlayWidget().SetLives(2);
                     break;
@@ -200,8 +187,7 @@ namespace EA4S.Minigames.HideAndSeek
 
         public void LockTrees()
         {
-            for (int i = 0; i < MAX_OBJECT; ++i)
-            {
+            for (int i = 0; i < MAX_OBJECT; ++i) {
                 ArrayTrees[i].GetComponent<SphereCollider>().enabled = false;
             }
         }
@@ -213,16 +199,14 @@ namespace EA4S.Minigames.HideAndSeek
 
         void LockLetters(bool toLock)
         {
-            for (int i = 0; i < MAX_OBJECT; ++i)
-            {
+            for (int i = 0; i < MAX_OBJECT; ++i) {
                 ArrayLetters[i].GetComponent<CapsuleCollider>().enabled = !toLock;
             }
         }
 
         public void ClearRound()
         {
-            for (int i = 0; i < MAX_OBJECT; ++i)
-            {
+            for (int i = 0; i < MAX_OBJECT; ++i) {
                 ArrayLetters[i].SetActive(true);
                 ArrayLetters[i].transform.position = originLettersPlaceholder.position;
                 ArrayLetters[i].GetComponent<HideAndSeekLetterController>().ResetLetter();
@@ -243,27 +227,23 @@ namespace EA4S.Minigames.HideAndSeek
             ActiveTrees = new List<GameObject>();
 
             List<ILivingLetterData> letterList = new List<ILivingLetterData>();
-            foreach (LL_LetterData letter in currentQuestion.GetCorrectAnswers())
-            {
+            foreach (LL_LetterData letter in currentQuestion.GetCorrectAnswers()) {
                 letterList.Add(letter);
             }
 
             int numWrong = Mathf.RoundToInt(2 + HideAndSeekConfiguration.Instance.Difficulty * 4);
-            foreach (LL_LetterData letter in currentQuestion.GetWrongAnswers())
-            {
+            foreach (LL_LetterData letter in currentQuestion.GetWrongAnswers()) {
                 if (numWrong-- == 0)
                     break;
-                
+
                 letterList.Add(letter);
             }
 
             ActiveLetters = letterList.Count;
 
-            for (int i = 0; i < ActiveLetters; ++i)
-            {
+            for (int i = 0; i < ActiveLetters; ++i) {
                 int index = getRandomPlaceholder();
-                if (index != -1)
-                {
+                if (index != -1) {
 
                     ActiveTrees.Add(ArrayTrees[index]);
                     Vector3 hiddenPosition = new Vector3(ArrayPlaceholder[index].transform.position.x, ArrayPlaceholder[index].transform.position.y - 3f, ArrayPlaceholder[index].transform.position.z + 3f);
@@ -296,15 +276,14 @@ namespace EA4S.Minigames.HideAndSeek
 
         private IEnumerator DisplayRound_Coroutine()
         {
-            foreach (GameObject tree in ActiveTrees)
-            {
+            foreach (GameObject tree in ActiveTrees) {
                 tree.GetComponent<SphereCollider>().enabled = true;
             }
 
             var winInitialDelay = 0.5f;
             yield return new WaitForSeconds(winInitialDelay);
 
-            game.Context.GetAudioManager().PlayLetterData(GetCorrectAnswer());
+            game.Context.GetAudioManager().PlayVocabularyData(GetCorrectAnswer());
             game.PlayState.gameTime.Start();
 
             buttonRepeater.SetActive(true);
@@ -315,12 +294,10 @@ namespace EA4S.Minigames.HideAndSeek
             int result = 0;
             int position = Random.Range(0, FreePlaceholder--);
 
-            for (int i = 0; i < UsedPlaceholder.Length; ++i)
-            {
+            for (int i = 0; i < UsedPlaceholder.Length; ++i) {
                 if (UsedPlaceholder[i] == true)
                     continue;
-                if (result == position)
-                {
+                if (result == position) {
                     UsedPlaceholder[i] = true;
                     return i;
                 }

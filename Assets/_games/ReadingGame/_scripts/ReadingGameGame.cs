@@ -1,15 +1,16 @@
 ﻿using System.IO;
 using System.Text;
-using EA4S.MinigamesAPI;
-using EA4S.MinigamesCommon;
+using Antura.LivingLetters;
+using Antura.Minigames;
 using UnityEngine;
 
-namespace EA4S.Minigames.ReadingGame
+namespace Antura.Minigames.ReadingGame
 {
-    public class ReadingGameGame : MiniGame // ReadingGameGameGameGameGame!
+    public class ReadingGameGame : MiniGameController // ReadingGameGameGameGameGame!
     {
         public ReadingBarSet barSet;
         public GameObject blurredText;
+        public HiddenText hiddenText;
         public GameObject circleBox;
         public ReadingGameAntura antura;
         public ReadingRadialWidget radialWidget;
@@ -24,6 +25,9 @@ namespace EA4S.Minigames.ReadingGame
 
         int lives = 3;
         public int Lives { get { return lives; } }
+
+        public Material magnifyingGlassMaterial;
+        public Material blurredTextMaterial;
 
         [HideInInspector]
         public KaraokeSong songToPlay;
@@ -83,7 +87,7 @@ namespace EA4S.Minigames.ReadingGame
             return ReadingGameConfiguration.Instance;
         }
 
-        protected override IState GetInitialState()
+        protected override FSM.IState GetInitialState()
         {
             return InitialState;
         }
@@ -99,7 +103,7 @@ namespace EA4S.Minigames.ReadingGame
             {
                 ISongParser parser = new AkrSongParser();
 
-                var textAsset = ReadingGameConfiguration.Instance.Variation == ReadingGameVariation.AlphabetSong ? alphabetSongSrt : diacriticSongSrt;
+                var textAsset = ReadingGameConfiguration.Instance.Variation == ReadingGameVariation.Alphabet ? alphabetSongSrt : diacriticSongSrt;
 
                 using (MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes(textAsset.text)))
                 {
@@ -108,6 +112,12 @@ namespace EA4S.Minigames.ReadingGame
             }
 
             radialWidget.Hide();
+
+            // Instantiating a runtime material
+            magnifyingGlassMaterial = new Material(magnifyingGlassMaterial);
+            magnifyingGlassMaterial.name = magnifyingGlassMaterial.name + "(INSTANCE)";
+            blurredTextMaterial = new Material(blurredTextMaterial);
+            blurredTextMaterial.name = blurredTextMaterial.name + "(INSTANCE)";
         }
 
         public void AddScore(int score)

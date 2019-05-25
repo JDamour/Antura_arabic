@@ -2,7 +2,7 @@
 using System.Collections;
 using TMPro;
 
-namespace EA4S.Minigames.DancingDots
+namespace Antura.Minigames.DancingDots
 {
 	public class DancingDotsDraggableDot : MonoBehaviour {
 
@@ -114,10 +114,6 @@ namespace EA4S.Minigames.DancingDots
 
 		public void Reset()
 		{
-			if (!isDot)
-			{
-				Debug.Log("Diacritic Reset");
-			}
 			transform.position = new Vector3(startX, startY, startZ);
 			isDragging = false;
 			transform.localScale = Vector3.zero;
@@ -148,9 +144,9 @@ namespace EA4S.Minigames.DancingDots
 		void Dance()
 		{
 			transform.position = new Vector3(
-				startX + Mathf.PerlinNoise(Time.time, startX) * 3 + 1, 
-				startY + Mathf.PerlinNoise(Time.time, startY) * 3 + 1, 
-				startZ + Mathf.PerlinNoise(Time.time, startZ) * 3 + 1);
+				startX + Mathf.PerlinNoise(Time.time, startX) * 2.0f + 1, 
+				startY + Mathf.PerlinNoise(Time.time, startY) * 2.0f + 1, 
+				startZ + Mathf.PerlinNoise(Time.time, startZ) * 2.0f + 1);
 		}
 
 		void Setmarker(Collider other, bool markerStatus)

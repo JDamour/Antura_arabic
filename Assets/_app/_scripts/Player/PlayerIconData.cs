@@ -1,6 +1,7 @@
-﻿using System;
+﻿using Antura.Core;
+using System;
 
-namespace EA4S.Profile
+namespace Antura.Profile
 {
     /// <summary>
     /// Contains the data to generate a saved player profile (icon in the main menu)
@@ -15,8 +16,12 @@ namespace EA4S.Profile
         public bool IsDemoUser;
         public bool HasFinishedTheGame;
         public bool HasFinishedTheGameWithAllStars;
+        public bool HasMaxStarsInCurrentPlaySessions;
+        public JourneyPosition MaxJourneyPosition;
 
-        public PlayerIconData(string _Uuid, int _AvatarId, PlayerGender _Gender, PlayerTint _Tint, bool _IsDemoUser, bool _HasFinishedTheGame, bool _HasFinishedTheGameWithAllStars) {
+        public PlayerIconData(string _Uuid, int _AvatarId, PlayerGender _Gender, PlayerTint _Tint, bool _IsDemoUser,
+            bool _HasFinishedTheGame, bool _HasFinishedTheGameWithAllStars, bool _HasMaxStarsInCurrentPlaySessions, JourneyPosition _MaxJourneyPosition)
+        {
             Uuid = _Uuid;
             AvatarId = _AvatarId;
             Gender = _Gender;
@@ -24,7 +29,8 @@ namespace EA4S.Profile
             IsDemoUser = _IsDemoUser;
             HasFinishedTheGame = _HasFinishedTheGame;
             HasFinishedTheGameWithAllStars = _HasFinishedTheGameWithAllStars;
+            HasMaxStarsInCurrentPlaySessions = _HasMaxStarsInCurrentPlaySessions;
+            MaxJourneyPosition = _MaxJourneyPosition;
         }
-
     }
 }

@@ -2,14 +2,14 @@
 // Created: 2016/08/01 12:33
 // License Copyright (c) Daniele Giardini
 
+using Antura.UI;
 using DG.DemiEditor;
 using DG.DemiLib;
-using EA4S.UI;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace EA4S.Editor.Inspectors
+namespace Antura.Editor.Inspectors
 {
     [CustomEditor(typeof(ContinueScreen))]
     public class ContinueScreenInspector : UnityEditor.Editor
@@ -48,6 +48,7 @@ namespace EA4S.Editor.Inspectors
             GUILayout.Label("References", DeGUI.styles.label.bold);
             src.Bg = EditorGUILayout.ObjectField("Bg", src.Bg, typeof(Button), true) as Button;
             src.BtContinue = EditorGUILayout.ObjectField("BT Continue", src.BtContinue, typeof(Button), true) as Button;
+            src.BtRetry = EditorGUILayout.ObjectField("BT Retry", src.BtRetry, typeof(Button), true) as Button;
             src.IcoContinue = EditorGUILayout.ObjectField("Ico Continue", src.IcoContinue, typeof(RectTransform), true) as RectTransform;
         }
 

@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-namespace EA4S.MinigamesAPI
+﻿namespace Antura.LivingLetters
 {
     /// <summary>
     /// Common interface for data that can appear on a LivingLetter object.
@@ -15,9 +13,6 @@ namespace EA4S.MinigamesAPI
         /// </summary>
         string TextForLivingLetter { get; }
 
-        [System.Obsolete("Use DrawingCharForLivingLetter instead of this.")]
-        Sprite DrawForLivingLetter { get; }
-
         /// <summary>
         /// Character to display on the living letter (using a custom font)
         /// </summary>
@@ -30,19 +25,6 @@ namespace EA4S.MinigamesAPI
         string Id { get; set; }
 
         bool Equals(ILivingLetterData data);
-    }
-}
 
-namespace EA4S
-{
-    /// <summary>
-    /// Type of data that can appear on a LivingLetter object.
-    /// </summary>
-    public enum LivingLetterDataType
-    {
-        Letter,
-        Word,
-        Image,
-        Phrase,
     }
 }

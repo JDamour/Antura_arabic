@@ -1,30 +1,25 @@
-﻿using UnityEngine;
-using EA4S.UI;
+﻿using Antura.UI;
+using UnityEngine;
 
-namespace EA4S.Minigames.Balloons
+namespace Antura.Minigames.Balloons
 {
     public class TimerManager : MonoBehaviour
     {
         [HideInInspector]
         public float time;
-        //public TextMeshProUGUI timerText;
 
         private bool isRunning;
         private float timeRemaining;
 
-
         void Update()
         {
-            if (isRunning)
-            {
-                if (timeRemaining > 0f)
-                {
+            if (isRunning) {
+                if (timeRemaining > 0f) {
                     timeRemaining -= Time.deltaTime;
                     DisplayTime();
                 }
 
-                if (timeRemaining <= 0f)
-                {
+                if (timeRemaining <= 0f) {
                     StopTimer(true);
                     BalloonsGame.instance.OnTimeUp();
                 }
@@ -33,9 +28,8 @@ namespace EA4S.Minigames.Balloons
 
         public void InitTimer()
         {
-            time = BalloonsGame.instance.roundTime;
-            if (MinigamesUI.Timer != null)
-            {
+            time = BalloonsGame.instance.RoundTime;
+            if (MinigamesUI.Timer != null) {
                 MinigamesUI.Timer.Setup(time);
             }
         }
@@ -44,27 +38,31 @@ namespace EA4S.Minigames.Balloons
         {
             isRunning = true;
             MinigamesUI.Timer.Play();
+            MinigamesUI.Timer.gameObject.SetActive(true);
         }
 
         public void StopTimer(bool forceCompletion = false)
         {
             isRunning = false;
-            if (MinigamesUI.Timer != null)
-            {
-                if (forceCompletion) MinigamesUI.Timer.Complete();
-                else MinigamesUI.Timer.Pause();
+            if (MinigamesUI.Timer != null) {
+                if (forceCompletion) {
+                    MinigamesUI.Timer.Complete();
+                } else {
+                    MinigamesUI.Timer.Pause();
+                }
             }
             //AudioManager.I.StopSfx(Sfx.DangerClockLong);
+
+            // Hide the timer
+            if (MinigamesUI.Timer != null) MinigamesUI.Timer.gameObject.SetActive(false);
         }
 
         public void ResetTimer()
         {
-            if (MinigamesUI.Timer == null)
-            {
+            if (MinigamesUI.Timer == null) {
                 return;
             }
-            if (!MinigamesUI.Timer.IsSetup)
-            {
+            if (!MinigamesUI.Timer.IsSetup) {
                 InitTimer();
             }
             StopTimer();

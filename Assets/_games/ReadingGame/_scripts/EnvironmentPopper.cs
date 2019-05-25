@@ -1,8 +1,8 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections.Generic;
-using EA4S.MinigamesCommon;
+using Antura.Minigames;
 
-namespace EA4S.Minigames.ReadingGame
+namespace Antura.Minigames.ReadingGame
 {
     public class EnvironmentPopper : MonoBehaviour
     {

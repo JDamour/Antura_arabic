@@ -1,8 +1,8 @@
-﻿using UnityEngine;
-using DG.Tweening;
+﻿using DG.Tweening;
+using UnityEngine;
 using UnityEngine.UI;
 
-namespace EA4S.UI
+namespace Antura.UI
 {
     /// <summary>
     /// Controls the Credits panel.
@@ -25,7 +25,7 @@ namespace EA4S.UI
         public void Open()
         {
             gameObject.SetActive(true);
-            if (showTween != null) showTween.PlayForward();
+            if (showTween != null) { showTween.PlayForward(); }
         }
 
         public void Close()

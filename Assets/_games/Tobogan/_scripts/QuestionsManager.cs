@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System;
 using System.Linq;
-using EA4S.MinigamesAPI;
-using EA4S.Helpers;
+using Antura.LivingLetters;
+using Antura.Helpers;
 
-namespace EA4S.Minigames.Tobogan
+namespace Antura.Minigames.Tobogan
 {
     public class QuestionsManager
     {
@@ -214,7 +214,7 @@ namespace EA4S.Minigames.Tobogan
             questionLivingLetter.EnableCollider(true);
 
             if (playWhenEnter)
-                game.Context.GetAudioManager().PlayLetterData(questionLivingLetter.letter.Data, true);
+                game.Context.GetAudioManager().PlayVocabularyData(questionLivingLetter.letter.Data, true);
 
         }
 

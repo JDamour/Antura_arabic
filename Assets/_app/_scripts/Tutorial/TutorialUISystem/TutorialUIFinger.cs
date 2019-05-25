@@ -2,7 +2,7 @@
 using DG.Tweening;
 using UnityEngine;
 
-namespace EA4S.Tutorial
+namespace Antura.Tutorial
 {
     public class TutorialUIFinger : TutorialUIProp
     {
@@ -48,7 +48,8 @@ namespace EA4S.Tutorial
 
         IEnumerator CO_Click()
         {
-            if (!ShowTween.IsComplete()) {
+            if (!ShowTween.IsComplete())
+            {
                 ShowTween.timeScale = 2f;
                 ShowTween.PlayForward();
                 yield return ShowTween.WaitForCompletion();
@@ -67,7 +68,8 @@ namespace EA4S.Tutorial
 
         IEnumerator CO_ClickRepeat(float _duration, float _clicksPerSecond)
         {
-            if (!ShowTween.IsComplete()) {
+            if (!ShowTween.IsComplete())
+            {
                 ShowTween.timeScale = 2f;
                 ShowTween.PlayForward();
                 yield return ShowTween.WaitForCompletion();
@@ -77,14 +79,20 @@ namespace EA4S.Tutorial
             float startTime = Time.time;
             float clickTime = 0;
             float clickWait = 1 / _clicksPerSecond;
-            while (Time.time - startTime < _duration) {
-                if (Time.time - clickTime >= clickWait) {
+            while (Time.time - startTime < _duration)
+            {
+                if (Time.time - clickTime >= clickWait)
+                {
                     clickTime = Time.time;
                     Img.sprite = ClickSprite;
                     TutorialUI.I.Pools.SpawnClicker(this.transform.parent, this.transform.position, true);
                     yield return new WaitForSeconds(0.1f);
                     Img.sprite = defSprite;
-                } else yield return null;
+                }
+                else
+                {
+                    yield return null;
+                }
             }
 
             Hide();

@@ -1,14 +1,26 @@
-﻿using EA4S.Core;
-using EA4S.Profile;
+﻿using Antura.Core;
+using Antura.Debugging;
+using Antura.Profile;
 using UnityEngine;
 
-namespace EA4S.Scenes
+namespace Antura.Scenes
 {
     public class PlayerCreationScene : SceneBase
     {
-
         protected override void Start()
         {
+            base.Start();
+            DebugManager.OnSkipCurrentScene += HandleSkipScene;
+        }
+
+        void OnDestroy()
+        {
+            DebugManager.OnSkipCurrentScene -= HandleSkipScene;
+        }
+
+        private void HandleSkipScene()
+        {
+            CreatePlayer(4, PlayerGender.M, 0, PlayerTint.Blue);
         }
 
         public static void CreatePlayer(int age, PlayerGender gender, int avatarID, PlayerTint color)
@@ -18,6 +30,5 @@ namespace EA4S.Scenes
             LogManager.I.LogInfo(InfoEvent.AppPlay, JsonUtility.ToJson(new DeviceInfo()));
             AppManager.I.NavigationManager.GoToNextScene();
         }
-
     }
 }

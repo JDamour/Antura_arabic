@@ -1,27 +1,24 @@
-﻿using UnityEngine;
+﻿using Antura.Audio;
+using Antura.LivingLetters;
+using Antura.Tutorial;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using EA4S.Audio;
-using EA4S.LivingLetters;
-using EA4S.MinigamesAPI;
-using EA4S.MinigamesCommon;
-using EA4S.Tutorial;
+using UnityEngine;
 
-namespace EA4S.Minigames.HideAndSeek
+namespace Antura.Minigames.HideAndSeek
 {
     public class HideAndSeekTutorialManager : MonoBehaviour
     {
         void OnEnable()
         {
-            foreach (var a in ArrayLetters)
-            {
+            foreach (var a in ArrayLetters) {
                 a.GetComponent<HideAndSeekLetterController>().onLetterTouched += CheckResult;
             }
 
-            foreach (var a in ArrayTrees)
+            foreach (var a in ArrayTrees) {
                 a.GetComponent<HideAndSeekTreeController>().onTreeTouched += MoveObject;
-
+            }
             SetupTutorial();
 
             phase = 0;
@@ -29,15 +26,17 @@ namespace EA4S.Minigames.HideAndSeek
 
         void OnDisable()
         {
-            foreach (var a in ArrayLetters)
-            {
-                if (a != null)
+            foreach (var a in ArrayLetters) {
+                if (a != null) {
                     a.GetComponent<HideAndSeekLetterController>().onLetterTouched -= CheckResult;
+                }
             }
 
-            foreach (var a in ArrayTrees)
-                if (a != null)
+            foreach (var a in ArrayTrees) {
+                if (a != null) {
                     a.GetComponent<HideAndSeekTreeController>().onTreeTouched -= MoveObject;
+                }
+            }
         }
 
         void Update()
@@ -84,7 +83,15 @@ namespace EA4S.Minigames.HideAndSeek
             var winInitialDelay = 1f;
             yield return new WaitForSeconds(winInitialDelay);
 
-            game.Context.GetAudioManager().PlayLetterData(GetCorrectAnswer());
+            var answerAudio = game.Context.GetAudioManager().PlayVocabularyData(GetCorrectAnswer());
+
+            yield return new WaitForSeconds(answerAudio.Duration);
+
+            if (HideAndSeekConfiguration.Instance.Variation == HideAndSeekVariation.LetterPhoneme)
+                game.Context.GetAudioManager().PlayDialogue(Database.LocalizationDataId.HideSeek_letterphoneme_Tuto);
+            else
+                game.Context.GetAudioManager().PlayDialogue(Database.LocalizationDataId.HideSeek_Words_Tuto);
+
 
             buttonRepeater.SetActive(true);
 
@@ -98,8 +105,7 @@ namespace EA4S.Minigames.HideAndSeek
             Vector3 offsetFirst = new Vector3(0.5f, 3f, -2f);
 
 
-            switch (phase)
-            {
+            switch (phase) {
                 case 0:
                     TutorialUI.ClickRepeat(ArrayTrees[0].transform.position + offsetFirst, animDuration, 1);
                     break;
@@ -121,14 +127,12 @@ namespace EA4S.Minigames.HideAndSeek
         void MoveObject(int id)
         {
             HideAndSeekConfiguration.Instance.Context.GetAudioManager().PlaySound(Sfx.BushRustlingOut);
-            if (ArrayLetters.Length > 0)
-            {
+            if (ArrayLetters.Length > 0) {
                 script = ArrayLetters[GetIdFromPosition(id)].GetComponent<HideAndSeekLetterController>();
                 script.MoveTutorial();
             }
 
-            if (GetIdFromPosition(id) == 0)
-            {
+            if (GetIdFromPosition(id) == 0) {
                 ArrayTrees[0].GetComponent<SphereCollider>().enabled = false;
                 ArrayTrees[1].GetComponent<SphereCollider>().enabled = true; // skip to phase 2
                 phase = 2;
@@ -137,8 +141,7 @@ namespace EA4S.Minigames.HideAndSeek
             }
 
 
-            if (GetIdFromPosition(id) == 1)
-            {
+            if (GetIdFromPosition(id) == 1) {
                 ArrayTrees[1].GetComponent<SphereCollider>().enabled = false;
                 phase = 3;
                 TutorialUI.Clear(false);
@@ -151,8 +154,7 @@ namespace EA4S.Minigames.HideAndSeek
         {
             letterInAnimation = GetIdFromPosition(id);
             HideAndSeekLetterController script = ArrayLetters[letterInAnimation].GetComponent<HideAndSeekLetterController>();
-            if (script.view.Data.Id == GetCorrectAnswer().Id)
-            {
+            if (script.view.Data.Id == GetCorrectAnswer().Id) {
                 script.PlayResultAnimation(true);
                 AudioManager.I.PlaySound(Sfx.Win);
                 AudioManager.I.PlaySound(Sfx.OK);
@@ -160,9 +162,7 @@ namespace EA4S.Minigames.HideAndSeek
                 StartCoroutine(GoToPlay());
                 phase = -1;
                 buttonRepeater.SetActive(false);
-            }
-            else
-            {
+            } else {
                 script.PlayResultAnimation(false);
                 ArrayTrees[1].GetComponent<SphereCollider>().enabled = true;
                 phase = 2;
@@ -180,10 +180,8 @@ namespace EA4S.Minigames.HideAndSeek
             var winInitialDelay = 3f;
             yield return new WaitForSeconds(winInitialDelay);
 
-            foreach (GameObject x in ArrayLetters)
-            {
-                if (x.activeSelf)
-                {
+            foreach (GameObject x in ArrayLetters) {
+                if (x.activeSelf) {
                     x.GetComponent<LivingLetterController>().Poof();
                     AudioManager.I.PlaySound(Sfx.Poof);
                     x.SetActive(false);
@@ -200,17 +198,17 @@ namespace EA4S.Minigames.HideAndSeek
 
         int GetIdFromPosition(int index)
         {
-            for (int i = 0; i < ArrayLetters.Length; ++i)
-            {
-                if (ArrayLetters[i].GetComponent<HideAndSeekLetterController>().id == index)
+            for (int i = 0; i < ArrayLetters.Length; ++i) {
+                if (ArrayLetters[i].GetComponent<HideAndSeekLetterController>().id == index) {
                     return i;
+                }
             }
             return -1;
         }
 
         public void RepeatAudio()
         {
-            game.Context.GetAudioManager().PlayLetterData(GetCorrectAnswer());
+            game.Context.GetAudioManager().PlayVocabularyData(GetCorrectAnswer());
         }
 
         public GameObject[] ArrayTrees;

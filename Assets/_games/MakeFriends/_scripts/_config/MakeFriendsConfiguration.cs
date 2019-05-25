@@ -1,89 +1,35 @@
-﻿using EA4S.MinigamesAPI;
-using EA4S.MinigamesCommon;
-using EA4S.Teacher;
+using Antura.Teacher;
+using System;
+using System.Collections.Generic;
+using Antura.Database;
 
-namespace EA4S.Minigames.MakeFriends
+namespace Antura.Minigames.MakeFriends
 {
-    public enum MakeFriendsVariation
+    public enum MakeFriendsDifficulty
     {
         EASY,
         MEDIUM,
         HARD
     }
 
-    public class MakeFriendsConfiguration : IGameConfiguration
+    public enum MakeFriendsVariation
     {
-        // Game configuration
-        public IGameContext Context { get; set; }
-        public IQuestionProvider Questions { get; set; }
+        LetterInWord = MiniGameCode.MakeFriends_letterinword
+    }
 
-        public float Difficulty { get; set; }
-        public bool TutorialEnabled { get; set; }
+    public class MakeFriendsConfiguration : AbstractGameConfiguration
+    {
+        private MakeFriendsVariation Variation { get; set; }
 
-        public MakeFriendsVariation Variation {
-            get {
-                // GameManager Override
-                if (MakeFriendsGame.Instance.overrideDifficulty) {
-                    switch (MakeFriendsGame.Instance.difficultySetting) {
-                        case MakeFriendsVariation.EASY:
-                            Difficulty = EASY_THRESHOLD;
-                            break;
-
-                        case MakeFriendsVariation.MEDIUM:
-                            Difficulty = MEDIUM_THRESHOLD;
-                            break;
-
-                        case MakeFriendsVariation.HARD:
-                            Difficulty = HARD_THRESHOLD;
-                            break;
-                    }
-                }
-
-                // SRDebugger Override
-#if SRDebuggerEnabled
-                if (SROptions.Current.MakeFriendsUseDifficulty)
-                {
-                    switch (SROptions.Current.MakeFriendsDifficulty)
-                    {
-                        case MakeFriendsVariation.EASY:
-                            Difficulty = EASY_THRESHOLD;
-                            break;
-
-                        case MakeFriendsVariation.MEDIUM:
-                            Difficulty = MEDIUM_THRESHOLD;
-                            break;
-
-                        case MakeFriendsVariation.HARD:
-                            Difficulty = HARD_THRESHOLD;
-                            break;
-                    }
-                }
-#endif
-                // Get Variation based on Difficulty
-                var variation = default(MakeFriendsVariation);
-
-                if (Difficulty < MEDIUM_THRESHOLD) {
-                    variation = MakeFriendsVariation.EASY;
-                } else if (Difficulty < HARD_THRESHOLD) {
-                    variation = MakeFriendsVariation.MEDIUM;
-                } else {
-                    variation = MakeFriendsVariation.HARD;
-                }
-
-                return variation;
-            }
+        public override void SetMiniGameCode(MiniGameCode code)
+        {
+            Variation = (MakeFriendsVariation)code;
         }
 
-        public const float EASY_THRESHOLD = 0f;
-        public const float MEDIUM_THRESHOLD = 0.3f;
-        public const float HARD_THRESHOLD = 0.7f;
-
-
-        /////////////////
         // Singleton Pattern
         static MakeFriendsConfiguration instance;
-
-        public static MakeFriendsConfiguration Instance {
+        public static MakeFriendsConfiguration Instance
+        {
             get {
                 if (instance == null)
                     instance = new MakeFriendsConfiguration();
@@ -91,35 +37,41 @@ namespace EA4S.Minigames.MakeFriends
             }
         }
 
-        /////////////////
-
         private MakeFriendsConfiguration()
         {
             // Default values
-            // THESE SETTINGS ARE FOR SAMPLE PURPOSES, THESE VALUES MUST BE SET BY GAME CORE
             Questions = new MakeFriendsQuestionProvider();
-            Context = new MinigamesGameContext(MiniGameCode.MakeFriends, System.DateTime.Now.Ticks.ToString());
+            Context = new MinigamesGameContext(MiniGameCode.MakeFriends_letterinword, System.DateTime.Now.Ticks.ToString());
             Difficulty = 0f;
             TutorialEnabled = true;
         }
 
-        public IQuestionBuilder SetupBuilder()
+        public override IQuestionBuilder SetupBuilder()
         {
             IQuestionBuilder builder = null;
 
             int nPacks = 10;
-            int nMinCommonLetters = 1;
-            int nMaxCommonLetters = 1;
             int nWrong = 5;
             int nWords = 2;
+            var letterEqualityStrictness = LetterEqualityStrictness.WithVisualForm;
 
-            var builderParams = new Teacher.QuestionBuilderParameters();
-            builder = new CommonLettersInWordQuestionBuilder(nPacks, nMinCommonLetters, nMaxCommonLetters, nWrong, nWords, parameters: builderParams);
+
+            var builderParams = new QuestionBuilderParameters();
+            switch (Variation) {
+                case MakeFriendsVariation.LetterInWord:
+                    builderParams.letterFilters.excludeDiphthongs = true;
+                    builderParams.wordFilters.excludeDipthongs = true;
+                    builderParams.wordFilters.excludeArticles = true;
+                    builder = new CommonLetterInWordQuestionBuilder(nPacks, nWrong, nWords, parameters: builderParams, letterEqualityStrictness: letterEqualityStrictness);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
 
             return builder;
         }
 
-        public MiniGameLearnRules SetupLearnRules()
+        public override MiniGameLearnRules SetupLearnRules()
         {
             var rules = new MiniGameLearnRules();
             // example: a.minigameVoteSkewOffset = 1f;
@@ -127,5 +79,46 @@ namespace EA4S.Minigames.MakeFriends
         }
 
 
+        #region Difficulty Choice
+
+        private const float EASY_THRESHOLD = 0f;
+        private const float MEDIUM_THRESHOLD = 0.3f;
+        private const float HARD_THRESHOLD = 0.7f;
+
+        public MakeFriendsDifficulty DifficultyChoice
+        {
+            get {
+                // GameManager Override
+                if (MakeFriendsGame.Instance.overrideDifficulty) {
+                    switch (MakeFriendsGame.Instance.difficultySetting) {
+                        case MakeFriendsDifficulty.EASY:
+                            Difficulty = EASY_THRESHOLD;
+                            break;
+
+                        case MakeFriendsDifficulty.MEDIUM:
+                            Difficulty = MEDIUM_THRESHOLD;
+                            break;
+
+                        case MakeFriendsDifficulty.HARD:
+                            Difficulty = HARD_THRESHOLD;
+                            break;
+                    }
+                }
+
+                // Get Variation based on Difficulty
+                MakeFriendsDifficulty variation;
+                if (Difficulty < MEDIUM_THRESHOLD) {
+                    variation = MakeFriendsDifficulty.EASY;
+                } else if (Difficulty < HARD_THRESHOLD) {
+                    variation = MakeFriendsDifficulty.MEDIUM;
+                } else {
+                    variation = MakeFriendsDifficulty.HARD;
+                }
+
+                return variation;
+            }
+        }
+
+        #endregion
     }
 }

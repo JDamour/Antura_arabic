@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace EA4S.EditorUtilities
+namespace Antura.EditorUtilities
 {
     /// <summary>
     /// Allows to set the sortingOrder of 3D objects in the world, simply setting the order (no layerName/Id)
@@ -19,10 +19,10 @@ namespace EA4S.EditorUtilities
         Renderer rend;
         void Update()
         {
-            if (Application.isPlaying) return;
+            if (Application.isPlaying) { return; }
 
-            if (rend == null) rend = this.GetComponent<Renderer>();
-            if (rend.sortingOrder != SortingOrder) rend.sortingOrder = SortingOrder;
+            if (rend == null) { rend = this.GetComponent<Renderer>(); }
+            if (rend.sortingOrder != SortingOrder) { rend.sortingOrder = SortingOrder; }
         }
 #endif
     }

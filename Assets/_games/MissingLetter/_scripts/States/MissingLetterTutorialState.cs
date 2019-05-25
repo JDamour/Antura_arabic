@@ -1,13 +1,12 @@
-﻿using EA4S.Audio;
-using EA4S.LivingLetters;
-using EA4S.MinigamesCommon;
-using EA4S.Tutorial;
+using Antura.Audio;
+using Antura.LivingLetters;
+using Antura.Tutorial;
 using UnityEngine;
 
-namespace EA4S.Minigames.MissingLetter
+namespace Antura.Minigames.MissingLetter
 {
 
-    public class MissingLetterTutorialState : IState
+    public class MissingLetterTutorialState : FSM.IState
     {
 
         public MissingLetterTutorialState(MissingLetterGame _game)
@@ -46,8 +45,8 @@ namespace EA4S.Minigames.MissingLetter
         {
             m_fDelayTime -= delta;
             if (m_fDelayTime < 0 && !m_bSuggested) {
-                if (MissingLetterConfiguration.Instance.Variation == MissingLetterVariation.MissingLetter ||
-                    MissingLetterConfiguration.Instance.Variation == MissingLetterVariation.MissingForm) {
+                if (MissingLetterConfiguration.Instance.Variation == MissingLetterVariation.LetterForm ||
+                    MissingLetterConfiguration.Instance.Variation == MissingLetterVariation.LetterInWord) {
                     AudioManager.I.PlayDialogue(Database.LocalizationDataId.MissingLetter_Tuto);
                 } else {
                     AudioManager.I.PlayDialogue(Database.LocalizationDataId.MissingLetter_phrases_Tuto);

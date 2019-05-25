@@ -1,9 +1,9 @@
-﻿using EA4S.CameraEffects;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Antura.CameraEffects;
 using TMPro;
 using UnityEngine;
 
-namespace EA4S.Minigames.ReadingGame
+namespace Antura.Minigames.ReadingGame
 {
     public class HiddenText : MonoBehaviour
     {
@@ -13,9 +13,6 @@ namespace EA4S.Minigames.ReadingGame
 
         RenderTexture textRenderTexture;
         RenderTexture blurredTextRenderTexture;
-
-        public Material magnifyingGlassMaterial;
-        public Material blurredTextMaterial;
 
         Vector2 lastMin = new Vector2(Screen.width, Screen.height);
         Vector2 lastMax = Vector2.zero;
@@ -32,7 +29,23 @@ namespace EA4S.Minigames.ReadingGame
         List<MeshRenderer> renderers = new List<MeshRenderer>();
         List<TextMeshPro> texts = new List<TextMeshPro>();
 
-        public void UpdateTarget()
+        private Material magnifyingGlassMaterial
+        {
+            get { return ((ReadingGameGame) ReadingGameGame.I).magnifyingGlassMaterial; }
+        }
+
+        private Material blurredTextMaterial
+        {
+            get { return ((ReadingGameGame) ReadingGameGame.I).blurredTextMaterial; }
+        }
+
+        public void Clear()
+        {
+            if (textCamera != null)
+                textCamera.Render();
+        }
+
+        private void UpdateTarget()
         {
             hasElements = true;
 
@@ -122,23 +135,27 @@ namespace EA4S.Minigames.ReadingGame
 
             if (textRenderTexture != null)
             {
+                magnifyingGlassMaterial.SetTexture("_BackTex", null);
+                textCamera.GetComponent<BlurredCamera>().normalTextureOutput = null;
                 textRenderTexture.Release();
+                DestroyImmediate(textRenderTexture);
                 textRenderTexture = null;
             }
 
-            textRenderTexture = new RenderTexture(width, height, 16);
-            textRenderTexture.hideFlags = HideFlags.HideAndDontSave;
+            textRenderTexture = new RenderTexture(width, height, 0);
 
             magnifyingGlassMaterial.SetTexture("_BackTex", textRenderTexture);
 
             if (blurredTextRenderTexture != null)
             {
+                blurredTextMaterial.SetTexture("_MainTex", null);
+                textCamera.targetTexture = null;
                 blurredTextRenderTexture.Release();
+                DestroyImmediate(blurredTextRenderTexture);
                 blurredTextRenderTexture = null;
             }
 
-            blurredTextRenderTexture = new RenderTexture(width, height, 16);
-            blurredTextRenderTexture.hideFlags = HideFlags.HideAndDontSave;
+            blurredTextRenderTexture = new RenderTexture(width, height, 0);
 
             blurredTextMaterial.SetTexture("_MainTex", blurredTextRenderTexture);
 
@@ -163,6 +180,7 @@ namespace EA4S.Minigames.ReadingGame
             magnifyingGlassMaterial.SetVector("_BackScale", (Vector2)(uvMax - uvMin));
             needsRender = true;
 
+            GetComponentInChildren<MeshRenderer>().sharedMaterial = blurredTextMaterial;
         }
 
         void Update()
@@ -187,13 +205,19 @@ namespace EA4S.Minigames.ReadingGame
         {
             if (textRenderTexture != null)
             {
+                magnifyingGlassMaterial.SetTexture("_BackTex", null);
+                textCamera.GetComponent<BlurredCamera>().normalTextureOutput = null;
                 textRenderTexture.Release();
+                DestroyImmediate(textRenderTexture);
                 textRenderTexture = null;
             }
 
             if (blurredTextRenderTexture != null)
             {
+                blurredTextMaterial.SetTexture("_MainTex", null);
+                textCamera.targetTexture = null;
                 blurredTextRenderTexture.Release();
+                DestroyImmediate(blurredTextRenderTexture);
                 blurredTextRenderTexture = null;
             }
         }

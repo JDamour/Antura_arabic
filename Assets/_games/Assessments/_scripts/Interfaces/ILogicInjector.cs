@@ -1,13 +1,13 @@
 using System.Collections;
 
-namespace EA4S.Assessment
+namespace Antura.Assessment
 {
     /// <summary>
     /// This class adds game-specific logic to LivingLetters Objects
     /// </summary>
     public interface ILogicInjector
     {
-        void Wire( IQuestion question, Answer[] answers);
+        void Wire(IQuestion question, Answer[] answers);
         void EnableGamePlay();
         void CompleteWiring();
         void ResetRound();

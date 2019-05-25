@@ -1,55 +1,54 @@
-﻿using EA4S.MinigamesAPI;
-using EA4S.MinigamesCommon;
-using EA4S.Teacher;
+﻿using Antura.Database;
+using Antura.Teacher;
+using System;
+using UnityEngine;
 
-namespace EA4S.Minigames.Egg
+namespace Antura.Minigames.Egg
 {
-    public class EggConfiguration : IGameConfiguration
+    public enum EggVariation
     {
-        public enum EggVariation : int
+        LetterName = MiniGameCode.Egg_lettername,
+        LetterPhoneme = MiniGameCode.Egg_letterphoneme,
+        BuildWord = MiniGameCode.Egg_buildword
+    }
+
+    public class EggConfiguration : AbstractGameConfiguration
+    {
+        public EggVariation Variation { get; private set; }
+
+        public override void SetMiniGameCode(MiniGameCode code)
         {
-            Single = 1,
-            Sequence = 2,
+            Variation = (EggVariation)code;
         }
 
-        // Game configuration
-        public IGameContext Context { get; set; }
-        public IQuestionProvider Questions { get; set; }
-        public float Difficulty { get; set; }
-        public bool TutorialEnabled { get; set; }
-        public EggVariation Variation { get; set; }
-
-        /////////////////
         // Singleton Pattern
         static EggConfiguration instance;
         public static EggConfiguration Instance
         {
-            get
-            {
-                if (instance == null)
+            get {
+                if (instance == null) {
                     instance = new EggConfiguration();
+                }
                 return instance;
             }
         }
-        /////////////////
 
         private EggConfiguration()
         {
             // Default values
-            // THESE SETTINGS ARE FOR SAMPLE PURPOSES, THESE VALUES MUST BE SET BY GAME CORE
-            Context = new MinigamesGameContext(MiniGameCode.Egg_letters, System.DateTime.Now.Ticks.ToString());
+            Context = new MinigamesGameContext(MiniGameCode.Egg_letterphoneme, System.DateTime.Now.Ticks.ToString());
             Difficulty = 0.1f;
-            Variation = EggVariation.Single;
+            Variation = EggVariation.LetterPhoneme;
 
-            if (Variation == EggVariation.Sequence)
+            if (Variation == EggVariation.BuildWord) {
                 Questions = new SampleEggSequenceQuestionProvider();
-            else
+            } else {
                 Questions = new SampleEggSingleQuestionProvider();
-
+            }
             TutorialEnabled = true;
         }
 
-        public IQuestionBuilder SetupBuilder()
+        public override IQuestionBuilder SetupBuilder()
         {
             IQuestionBuilder builder = null;
 
@@ -57,19 +56,80 @@ namespace EA4S.Minigames.Egg
             int nCorrect = 6;
             int nWrong = 7;
 
-            var builderParams = new Teacher.QuestionBuilderParameters();
-            builderParams.correctSeverity = Teacher.SelectionSeverity.AsManyAsPossible;
+            // Debug.LogWarning("SetupBuilder " + Variation.ToString());
 
-            builder = new RandomLettersQuestionBuilder(nPacks, nCorrect, nWrong, parameters: builderParams);
+            var builderParams = new QuestionBuilderParameters();
+            builderParams.correctSeverity = SelectionSeverity.AsManyAsPossible;
+
+            switch (Variation) {
+                case EggVariation.LetterName:
+                    builder = new RandomLettersQuestionBuilder(nPacks, nCorrect, nWrong, parameters: builderParams);
+                    break;
+                case EggVariation.BuildWord:
+                    builderParams.wordFilters.excludeDipthongs = true;
+                    builder = new LettersInWordQuestionBuilder(nPacks, nWrong: nWrong, useAllCorrectLetters: true, parameters: builderParams);
+                    break;
+                case EggVariation.LetterPhoneme:
+                    builder = new RandomLetterAlterationsQuestionBuilder(nPacks, 1, 3, parameters: builderParams, letterAlterationFilters: LetterAlterationFilters.FormsAndPhonemesOfMultipleLetters_OneForm, avoidWrongLettersWithSameSound: true);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
 
             return builder;
         }
 
-        public MiniGameLearnRules SetupLearnRules()
+        public override MiniGameLearnRules SetupLearnRules()
         {
             var rules = new MiniGameLearnRules();
             // example: a.minigameVoteSkewOffset = 1f;
             return rules;
         }
+
+        #region Variation checks
+
+        public override LocalizationDataId TitleLocalizationId
+        {
+            get {
+                switch (Variation) {
+                    case EggVariation.LetterName:
+                        return LocalizationDataId.Egg_letters_Title;
+                    case EggVariation.LetterPhoneme:
+                        return LocalizationDataId.Egg_letterphoneme_Title;
+                    case EggVariation.BuildWord:
+                        return LocalizationDataId.Egg_buildword_Title;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+        }
+
+        public bool IsSingleVariation()
+        {
+            switch (Variation) {
+                case EggVariation.LetterName:
+                case EggVariation.LetterPhoneme:
+                    return true;
+                case EggVariation.BuildWord:
+                    return false;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        public bool IsSequence()
+        {
+            switch (Variation) {
+                case EggVariation.LetterName:
+                case EggVariation.LetterPhoneme:
+                    return false;
+                case EggVariation.BuildWord:
+                    return true;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+        #endregion
+
     }
 }

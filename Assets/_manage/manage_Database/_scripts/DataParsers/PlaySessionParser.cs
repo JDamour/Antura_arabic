@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace EA4S.Database.Management
+namespace Antura.Database.Management
 {
     /// <summary>
     /// Custom JSON parser for PlaySessionData
@@ -20,7 +20,7 @@ namespace EA4S.Database.Management
             data.Id = data.Stage + "." + data.LearningBlock + "." + data.PlaySession;
 
             data.Letters = ParseIDArray<LetterData, LetterTable>(data, (string)dict["Letters"], db.GetLetterTable());
-            CustomAddDiacritics(data, db);
+            //CustomAddDiacritics(data, db);
 
             data.Words = ParseIDArray<WordData, WordTable>(data, (string)dict["Words"], db.GetWordTable());
             data.Words_previous = ParseIDArray<WordData, WordTable>(data, (string)dict["Words_previous"], db.GetWordTable());
@@ -53,16 +53,17 @@ namespace EA4S.Database.Management
             newLetters.CopyTo(psData.Letters);
         }
 
-        public MiniGameInPlaySession[] CustomParseMinigames(PlaySessionData data, Dictionary<string, object> dict, MiniGameTable table)
+        private List<MiniGameCode> notFoundCodes = new List<MiniGameCode>();
+        public MiniGameInPlaySession[] CustomParseMinigames(PlaySessionData PSdata, Dictionary<string, object> dict, MiniGameTable table)
         {
             var list = new List<MiniGameInPlaySession>();
 
-            if (data.Type == "Assessment") {
+            if (PSdata.Type == "Assessment") {
                 // Assessments have AssessmentType as their minigame
                 var minigameStruct = new MiniGameInPlaySession();
                 var assessmentType = ToString(dict["AssessmentType"]);
                 if (assessmentType == "") {
-                    Debug.LogWarning(data.GetType().ToString() + " could not find AssessmentType for assessment " + data.Id);
+                    Debug.LogWarning(PSdata.GetType() + " could not find AssessmentType for assessment " + PSdata.Id);
                     return list.ToArray(); // this means that no assessment type has been selected
                 }
                 minigameStruct.MiniGameCode = (MiniGameCode)System.Enum.Parse(typeof(MiniGameCode), assessmentType);
@@ -72,18 +73,34 @@ namespace EA4S.Database.Management
             } else {
                 // Non-Assessments (i.e. Minigames) must be checked through columns
                 for (int enum_i = 0; enum_i < System.Enum.GetValues(typeof(MiniGameCode)).Length; enum_i++) {
-                    var enum_string = ((MiniGameCode)enum_i).ToString();
-                    if (enum_string == "") continue; // this means that the enum does not exist
-                    if (enum_string == "0") continue; // 0 does not exist in the table
+                    if ((MiniGameCode)enum_i == MiniGameCode.Invalid) {
+                        continue;
+                    }
 
+                    var enum_string = ((MiniGameCode)enum_i).ToString();
+                    int result = 0;
+
+                    if (enum_string == "") {
+                        // this means that the enum does not exist
+                        continue;
+                    }
+                    if (int.TryParse(enum_string, out result)) {
+                        // this means that the enum does not exist among the ones we want
+                        continue;
+                    }
+
+                    // this checks if a minigame isn't used in the PlaySession table
                     if (!dict.ContainsKey(enum_string)) {
-                        // TODO: what to do if the enum is not found in the dict? tell once?
-                        //Debug.LogWarning(data.GetType().ToString() + " could not find minigame column for " + enum_string);
+                        if (!notFoundCodes.Contains((MiniGameCode)enum_i)) {
+                            Debug.LogWarning(PSdata.GetType() + " could not find minigame column for " + enum_string);
+                            notFoundCodes.Add((MiniGameCode)enum_i);
+                        }
                         continue;
                     }
 
                     var minigameStruct = new MiniGameInPlaySession();
                     minigameStruct.MiniGameCode = (MiniGameCode)enum_i;
+                    // Debug.Log("mingame: " + enum_string);
                     minigameStruct.Weight = ToInt(dict[enum_string]);
                     if (minigameStruct.Weight == 0) {
                         // Skip adding if the weight is zero
@@ -94,7 +111,6 @@ namespace EA4S.Database.Management
                 }
 
             }
-
 
             return list.ToArray();
         }

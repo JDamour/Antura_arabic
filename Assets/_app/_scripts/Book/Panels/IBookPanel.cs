@@ -1,5 +1,4 @@
-﻿
-namespace EA4S.Book
+﻿namespace Antura.Book
 {
     public interface IBookPanel
     {

@@ -1,8 +1,8 @@
-﻿using EA4S.Core;
+using Antura.Core;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace EA4S.UI
+namespace Antura.UI
 {
     /// <summary>
     /// Button for selecting an avatar in the Profile Selector.
@@ -11,7 +11,7 @@ namespace EA4S.UI
     {
         public Image AvatarImg;
 
-        CanvasGroup cGroup;
+        private CanvasGroup cGroup;
 
         #region Unity
 
@@ -19,7 +19,9 @@ namespace EA4S.UI
         {
             base.Awake();
 
-            if (cGroup == null) cGroup = this.gameObject.AddComponent<CanvasGroup>();
+            if (cGroup == null) {
+                cGroup = this.gameObject.AddComponent<CanvasGroup>();
+            }
         }
 
         #endregion
@@ -28,12 +30,14 @@ namespace EA4S.UI
 
         public void SetAvatar(int _avatarIndex)
         {
-            AvatarImg.sprite = Resources.Load<Sprite>(AppConstants.AvatarsResourcesDir + _avatarIndex);
+            AvatarImg.sprite = Resources.Load<Sprite>(AppConfig.RESOURCES_DIR_AVATARS + _avatarIndex);
         }
 
         public void SetInteractivity(bool _interactive)
         {
-            if (cGroup == null) cGroup = this.gameObject.AddComponent<CanvasGroup>();
+            if (cGroup == null) {
+                cGroup = this.gameObject.AddComponent<CanvasGroup>();
+            }
             cGroup.alpha = _interactive ? 1 : 0.3f;
             Bt.interactable = _interactive;
         }

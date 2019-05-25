@@ -4,9 +4,10 @@
 // put this in the resource directory,
 // and do not remove from it, please!
 // (and do not remove from it please!)"
-namespace EA4S.Environment
+namespace Antura.Environment
 {
-    public enum WorldID : int
+    // TODO refactor we want Worlds 1..6 (not 0..5)
+    public enum WorldID
     {
         Default = -1,
         World0 = 0,
@@ -19,20 +20,34 @@ namespace EA4S.Environment
 
     public class WorldManager : MonoBehaviour
     {
-        WorldID currentWorld = WorldID.Default;
+        const string ResourceId = "Prefabs/Managers/WorldManager";
+        private static WorldManager instance;
+
+        private WorldID currentWorld = WorldID.Default;
+
         public WorldID CurrentWorld
         {
-            get
-            {
-                return currentWorld;
-            }
-            set
-            {
+            get { return currentWorld; }
+            set {
                 currentWorld = value;
-                if (currentWorld > WorldID.World5)
-                {
+                if (currentWorld > WorldID.World5) {
                     currentWorld = WorldID.World5;
                 }
+            }
+        }
+
+        /////////////////////
+        // Singleton Pattern
+        public static WorldManager I
+        {
+            get {
+                if (instance == null) {
+                    GameObject go = Instantiate(Resources.Load<GameObject>(ResourceId));
+                    go.name = "[WorldManager]";
+                    go.hideFlags = HideFlags.HideAndDontSave;
+                    instance = go.GetComponent<WorldManager>();
+                }
+                return instance;
             }
         }
 
@@ -46,17 +61,17 @@ namespace EA4S.Environment
 
         public GameObject GetPrefab(WorldPrefabSet prefabSet, WorldID world)
         {
-            if (world == WorldID.Default)
-            {
-                if (prefabSet.defaultPrefab != null)
+            if (world == WorldID.Default) {
+                if (prefabSet.defaultPrefab != null) {
                     return prefabSet.defaultPrefab;
+                }
 
                 return prefabSet.worldPrefabs[0];
-            }
-            else
+            } else {
                 return prefabSet.worldPrefabs[(int)world];
+            }
         }
-        
+
         /// <summary>
         /// Get color for current world
         /// </summary>
@@ -67,31 +82,10 @@ namespace EA4S.Environment
 
         public Color GetColor(WorldColorSet set, WorldID world)
         {
-            if (world == WorldID.Default)
-            {
+            if (world == WorldID.Default) {
                 return set.defaultColor;
-            }
-            else
+            } else {
                 return set.colors[(int)world];
-        }
-
-        /////////////////////
-        // Singleton Pattern
-        const string ResourceId = "Prefabs/Managers/WorldManager";
-
-        static WorldManager instance;
-        public static WorldManager I
-        {
-            get
-            {
-                if (instance == null)
-                {
-                    GameObject go = Instantiate(Resources.Load<GameObject>(ResourceId));
-                    go.name = "[WorldManager]";
-                    go.hideFlags = HideFlags.HideAndDontSave;
-                    instance = go.GetComponent<WorldManager>();
-                }
-                return instance;
             }
         }
     }

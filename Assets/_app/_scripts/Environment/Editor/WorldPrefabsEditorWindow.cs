@@ -1,4 +1,4 @@
-﻿using EA4S.Environment;
+﻿using Antura.Environment;
 using UnityEditor;
 
 public class WorldPrefabsEditorWindow : EditorWindow
@@ -6,7 +6,7 @@ public class WorldPrefabsEditorWindow : EditorWindow
     WorldID world = WorldID.Default;
     WorldID lastWorld = WorldID.Default;
 
-    [MenuItem("Tools/Antura/World Prefabs", false, 301)]
+    [MenuItem("Antura/Test/World Prefabs", false)]
     static void Init()
     {
         // Get existing open window or if none, make a new one:

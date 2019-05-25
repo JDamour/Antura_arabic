@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace EA4S.Database
+namespace Antura.Database
 {
     /// <summary>
     /// Concrete implementation of IDataTable.
@@ -34,16 +34,14 @@ namespace EA4S.Database
 
         public IEnumerable<IData> GetValues()
         {
-            foreach (var value in innerList)
-            {
+            foreach (var value in innerList) {
                 yield return value;
             }
         }
 
         public IEnumerable<K> GetValuesTyped()
         {
-            foreach (var value in innerList)
-            {
+            foreach (var value in innerList) {
                 yield return value;
             }
         }
@@ -59,4 +57,3 @@ namespace EA4S.Database
         }
     }
 }
-

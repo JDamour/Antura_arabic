@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Collections.Generic;
 
-namespace EA4S.Helpers
+namespace Antura.Helpers
 {
     /// <summary>
     /// Static helper class for randomization utilities.
@@ -12,7 +12,7 @@ namespace EA4S.Helpers
         private static readonly Random _random = new Random(DateTime.Now.Millisecond);
 
         #region Value Random
-        
+
         /// <summary>
         /// Return random float value around _value parameter + or - _variation.
         /// </summary>
@@ -34,25 +34,10 @@ namespace EA4S.Helpers
         /// </summary>
         public static T GetRandom<T>(this IList<T> list)
         {
-            if (list.Count == 0)
-            {
-                throw new Exception("Cannot get a random element from the list as count is zero.");
-            }
-            return list[_random.Next(0, list.Count)];
-        }
-
-        /// <summary>
-        /// Gets the random alternative. USE ONLY IN LOOP SCENARIO.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="list">The list.</param>
-        /// <returns></returns>
-        /// <exception cref="System.Exception">Cannot get a random element from the list as count is zero.</exception>
-        public static T GetRandomAlternative<T>(this IList<T> list) {
             if (list.Count == 0) {
                 throw new Exception("Cannot get a random element from the list as count is zero.");
             }
-            return list[UnityEngine.Random.Range(0, list.Count)];
+            return list[_random.Next(0, list.Count)];
         }
 
         /// <summary>
@@ -83,8 +68,7 @@ namespace EA4S.Helpers
         /// </summary>
         public static T RandomSelectOne<T>(this List<T> all_list)
         {
-            if (all_list.Count == 0)
-            {
+            if (all_list.Count == 0) {
                 throw new Exception("The list has zero elements to select from.");
             }
 
@@ -96,18 +80,15 @@ namespace EA4S.Helpers
         /// </summary>
         public static List<T> RandomSelect<T>(this List<T> all_list, int maxNumberToSelect, bool forceMaxNumber = false)
         {
-            if (maxNumberToSelect == 0)
-            {
+            if (maxNumberToSelect == 0) {
                 return new List<T>();
             }
 
-            if (all_list.Count == 0)
-            {
+            if (all_list.Count == 0) {
                 throw new Exception("The list has zero elements to select from.");
             }
 
-            if (!forceMaxNumber && all_list.Count < maxNumberToSelect)
-            {
+            if (!forceMaxNumber && all_list.Count < maxNumberToSelect) {
                 maxNumberToSelect = all_list.Count;
             }
 
@@ -177,7 +158,8 @@ namespace EA4S.Helpers
         /// <summary>
         /// Shuffle a list in place.
         /// </summary>
-        public static void Shuffle<T>(this IList<T> list) {
+        public static void Shuffle<T>(this IList<T> list)
+        {
             int n = list.Count;
             while (n > 1) {
                 n--;
@@ -196,8 +178,7 @@ namespace EA4S.Helpers
             IList<T> list = new List<T>(thisList.ToArray());
 
             int n = list.Count;
-            while (n > 1)
-            {
+            while (n > 1) {
                 n--;
                 int k = _random.Next(n + 1);
                 T value = list[k];

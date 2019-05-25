@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
-using EA4S.MinigamesAPI;
+using System.Collections.Generic;
+using Antura.LivingLetters;
 using UnityEngine;
 
-namespace EA4S.Minigames.FastCrowd
+namespace Antura.Minigames.FastCrowd
 {
     public class QuestionManager : MonoBehaviour
     {
@@ -51,8 +51,8 @@ namespace EA4S.Minigames.FastCrowd
 
                 // Add drop areas
                 if (FastCrowdConfiguration.Instance.Variation == FastCrowdVariation.Counting)
-                    dropContainer.AddDropNumber(correctAnswer, i+1);
-                else if (FastCrowdConfiguration.Instance.Variation == FastCrowdVariation.Words)
+                    dropContainer.AddDropNumber(correctAnswer, i);
+                else if (FastCrowdConfiguration.Instance.Variation == FastCrowdVariation.Word)
                     dropContainer.AddDropData(correctAnswer, true);
                 else
                     dropContainer.AddDropData(correctAnswer, false);

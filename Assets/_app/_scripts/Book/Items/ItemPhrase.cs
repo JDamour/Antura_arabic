@@ -1,11 +1,11 @@
-﻿using EA4S.Core;
+﻿using Antura.Database;
+using Antura.UI;
+using Antura.Core;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
-using EA4S.Database;
-using EA4S.UI;
 
-namespace EA4S.Book
+namespace Antura.Book
 {
     /// <summary>
     /// Displays a Phrase item in the Dictionary page of the Player Book.
@@ -17,9 +17,9 @@ namespace EA4S.Book
         public TextRender SubTitle;
         public Image LockIcon;
 
-        VocabularyPanel manager;
+        PhrasesPage manager;
 
-        public void Init(VocabularyPanel _manager, PhraseInfo _info)
+        public void Init(PhrasesPage _manager, PhraseInfo _info)
         {
             info = _info;
             manager = _manager;
@@ -32,7 +32,6 @@ namespace EA4S.Book
 
             Title.text = info.data.Arabic;
             SubTitle.text = info.data.English;
-
         }
 
         public void OnPointerClick(PointerEventData eventData)

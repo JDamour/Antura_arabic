@@ -1,10 +1,9 @@
-﻿using System.Collections;
+﻿using Antura.Helpers;
 using DG.Tweening;
-using EA4S.Helpers;
-using EA4S.Utilities;
+using System.Collections;
 using UnityEngine;
 
-namespace EA4S.UI
+namespace Antura.UI
 {
     /// <summary>
     /// Controls the Credits panel.
@@ -14,21 +13,24 @@ namespace EA4S.UI
     {
         [Tooltip("Units x second for the scroll animation")]
         public float ScrollAnimationSpeed = 100;
+
         public float ScrollAnimationDelay = 1.5f;
         public Color Level0Color = Color.blue;
         public int Level0FontPerc = 140;
         public Color Level1Color = Color.yellow;
         public int Level1FontPerc = 110;
+
         [Header("References")]
         public TextAsset CreditsTxt;
+
         public RectTransform CreditsContainer;
         public UIButton BtBack;
         public TMPro.TextMeshProUGUI TfCredits;
 
         public bool HasAwoken { get; private set; }
-        RectTransform rectT;
-        Vector2 defCreditsContainerPos;
-        Tween showTween, scrollTween;
+        private RectTransform rectT;
+        private Vector2 defCreditsContainerPos;
+        private Tween showTween, scrollTween;
 
         #region Unity
 
@@ -38,7 +40,8 @@ namespace EA4S.UI
             defCreditsContainerPos = CreditsContainer.anchoredPosition;
             rectT = this.GetComponent<RectTransform>();
 
-            showTween = this.GetComponent<CanvasGroup>().DOFade(0, 0.4f).From().SetEase(Ease.Linear).SetUpdate(true).SetAutoKill(false).Pause()
+            showTween = this.GetComponent<CanvasGroup>().DOFade(0, 0.4f).From().SetEase(Ease.Linear).SetUpdate(true).SetAutoKill(false)
+                .Pause()
                 .OnRewind(() => this.gameObject.SetActive(false));
 
             this.gameObject.SetActive(false);
@@ -51,8 +54,11 @@ namespace EA4S.UI
 
         void Update()
         {
-            if (Input.GetMouseButtonDown(0)) StopScrollLoop();
-            else if (Input.GetMouseButtonUp(0) && showTween.IsComplete()) StartScrollLoop();
+            if (Input.GetMouseButtonDown(0)) {
+                StopScrollLoop();
+            } else if (Input.GetMouseButtonUp(0) && showTween.IsComplete()) {
+                StartScrollLoop();
+            }
         }
 
         void OnDestroy()
@@ -110,8 +116,11 @@ namespace EA4S.UI
             yield return null;
 
             float toY = CreditsContainer.rect.height - rectT.rect.height;
-            scrollTween = CreditsContainer.DOAnchorPosY(toY, ScrollAnimationSpeed).SetSpeedBased()
-                .SetEase(Ease.Linear).SetDelay(ScrollAnimationDelay).SetUpdate(true);
+            scrollTween = CreditsContainer.DOAnchorPosY(toY, ScrollAnimationSpeed)
+                                          .SetSpeedBased()
+                                          .SetEase(Ease.Linear)
+                                          .SetDelay(ScrollAnimationDelay)
+                                          .SetUpdate(true);
         }
 
         void StopScrollLoop()

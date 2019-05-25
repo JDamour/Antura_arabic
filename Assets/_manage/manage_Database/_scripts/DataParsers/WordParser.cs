@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using EA4S.Helpers;
+using Antura.Helpers;
 
-namespace EA4S.Database.Management
+namespace Antura.Database.Management
 {
     /// <summary>
     /// Custom JSON parser for WordData
@@ -23,6 +23,7 @@ namespace EA4S.Database.Management
             data.Gender = CustomParseGender(data, dict["Gender"]);
             data.LinkedWord = ToString(dict["LinkedWord"]);
             data.Arabic = ToString(dict["Arabic"]);
+            data.ArabicNoShaddah = ToString(dict["Arabic_NoShaddah"]);
             data.Value = ToString(dict["Value"]);
             data.Letters = CustomParseLetters(data, db);
             data.Drawing = ToString(dict["Drawing"]);
@@ -33,7 +34,7 @@ namespace EA4S.Database.Management
 
         private string[] CustomParseLetters(WordData wordData, DatabaseObject db)
         {
-            var parts = ArabicAlphabetHelper.AnalyzeData(db, wordData);
+            var parts = ArabicAlphabetHelper.SplitWord(db, wordData);
 
             string[] letters = new string[parts.Count];
 

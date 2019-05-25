@@ -1,19 +1,14 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
-using EA4S.Audio;
-using EA4S.MinigamesAPI;
-using EA4S.MinigamesCommon;
+using Antura.Audio;
+using Antura.LivingLetters;
+using Antura.Minigames;
 
-namespace EA4S.Minigames.Scanner
+namespace Antura.Minigames.Scanner
 {
-    public enum ScannerVariation
-    {
-        OneWord = 1,
-        MultipleWords = 2
-    }
 
-    public class ScannerGame : MiniGame
+    public class ScannerGame : MiniGameController
     {
         public bool disableInput;
         public bool gameActive = true;
@@ -36,7 +31,8 @@ namespace EA4S.Minigames.Scanner
 
         public string currentWord = "";
 
-        [Range(0, 1)] public float pedagogicalLevel = 0;
+        [Range(0, 1)]
+        public float pedagogicalLevel = 0;
 
         public int numberOfRounds = 6;
 
@@ -47,22 +43,27 @@ namespace EA4S.Minigames.Scanner
 
         public GameObject LLPrefab;
 
-        [HideInInspector] public List<ScannerLivingLetter> scannerLL;
+        [HideInInspector]
+        public List<ScannerLivingLetter> scannerLL;
 
         public List<ScannerSuitcase> suitcases;
 
-        [HideInInspector] public List<ILivingLetterData> wordData;
+        [HideInInspector]
+        public List<ILivingLetterData> wordData;
 
-        [HideInInspector] public ScannerRoundsManager roundsManager;
+        [HideInInspector]
+        public ScannerRoundsManager roundsManager;
 
-        [HideInInspector] public int LLCount;
+        [HideInInspector]
+        public int LLCount;
 
         public int CurrentScoreRecord;
 
         public Animator trapDoor;
 
         public ScannerTutorial tut;
-        public bool TutorialEnabled {
+        public bool TutorialEnabled
+        {
             get { return GetConfiguration().TutorialEnabled; }
         }
 
@@ -70,9 +71,8 @@ namespace EA4S.Minigames.Scanner
 
         public int CurrentStars
         {
-            get
-            {
-                return (int) Mathf.Ceil(roundsManager.numberOfRoundsWon / 2f);
+            get {
+                return (int)Mathf.Ceil(roundsManager.numberOfRoundsWon / 2f);
             }
         }
 
@@ -85,7 +85,7 @@ namespace EA4S.Minigames.Scanner
             CurrentScoreRecord = 0;
         }
 
-        protected override IState GetInitialState()
+        protected override FSM.IState GetInitialState()
         {
             return IntroductionState;
         }
@@ -169,7 +169,7 @@ namespace EA4S.Minigames.Scanner
         public void PlayWord(float deltaTime, ScannerLivingLetter LL)
         {
             Debug.Log("Play word: " + deltaTime);
-            IAudioSource wordSound = Context.GetAudioManager().PlayLetterData(LL.LLController.Data, true);
+            IAudioSource wordSound = Context.GetAudioManager().PlayVocabularyData(LL.LLController.Data, true);
             //float scaledDelta = (maxPlaySpeed - minPlaySpeed) / (max - min) * (deltaTime - max) + maxPlaySpeed;
             wordSound.Pitch = Mathf.Clamp(scannerDevice.smoothedDraggingSpeed * 4f, minPlaySpeed, maxPlaySpeed);
         }

@@ -1,10 +1,8 @@
-﻿using EA4S.Audio;
-using EA4S.MinigamesCommon;
 using UnityEngine;
 
-namespace EA4S.Minigames.DancingDots
+namespace Antura.Minigames.DancingDots
 {
-    public class IntroductionGameState : IState
+    public class IntroductionGameState : FSM.IState
     {
         DancingDotsGame game;
 
@@ -17,11 +15,9 @@ namespace EA4S.Minigames.DancingDots
         public void EnterState()
         {
             this.game.dancingDotsLL.contentGO.SetActive(false);
-            Debug.Log("Intro");
-            AudioManager.I.PlayDialogue("DancingDots_Title");
+            game.Context.GetAudioManager().PlayDialogue(Database.LocalizationDataId.DancingDots_letterany_Title);
             game.dancingDotsLL.letterObjectView.DoTwirl(null);
             game.disableInput = true;
-            //game.StartRound();
         }
 
         public void ExitState()
@@ -32,8 +28,7 @@ namespace EA4S.Minigames.DancingDots
         {
             timer -= delta;
 
-            if (timer < 0)
-            {
+            if (timer < 0) {
                 game.SetCurrentState(game.QuestionState);
             }
         }

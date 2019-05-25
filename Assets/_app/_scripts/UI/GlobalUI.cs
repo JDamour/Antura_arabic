@@ -1,9 +1,11 @@
-﻿using System;
-using UnityEngine;
+﻿using Antura.Core;
 using DG.DeInspektor.Attributes;
-using EA4S.Core;
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.EventSystems;
 
-namespace EA4S.UI
+namespace Antura.UI
 {
     /// <summary>
     /// Global UI created dynamically at runtime,
@@ -25,16 +27,15 @@ namespace EA4S.UI
 
         const string ResourceId = "Prefabs/UI/GlobalUI";
         const string SceneTransitionerResourceId = "Prefabs/UI/SceneTransitionerUI";
-        Action onGoBack;
-        bool disableBackButtonOnClick;
+        private Action onGoBack;
+        private bool disableBackButtonOnClick;
 
         public static void Init()
         {
-            if (I != null) return;
+            if (I != null) { return; }
 
             I = Instantiate(Resources.Load<GlobalUI>(ResourceId));
             I.gameObject.name = "[GlobalUI]";
-            //            DontDestroyOnLoad(go);
         }
 
         void Awake()
@@ -54,7 +55,9 @@ namespace EA4S.UI
             ActionFeedback = StoreAndAwake<ActionFeedbackComponent>();
             Prompt = StoreAndAwake<PromptPanel>();
 
-            if (onGoBack == null) BackButton.gameObject.SetActive(false);
+            if (onGoBack == null) {
+                BackButton.gameObject.SetActive(false);
+            }
 
             // Listeners
             BackButton.Bt.onClick.AddListener(OnBack);
@@ -62,7 +65,7 @@ namespace EA4S.UI
 
         void OnDestroy()
         {
-            if (I == this) I = null;
+            if (I == this) { I = null; }
             BackButton.Bt.onClick.RemoveAllListeners();
         }
 
@@ -72,14 +75,18 @@ namespace EA4S.UI
         /// <param name="includeSceneTransitioner">If TRUE (default) also clears the sceneTransitioner, otherwise not</param>
         public static void Clear(bool includeSceneTransitioner = true)
         {
-            if (includeSceneTransitioner && SceneTransitioner != null)
+            if (includeSceneTransitioner && SceneTransitioner != null) {
                 SceneTransitioner.CloseImmediate();
-            if (ContinueScreen != null)
+            }
+            if (ContinueScreen != null) {
                 ContinueScreen.Close(true);
-            if (WidgetPopupWindow != null)
+            }
+            if (WidgetPopupWindow != null) {
                 WidgetPopupWindow.Close(true);
-            if (WidgetSubtitles != null)
+            }
+            if (WidgetSubtitles != null) {
                 WidgetSubtitles.Close(true);
+            }
         }
 
         /// <summary>
@@ -109,7 +116,6 @@ namespace EA4S.UI
         /// <summary>
         /// Shows a popup with a YES/NO button and relative callbacks
         /// </summary>
-
         public static void ShowPrompt(Database.LocalizationDataId id, Action _onYesCallback = null, Action _onNoCallback = null)
         {
             Prompt.Show(id, _onYesCallback, _onNoCallback);
@@ -134,8 +140,52 @@ namespace EA4S.UI
 
         void OnBack()
         {
-            if (disableBackButtonOnClick) I.BackButton.Bt.interactable = false;
-            if (onGoBack != null) onGoBack();
+            if (disableBackButtonOnClick) {
+                I.BackButton.Bt.interactable = false;
+            }
+            if (onGoBack != null) {
+                onGoBack();
+            }
+        }
+
+        public bool IsFingerOverUI()
+        {
+            // Mouse is -1, the rest are fingers
+            for (int touchIndex = -1; touchIndex < Input.touchCount; touchIndex++)
+            {
+                int fingerIndex = touchIndex;
+                if (touchIndex >= 0)
+                {
+                    var touch = Input.GetTouch(touchIndex);
+                    if (touch.phase == TouchPhase.Canceled || touch.phase == TouchPhase.Ended)
+                    {
+                        // Skip this touch
+                        continue;
+                    }
+                    fingerIndex = Input.GetTouch(touchIndex).fingerId;
+                }
+
+                Vector2 pos;
+                if (fingerIndex == -1) pos = Input.mousePosition;
+                else pos = Input.GetTouch(touchIndex).position;
+
+                bool isTouching = IsPointerOverUIObject(pos);
+                if (isTouching)
+                {
+                    //Debug.Log("FINGER " + touchIndex + " IS TOUCHING");
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private bool IsPointerOverUIObject(Vector2 pos)
+        {
+            PointerEventData eventDataCurrentPosition = new PointerEventData(EventSystem.current);
+            eventDataCurrentPosition.position = pos;
+            List<RaycastResult> results = new List<RaycastResult>();
+            EventSystem.current.RaycastAll(eventDataCurrentPosition, results);
+            return results.Count > 0;
         }
     }
 }

@@ -1,8 +1,8 @@
-﻿using UnityEngine;
-using EA4S.MinigamesCommon;
-using EA4S.UI;
+using Antura.Minigames;
+using Antura.UI;
+using UnityEngine;
 
-namespace EA4S.Minigames.ReadingGame
+namespace Antura.Minigames.ReadingGame
 {
     public class ReadingRadialWidget : MonoBehaviour
     {

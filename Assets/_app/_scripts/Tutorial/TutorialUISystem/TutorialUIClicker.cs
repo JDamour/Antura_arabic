@@ -1,7 +1,7 @@
 ﻿using DG.Tweening;
 using UnityEngine;
 
-namespace EA4S.Tutorial
+namespace Antura.Tutorial
 {
     public class TutorialUIClicker : TutorialUIProp
     {
@@ -21,10 +21,9 @@ namespace EA4S.Tutorial
                 .Join(Radius1.DOFade(1, 0.1f))
                 .Insert(0.2f, Radius0.DOFade(0, 0.3f))
                 .Join(Radius1.DOFade(0, 0.3f))
-                .OnRewind(() => {
-                    this.gameObject.SetActive(false);
-                })
-                .OnComplete(() => {
+                .OnRewind(() => { this.gameObject.SetActive(false); })
+                .OnComplete(() =>
+                {
                     this.gameObject.SetActive(false);
                     this.transform.parent = DefParent;
                 });

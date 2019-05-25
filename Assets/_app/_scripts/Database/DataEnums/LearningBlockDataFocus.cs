@@ -1,4 +1,4 @@
-namespace EA4S.Database
+namespace Antura.Database
 {
     public enum LearningBlockDataFocus
     {
@@ -8,5 +8,6 @@ namespace EA4S.Database
         Sounds = 3,
         Words = 4,
         Phrases = 5,
+        Phonems = 6
     }
 }

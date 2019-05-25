@@ -1,8 +1,8 @@
-﻿using UnityEngine;
+﻿using Antura.LivingLetters;
+using UnityEngine;
 using TMPro;
-using EA4S.MinigamesAPI;
 
-namespace EA4S.Minigames.Balloons
+namespace Antura.Minigames.Balloons
 {
     public class LetterPromptController : MonoBehaviour
     {
@@ -29,7 +29,6 @@ namespace EA4S.Minigames.Balloons
                 }
             }
         }
-
 
         public void Init(LL_LetterData _letterData)
         {

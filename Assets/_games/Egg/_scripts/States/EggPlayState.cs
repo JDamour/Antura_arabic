@@ -1,40 +1,43 @@
-﻿using EA4S.MinigamesAPI;
-using EA4S.MinigamesCommon;
-using EA4S.Tutorial;
+﻿using Antura.LivingLetters;
+using Antura.Tutorial;
 using UnityEngine;
 
-namespace EA4S.Minigames.Egg
+namespace Antura.Minigames.Egg
 {
-    public class EggPlayState : IState
+    public class EggPlayState : FSM.IState
     {
-        EggGame game;
+        private EggGame game;
 
-        int letterOnSequence;
-        bool isSequence;
+        private int letterOnSequence;
+        private bool isSequence;
 
-        int questionProgress;
-        int correctAnswers;
+        private int questionProgress;
+        private int correctAnswers;
 
-        float nextStateTimer;
-        bool toNextState;
+        private float nextStateTimer;
+        private bool toNextState;
 
-        float inputButtonTime = 0.3f;
-        float inputButtonTimer;
-        int inputButtonCount;
-        int inputButtonMax = 4;
-        bool repeatInputHasProgressed;
-        bool enteredRepeatMode;
+        private float inputButtonTime = 0.3f;
+        private float inputButtonTimer;
+        private int inputButtonCount;
+        private int inputButtonMax = 4;
+        private bool repeatInputHasProgressed;
+        private bool enteredRepeatMode;
 
-        IAudioSource positiveAudioSource;
+        private IAudioSource positiveAudioSource;
 
-        bool showTutorial;
-        bool tutorialCorrectActive;
-        int tutorialSequenceIndex;
-        float tutorialCorrectTimer;
+        private bool showTutorial;
+        private bool tutorialCorrectActive;
+        private int tutorialSequenceIndex;
+        private float tutorialCorrectTimer;
 
-        float tutorialDelayTimer;
-        float tutorialDelayTime = 3f;
-        bool tutorialStop;
+        private float tutorialDelayTimer;
+        private float tutorialDelayTime = 3f;
+        private bool tutorialStop;
+
+        float lastTimePressed = 0;
+        const float deltaPressedInterval = 0.5f;
+        bool isPlayingQuestion = false;
 
         public EggPlayState(EggGame game)
         {
@@ -55,7 +58,14 @@ namespace EA4S.Minigames.Egg
                 correctAnswers = 3;
             }
 
+            game.HintButton.gameObject.SetActive(true);
             game.eggController.onEggPressedCallback = OnEggPressed;
+            UnityEngine.UI.Button.ButtonClickedEvent clickEvent = game.HintButton.onClick;
+
+            if (clickEvent == null) {
+                game.HintButton.onClick = clickEvent = new UnityEngine.UI.Button.ButtonClickedEvent();
+            }
+            clickEvent.AddListener(OnHintPressed);
 
             EnableAllGameplayInput();
 
@@ -78,9 +88,9 @@ namespace EA4S.Minigames.Egg
                 ShowTutorialPressCorrect();
 
                 if (isSequence) {
-                    game.Context.GetAudioManager().PlayDialogue(Database.LocalizationDataId.Egg_sequence_Tuto);
+                    game.Context.GetAudioManager().PlayDialogue(Database.LocalizationDataId.Egg_buildword_Tuto);
                 } else {
-                    game.Context.GetAudioManager().PlayDialogue(Database.LocalizationDataId.Egg_letters_Tuto);
+                    game.Context.GetAudioManager().PlayDialogue(Database.LocalizationDataId.Egg_letterphoneme_Tuto);
                 }
             }
 
@@ -93,6 +103,12 @@ namespace EA4S.Minigames.Egg
 
         public void ExitState()
         {
+            game.HintButton.gameObject.SetActive(false);
+            UnityEngine.UI.Button.ButtonClickedEvent clickEvent = game.HintButton.onClick;
+
+            if (clickEvent != null) {
+                clickEvent.RemoveListener(OnHintPressed);
+            }
             if (showTutorial) {
                 TutorialUI.Clear(true);
             }
@@ -188,9 +204,15 @@ namespace EA4S.Minigames.Egg
         {
             game.Context.GetAudioManager().PlaySound(Sfx.UIButtonClick);
 
+            if (Time.realtimeSinceStartup - lastTimePressed > deltaPressedInterval) {
+                game.Context.GetAudioManager().PlayVocabularyData(letterData, false);
+            }
+            lastTimePressed = Time.realtimeSinceStartup;
+
             if (showTutorial) {
-                if (!enteredRepeatMode)
+                if (!enteredRepeatMode) {
                     TutorialUI.Clear(false);
+                }
                 tutorialDelayTimer = tutorialDelayTime;
                 tutorialCorrectActive = false;
             }
@@ -206,17 +228,20 @@ namespace EA4S.Minigames.Egg
                     if (!enteredRepeatMode) {
                         EggConfiguration.Instance.Context.GetAudioManager().PlaySound(Sfx.OK);
                         enteredRepeatMode = true;
+                        game.HintButton.gameObject.SetActive(false);
                         Vector3 clickPosition = game.eggButtonBox.GetButtons(false)[0].transform.position;
                         TutorialUI.ClickRepeat(clickPosition, 4);
                         game.eggButtonBox.RemoveButtons((a) => { return a != letterData; });
 
-                        if (!showTutorial)
+                        if (!showTutorial) {
                             game.Context.GetLogManager().OnAnswered(letterData, true);
+                        }
                     }
                 }
             } else {
-                if (isSequence && game.eggButtonBox.GetEggButton(letterData).IsPressed())
+                if (isSequence && game.eggButtonBox.GetEggButton(letterData).IsPressed()) {
                     return;
+                }
 
                 game.eggButtonBox.SetButtonsOnStandardColor(game.eggButtonBox.GetEggButton(letterData));
 
@@ -229,13 +254,20 @@ namespace EA4S.Minigames.Egg
             }
         }
 
+        void OnHintPressed()
+        {
+            if (!isPlayingQuestion) {
+                OnEggPressed();
+            }
+        }
+
         void OnEggPressed()
         {
             DisableAllGameplayInput();
 
             game.eggController.EmoticonInterrogative();
-
-            game.eggController.PlayAudioQuestion(delegate () { game.eggController.EmoticonClose(); EnableAllGameplayInput(); });
+            isPlayingQuestion = true;
+            game.eggController.PlayAudioQuestion(delegate () { isPlayingQuestion = false; game.eggController.EmoticonClose(); EnableAllGameplayInput(); });
         }
 
         void PositiveFeedback()
@@ -253,6 +285,7 @@ namespace EA4S.Minigames.Egg
             game.eggController.ParticleCorrectEnabled();
 
             if (crackingProgress == 1f) {
+                game.HintButton.gameObject.SetActive(false);
                 game.Context.GetAudioManager().PlaySound(Sfx.EggBreak);
                 game.eggController.EmoticonHappy();
                 game.eggController.ParticleWinEnabled();
@@ -342,7 +375,7 @@ namespace EA4S.Minigames.Egg
             game.stagePositiveResult = true;
 
             if (isSequence) {
-                game.eggButtonBox.PlayButtonsAudio(true, false, 0.5f, OnLightUpButtonsComplete, () => { game.eggButtonBox.SetButtonsOnStandardColor(null, false); });
+                game.eggButtonBox.PlayButtonsAudio(null, game.CurrentQuestion.Question, true, false, 0.5f, OnLightUpButtonsComplete, () => { game.eggButtonBox.SetButtonsOnStandardColor(null, false); });
             } else {
                 game.eggButtonBox.GetButtons(false)[0].PlayButtonAudio(true, 0.5f, OnLightUpButtonsComplete, () => { game.eggButtonBox.SetButtonsOnStandardColor(null, false); });
             }

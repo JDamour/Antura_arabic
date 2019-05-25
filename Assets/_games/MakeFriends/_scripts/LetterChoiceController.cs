@@ -1,10 +1,10 @@
-﻿using EA4S.MinigamesAPI;
+﻿using Antura.LivingLetters;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using TMPro;
 
-namespace EA4S.Minigames.MakeFriends
+namespace Antura.Minigames.MakeFriends
 {
     public class LetterChoiceController : MonoBehaviour, IPointerDownHandler, IBeginDragHandler, IDragHandler, IEndDragHandler
     {
@@ -119,7 +119,7 @@ namespace EA4S.Minigames.MakeFriends
         {
             if (letterData != null && letterData.Id != null)
             {
-                MakeFriendsConfiguration.Instance.Context.GetAudioManager().PlayLetterData(letterData);
+                MakeFriendsConfiguration.Instance.Context.GetAudioManager().PlayVocabularyData(letterData);
             }
         }
 

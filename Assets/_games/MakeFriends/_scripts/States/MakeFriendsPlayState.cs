@@ -1,8 +1,6 @@
-﻿using EA4S.MinigamesCommon;
-
-namespace EA4S.Minigames.MakeFriends
+﻿namespace Antura.Minigames.MakeFriends
 {
-    public class MakeFriendsPlayState : IState
+    public class MakeFriendsPlayState : FSM.IState
     {
         MakeFriendsGame game;
 
@@ -13,8 +11,9 @@ namespace EA4S.Minigames.MakeFriends
 
         public void EnterState()
         {
-            MakeFriendsConfiguration.Instance.Context.GetOverlayWidget().Initialize(showStarsBar: true, showClock: false, showLives: false);
+            game.InitializeMinigameUI();
 
+            game.Reset();
             game.PlayIntroVoiceOver();
             game.PlayActiveMusic();
             game.Play();

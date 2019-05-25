@@ -1,11 +1,9 @@
-﻿using EA4S.MinigamesCommon;
-
-namespace EA4S.Minigames.SickLetters
+namespace Antura.Minigames.SickLetters
 {
-    public class QuestionGameState : IState
+    public class QuestionGameState : FSM.IState
     {
         SickLettersGame game;
-        
+
         public QuestionGameState(SickLettersGame game)
         {
             this.game = game;
@@ -14,7 +12,7 @@ namespace EA4S.Minigames.SickLetters
         public void EnterState()
         {
             game.SetCurrentState(game.PlayState);
-            
+
             //game.Context.GetPopupWidget().Show(OnQuestionCompleted, TextID.ASSESSMENT_RESULT_GOOD, true, null);
         }
 

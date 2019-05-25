@@ -1,16 +1,8 @@
-namespace EA4S.Assessment
-{
-    /// <summary>
-    /// Text flow options. I assume most languages are LeftToRight
-    /// and Right To left, We may have to add further options in future
-    /// if we need Chinese/Japanese. 
-    /// </summary>
-    public enum TextFlow
-    {
-        LeftToRight,
-        RightToLeft
-    }
+using Antura.Core;
+using Antura.LivingLetters;
 
+namespace Antura.Assessment
+{
     /// <summary>
     /// These options are setted by AssessmentFactory after MiniGameAPI produced the
     /// AssessmentConfiguration instance.
@@ -18,12 +10,10 @@ namespace EA4S.Assessment
     public class AssessmentOptions
     {
         private static AssessmentOptions instance;
+
         public static AssessmentOptions Instance
         {
-            get
-            {
-                return instance;
-            }
+            get { return instance; }
         }
 
         public static void Reset()
@@ -31,7 +21,7 @@ namespace EA4S.Assessment
             instance = new AssessmentOptions();
         }
 
-        public TextFlow LocaleTextFlow { get; set; }
+        public TextDirection LocaleTextDirection { get; set; }
         public bool PronunceQuestionWhenClicked { get; set; }
         public bool PronunceAnswerWhenClicked { get; set; }
         public bool ShowQuestionAsImage { get; set; }
@@ -41,9 +31,10 @@ namespace EA4S.Assessment
         public bool QuestionSpawnedPlaySound { get; set; }
         public bool PlayCorrectAnswer { get; set; }
         public bool PlayAllCorrectAnswers { get; set; }
-        
+
         // Options for event "on all answered".
         public bool ReadQuestionAndAnswer { get; set; }
+
         public bool CompleteWordOnAnswered { get; set; }
         public bool ShowFullWordOnAnswered { get; set; }
         public bool WideLL { get; set; }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
 
-namespace EA4S.GamesSelector
+namespace Antura.GamesSelector
 {
     /// <summary>
     /// Tutorial on the GamesSelector.
@@ -14,8 +14,8 @@ namespace EA4S.GamesSelector
         public TrailRenderer[] trails;
 
         public bool isPlaying { get; private set; }
-        Tween showTween, moveTween;
-        Sequence trailTimeTween;
+        private Tween showTween, moveTween;
+        private Sequence trailTimeTween;
 
         #region Unity
 
@@ -50,14 +50,19 @@ namespace EA4S.GamesSelector
             Finger.gameObject.SetActive(true);
 
             Vector3[] path = new Vector3[_bubbles.Count + 1];
-            this.transform.localPosition = _bubbles[0].transform.localPosition - new Vector3(2, 0, 0);
-            path[path.Length - 1] = _bubbles[_bubbles.Count - 1].transform.localPosition + new Vector3(2, 0, 0);
-            for (int i = 0; i < _bubbles.Count; ++i) path[i] = _bubbles[i].transform.localPosition;
+//            transform.localPosition = _bubbles[0].transform.localPosition - new Vector3(2, 0, 0);
+//            path[path.Length - 1] = _bubbles[_bubbles.Count - 1].transform.localPosition + new Vector3(2, 0, 0);
+            transform.localPosition = _bubbles[_bubbles.Count - 1].transform.localPosition + new Vector3(2, 0, 0);
+            path[path.Length - 1] = _bubbles[0].transform.localPosition - new Vector3(2, 0, 0);
+            for (int i = 0; i < _bubbles.Count; ++i) {
+                path[i] = _bubbles[_bubbles.Count - i - 1].transform.localPosition;
+            }
 
             showTween.Restart();
             moveTween = DOTween.Sequence().SetAutoKill(false)
                 .Append(this.transform.DOLocalPath(path, 1.25f, PathType.Linear))
-                .OnComplete(() => {
+                .OnComplete(() =>
+                {
                     showTween.PlayBackwards();
                     trailTimeTween.PlayForward();
                 })
@@ -72,7 +77,9 @@ namespace EA4S.GamesSelector
             this.StopAllCoroutines();
             moveTween.Kill();
             showTween.PlayBackwards();
-            foreach (TrailRenderer tr in trails) tr.Clear();
+            foreach (TrailRenderer tr in trails) {
+                tr.Clear();
+            }
         }
 
         #endregion
@@ -86,7 +93,9 @@ namespace EA4S.GamesSelector
                 yield return new WaitForSeconds(2);
                 moveTween.Restart();
                 trailTimeTween.Rewind();
-                foreach (TrailRenderer tr in trails) tr.Clear();
+                foreach (TrailRenderer tr in trails) {
+                    tr.Clear();
+                }
             }
         }
 

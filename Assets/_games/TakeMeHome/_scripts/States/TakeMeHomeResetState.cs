@@ -1,9 +1,9 @@
-﻿using EA4S.MinigamesCommon;
-using EA4S.Tutorial;
+using Antura.Tutorial;
+using Antura.Minigames;
 
-namespace EA4S.Minigames.TakeMeHome
+namespace Antura.Minigames.TakeMeHome
 {
-	public class TakeMeHomeResetState : IState {
+	public class TakeMeHomeResetState : FSM.IState {
 
 		TakeMeHomeGame game;
 		bool win;

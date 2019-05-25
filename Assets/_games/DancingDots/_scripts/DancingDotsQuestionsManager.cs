@@ -1,8 +1,8 @@
 ﻿using System.Linq;
-using EA4S.MinigamesAPI;
+using Antura.LivingLetters;
 
 
-namespace EA4S.Minigames.DancingDots
+namespace Antura.Minigames.DancingDots
 {
     public class DancingDotsQuestionsManager
 	{

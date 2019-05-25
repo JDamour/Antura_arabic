@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-namespace EA4S.Book
+namespace Antura.Book
 {
     /// <summary>
     /// Displays data using a bar graph.
@@ -19,7 +19,7 @@ namespace EA4S.Book
 
             // Cleanup
             foreach (Transform tr in this.transform) {
-                if (tr != this.transform) Destroy(tr.gameObject);
+                if (tr != this.transform) { Destroy(tr.gameObject); }
             }
 
             for (int i = 0; i < values.Length; i++) {
@@ -37,6 +37,5 @@ namespace EA4S.Book
                 }
             }
         }
-
     }
 }

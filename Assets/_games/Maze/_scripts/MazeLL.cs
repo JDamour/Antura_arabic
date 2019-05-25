@@ -1,19 +1,18 @@
-﻿using UnityEngine;
-using EA4S.LivingLetters;
+﻿using Antura.LivingLetters;
+using UnityEngine;
 
-namespace EA4S.Minigames.Maze
+namespace Antura.Minigames.Maze
 {
     public class MazeLL : MonoBehaviour
     {
         public LivingLetterController letter;
-        // Use this for initialization
+
         void Start()
         {
             letter = GetComponent<LivingLetterController>();
             letter.SetState(LLAnimationStates.LL_rocketing);
         }
 
-        // Update is called once per frame
         void Update()
         {
 

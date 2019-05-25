@@ -1,12 +1,13 @@
-﻿using System;
+﻿using Antura.Audio;
+using Antura.Core;
+using Antura.Scenes;
+using Antura.UI;
 using DG.DeExtensions;
 using DG.Tweening;
-using EA4S.Audio;
-using EA4S.Scenes;
-using EA4S.UI;
+using System;
 using UnityEngine;
 
-namespace EA4S.Profile
+namespace Antura.Profile
 {
     /// <summary>
     /// Player creation UI
@@ -38,6 +39,7 @@ namespace EA4S.Profile
 
         [Tooltip("Startup offset of categories")]
         public int StartupOffsetY = -160;
+
         public UIButton BtContinue;
         public RectTransform CategoriesContainer;
         public PlayerCreationUICategory[] Categories; // 0: gender // 1: avatar // 2: color
@@ -45,7 +47,8 @@ namespace EA4S.Profile
 
         #endregion
 
-        bool allAvatarCategoriesSelected {
+        bool allAvatarCategoriesSelected
+        {
             get {
                 foreach (var cat in Categories) {
                     if (cat.SelectedIndex < 0) {
@@ -55,6 +58,7 @@ namespace EA4S.Profile
                 return true;
             }
         }
+
         public static UIState State { get; private set; }
         int selectionStep = 0; // 0: age // 1: gender // 2: avatar // 3: color
         float selectionStepOffsetY;
@@ -87,7 +91,6 @@ namespace EA4S.Profile
             AgeCategory.OnDeselectAll += OnDeselectAllInCategory;
 
             playAudioDescription(0);
-
         }
 
         void OnDestroy()
@@ -108,7 +111,7 @@ namespace EA4S.Profile
 
         void SwitchState(UIState toState)
         {
-            if (State == toState) return;
+            if (State == toState) { return; }
 
             State = toState;
             PlayerCreationUICategory avatarCat = Categories[CategoryIndex.Avatar];
@@ -145,7 +148,7 @@ namespace EA4S.Profile
 
         void playAudioDescription(int SelectedIndex)
         {
-            Debug.Log("SelectedIndex: " + SelectedIndex);
+            //Debug.Log("SelectedIndex: " + SelectedIndex);
             switch (SelectedIndex) {
                 case 0:
                     AudioManager.I.PlayDialogue(Database.LocalizationDataId.Profile_Gender);
@@ -171,7 +174,7 @@ namespace EA4S.Profile
 
         void AvatarCreation_StepBackwards(int toStep)
         {
-            if (stepTween != null) stepTween.Complete();
+            if (stepTween != null) { stepTween.Complete(); }
             for (var i = toStep + 1; i < selectionStep + 1; ++i) {
                 PlayerCreationUICategory cat = Categories[i];
                 if (i == CategoryIndex.Color) {
@@ -189,6 +192,12 @@ namespace EA4S.Profile
         void AvatarCreation_SetGender()
         {
             Categories[CategoryIndex.Avatar].AvatarSetIcon(Categories[CategoryIndex.Gender].SelectedIndex == 1);
+            if (AppManager.I.Player != null) {
+                AppManager.I.Player.Gender = Categories[CategoryIndex.Gender].SelectedIndex == 0 ? PlayerGender.M : PlayerGender.F;
+            } else {
+                AppManager.I.PlayerProfileManager.TemporaryPlayerGender = Categories[CategoryIndex.Gender].SelectedIndex == 0 ? PlayerGender.M : PlayerGender.F;
+            }
+            //    Debug.Log("AvatarCreation_SetGender " + AppManager.I.PlayerProfileManager.TemporaryPlayerGender);
         }
 
         void CreateProfile()
@@ -213,6 +222,7 @@ namespace EA4S.Profile
                     if (selectionStep < Categories.Length - 1 && catIndex == selectionStep) {
                         AvatarCreation_NextStep();
                     }
+
                     switch (catIndex) {
                         case CategoryIndex.Gender:
                             AvatarCreation_SetGender();
@@ -221,6 +231,7 @@ namespace EA4S.Profile
                             Categories[CategoryIndex.Avatar].SetColor(uiButton.DefaultColor);
                             break;
                     }
+
                     if (allAvatarCategoriesSelected) {
                         BtContinue.gameObject.SetActive(true);
                         BtContinue.Pulse();

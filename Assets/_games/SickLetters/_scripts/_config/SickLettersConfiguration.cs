@@ -1,65 +1,79 @@
-﻿using EA4S.MinigamesAPI;
-using EA4S.MinigamesCommon;
-using EA4S.Teacher;
+﻿using Antura.Database;
+using Antura.Teacher;
+using System;
 
-namespace EA4S.Minigames.SickLetters
+namespace Antura.Minigames.SickLetters
 {
-    public class SickLettersConfiguration : IGameConfiguration
+    public enum SickLettersVariation
     {
-        // Game configuration
-        public IGameContext Context { get; set; }
-        public float Difficulty { get; set; }
-        public bool TutorialEnabled { get; set; }
-        public IQuestionProvider Questions { get; set; }
-        //public SickLettersQuestionProvider SickLettersQuestions { get; set; }
+        LetterName = MiniGameCode.SickLetters_lettername,
+    }
 
-        //public SickLettersConfiguration Questions { get; set; }
+    public class SickLettersConfiguration : AbstractGameConfiguration
+    {
+        private SickLettersVariation Variation { get; set; }
 
-        /////////////////
+        public override void SetMiniGameCode(MiniGameCode code)
+        {
+            Variation = (SickLettersVariation)code;
+        }
+
         // Singleton Pattern
         static SickLettersConfiguration instance;
         public static SickLettersConfiguration Instance
         {
-            get
-            {
+            get {
                 if (instance == null)
                     instance = new SickLettersConfiguration();
                 return instance;
             }
         }
-        /////////////////
 
         private SickLettersConfiguration()
         {
             // Default values
-            // THESE SETTINGS ARE FOR SAMPLE PURPOSES, THESE VALUES MUST BE SET BY GAME CORE
-            Context = new MinigamesGameContext(MiniGameCode.SickLetters, System.DateTime.Now.Ticks.ToString());
+            Context = new MinigamesGameContext(MiniGameCode.SickLetters_lettername, System.DateTime.Now.Ticks.ToString());
             Questions = new SickLettersQuestionProvider();
             TutorialEnabled = true;
             //SickLettersQuestions = new SickLettersQuestionProvider();
             Difficulty = 0.1f;
-            EA4S.Teacher.ConfigAI.verboseTeacher = true;
+            ConfigAI.VerboseTeacher = true;
         }
 
-        public IQuestionBuilder SetupBuilder() {
+        public override IQuestionBuilder SetupBuilder()
+        {
             IQuestionBuilder builder = null;
 
             int nPacks = 20;
             int nCorrect = 1;
             int nWrong = 0;
 
-            var builderParams = new Teacher.QuestionBuilderParameters();
-            builder = new RandomLettersQuestionBuilder(nPacks, nCorrect, nWrong, parameters:builderParams);
-            
+            var builderParams = new QuestionBuilderParameters();
+
+            switch (Variation) {
+                case SickLettersVariation.LetterName:
+                    builderParams.letterFilters.excludeDiacritics = LetterFilters.ExcludeDiacritics.All;
+                    builderParams.letterFilters.excludeLetterVariations = LetterFilters.ExcludeLetterVariations.All;
+                    builderParams.letterFilters.excludeDiphthongs = true;
+                    builder = new RandomLettersQuestionBuilder(nPacks, nCorrect, nWrong, parameters: builderParams);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
             return builder;
         }
 
-        public MiniGameLearnRules SetupLearnRules()
+        public override MiniGameLearnRules SetupLearnRules()
         {
             var rules = new MiniGameLearnRules();
             // example: a.minigameVoteSkewOffset = 1f;
             return rules;
         }
 
+        public override LetterDataSoundType GetVocabularySoundType()
+        {
+            return LetterDataSoundType.Name;
+        }
     }
 }

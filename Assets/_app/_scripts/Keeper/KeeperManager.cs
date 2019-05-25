@@ -1,8 +1,9 @@
-﻿using EA4S.Audio;
-using EA4S.UI;
+using Antura.Audio;
+using Antura.Core;
+using Antura.UI;
 using UnityEngine;
 
-namespace EA4S.Core
+namespace Antura.Keeper
 {
     /// <summary>
     /// Manages the Keeper throughout the application. The Keeper gives hints and explains minigames to the player.
@@ -10,7 +11,7 @@ namespace EA4S.Core
     public class KeeperManager : MonoBehaviour
     {
         public static KeeperManager I;
-        System.Action currentCallback;
+        private System.Action currentCallback;
 
         void Start()
         {
@@ -46,11 +47,11 @@ namespace EA4S.Core
             if (autoClose) {
                 WidgetSubtitles.I.DisplaySentence(data, 2, isKeeper, null);
                 currentCallback = _callback;
-                AudioManager.I.PlayDialogue(data, () =>
-                {
+                AudioManager.I.PlayDialogue(data, () => {
                     CloseDialog();
-                    if (currentCallback != null)
+                    if (currentCallback != null) {
                         currentCallback();
+                    }
                 });
             } else {
                 WidgetSubtitles.I.DisplaySentence(data, 2, true, null);

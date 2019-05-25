@@ -1,11 +1,16 @@
-﻿using EA4S.Antura;
-using EA4S.Core;
-using EA4S.Database;
-using EA4S.UI;
-using UnityEngine;
+using Antura.Dog;
+using Antura.Core;
+using Antura.Keeper;
+using Antura.Profile;
+using Antura.Tutorial;
+using Antura.UI;
+using DG.Tweening;
 using System.Collections;
+using Antura.Debugging;
+using Antura.Helpers;
+using UnityEngine;
 
-namespace EA4S.Rewards
+namespace Antura.Rewards
 {
     /// <summary>
     /// Manages the Rewards scene.
@@ -16,18 +21,41 @@ namespace EA4S.Rewards
     {
         [Header("Setup")]
         public AnturaAnimationStates AnturaAnimation = AnturaAnimationStates.sitting;
+
         [Header("References")]
         public AnturaAnimationController AnturaAnimController;
+        //public Button AnturaSpaceBtton;
+
+        //Tween btAnturaTween;
 
         protected override void Start()
         {
             base.Start();
             GlobalUI.ShowPauseMenu(false);
-            Debug.Log("RewardsManager playsession: " + AppManager.I.Player.CurrentJourneyPosition.PlaySession);
+            //Debug.Log("RewardsManager playsession: " + AppManager.I.Player.CurrentJourneyPosition.PlaySession);
 
             AnturaAnimController.State = AnturaAnimation;
-            SceneTransitioner.Close();
+            //AnturaSpaceBtton.gameObject.SetActive(false);
             ShowReward();
+
+            //AnturaSpaceBtton.onClick.AddListener(() => AppManager.I.NavigationManager.GoToAnturaSpace());
+
+            tutorialManager = gameObject.GetComponentInChildren<RewardsTutorialManager>();
+            tutorialManager.HandleStart();
+
+            DebugManager.OnSkipCurrentScene += HandleSceneSkip;
+        }
+
+        void HandleSceneSkip()
+        {
+            Continue();
+        }
+
+        void OnDestroy()
+        {
+            DebugManager.OnSkipCurrentScene -= HandleSceneSkip;
+
+            //btAnturaTween.Kill();
         }
 
         public void ShowReward()
@@ -37,9 +65,7 @@ namespace EA4S.Rewards
 
         IEnumerator StartReward()
         {
-            if (AppManager.I.Player.IsFirstContact()) {
-                KeeperManager.I.PlayDialog(Database.LocalizationDataId.Reward_Intro);
-            } else {
+            if (FirstContactManager.I.IsSequenceFinished()) {
                 int rnd = Random.Range(1, 3);
                 switch (rnd) {
                     case 1:
@@ -53,9 +79,14 @@ namespace EA4S.Rewards
                         break;
                 }
             }
+
             // Wait animation ending before show continue button
-            yield return new WaitForSeconds(4.4f);
+            yield return new WaitForSeconds(8.0f);
             ContinueScreen.Show(Continue, ContinueScreenMode.Button, true);
+            //if (FirstContactManager.I.IsFinished()) {
+            //    AnturaSpaceBtton.gameObject.SetActive(true);
+            //    btAnturaTween = AnturaSpaceBtton.transform.DOScale(0.1f, 0.4f).From().SetEase(Ease.OutBack);
+            //}
             yield return null;
         }
 
@@ -63,23 +94,31 @@ namespace EA4S.Rewards
 
         public void ClearLoadedRewardsOnAntura()
         {
-            // Clean and Charge antura reward.
-            AnturaModelManager.I.ClearLoadedRewards();
+            // Clean and load antura reward.
+            AnturaModelManager.I.ClearLoadedRewardPacks();
         }
 
         /// <summary>
         /// Gets the reward to instantiate.
         /// </summary>
         /// <returns></returns>
-        public RewardPackUnlockData GetRewardToInstantiate()
+        public RewardPack GetRewardPackToInstantiate()
         {
-            if (AppManager.I.Player.IsFirstContact()) {
-                return AppManager.I.Player.RewardsUnlocked.Find(r => r.Type == RewardTypes.reward);
-            } else {
-                RewardPackUnlockData newRewardToInstantiate = RewardSystemManager.GetNextRewardPack(true)[0];
-                AppManager.I.Player.AddRewardUnlocked(newRewardToInstantiate);
-                AppManager.I.Player.AdvanceMaxJourneyPosition();
-                return newRewardToInstantiate;
+            if (FirstContactManager.I.IsPhaseUnlockedAndNotCompleted(FirstContactPhase.Reward_FirstBig))
+            {
+                // Get the first prop reward (already unlocked)
+                var firstRewardPack = AppManager.I.RewardSystemManager.GetUnlockedRewardPacksOfBaseType(RewardBaseType.Prop).RandomSelectOne();
+                return firstRewardPack;
+            } else
+            {
+                // Unlock the rewards for this JP (should be one, since this is an Assessment)
+                var newRewardPacks = AppManager.I.RewardSystemManager.UnlockAllRewardPacksForJourneyPosition(AppManager.I.Player.CurrentJourneyPosition);
+                var newRewardPack = newRewardPacks[0];
+
+                // Also advance the MaxJP
+                AppManager.I.Player.AdvanceMaxJourneyPosition();    // TODO: move this out of here and into the NavigationManager instead
+
+                return newRewardPack;
             }
         }
 
@@ -88,7 +127,7 @@ namespace EA4S.Rewards
         /// </summary>
         /// <param name="_rewardToInstantiate">The reward to instantiate.</param>
         /// <returns></returns>
-        public GameObject InstantiateReward(RewardPackUnlockData _rewardToInstantiate)
+        public GameObject InstantiateReward(RewardPack _rewardToInstantiate)
         {
             return AnturaModelManager.I.LoadRewardPackOnAntura(_rewardToInstantiate);
         }
@@ -97,6 +136,9 @@ namespace EA4S.Rewards
 
         public void Continue()
         {
+            if (FirstContactManager.I.IsPhaseUnlockedAndNotCompleted(FirstContactPhase.Reward_FirstBig))
+                FirstContactManager.I.CompleteCurrentPhaseInSequence();
+
             AppManager.I.NavigationManager.GoToNextScene();
         }
     }

@@ -10,7 +10,6 @@ public class XcodeSettingsPostProcess
     [PostProcessBuildAttribute(0)]
     public static void OnPostprocessBuild(BuildTarget buildTarget, string pathToBuiltProject)
     {
-
         // Stop processing if targe is NOT iOS
         if (buildTarget != BuildTarget.iOS)
             return;
@@ -55,6 +54,11 @@ public class XcodeSettingsPostProcess
 
         // enable file sharing through iTunes
         plist.root.SetBoolean("UIFileSharingEnabled", true);
+
+        // authorize the saving screenshots into Camera Roll
+        plist.root.SetString("NSPhotoLibraryUsageDescription", "Save Antura photos");
+        // this is new for iOS 11
+        plist.root.SetString("NSPhotoLibraryAddUsageDescription", "Save Antura photos");
 
         // Add URL Scheme
         //var array = plist.root.CreateArray("CFBundleURLTypes");

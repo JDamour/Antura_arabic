@@ -1,10 +1,10 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections.Generic;
-using EA4S.Helpers;
-using EA4S.MinigamesAPI;
-using EA4S.MinigamesCommon;
+using Antura.Helpers;
+using Antura.LivingLetters;
+using Antura.Minigames;
 
-namespace EA4S.Minigames.ReadingGame
+namespace Antura.Minigames.ReadingGame
 {
     public class ReadingBarSet : MonoBehaviour
     {
