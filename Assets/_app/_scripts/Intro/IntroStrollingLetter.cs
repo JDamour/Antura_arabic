@@ -1,8 +1,9 @@
-﻿using EA4S.Minigames.FastCrowd;
-using EA4S.LivingLetters;
+using Antura.FSM;
+using Antura.LivingLetters;
+using Antura.Minigames.FastCrowd;
 using UnityEngine;
 
-namespace EA4S.Intro
+namespace Antura.Intro
 {
     /// <summary>
     /// Behaviour of the LivingLetters in the Introduction
@@ -12,10 +13,11 @@ namespace EA4S.Intro
         public event System.Action onDestroy;
         public event System.Action<bool> onDropped;
 
-        StateManager stateManager = new StateManager();
+        StateMachineManager stateManager = new StateMachineManager();
 
         // TODO refactor: the use of FSMs is not standardized across the codebase
         public IntroStrollingLetterWalkingState WalkingState { get; private set; }
+
         public IntroStrollingLetterIdleState IdleState { get; private set; }
         public IntroStrollingLetterFallingState FallingState { get; private set; }
         public IntroStrollingLetterHangingState HangingState { get; private set; }
@@ -26,8 +28,16 @@ namespace EA4S.Intro
         Collider[] colliders;
 
         public IntroFactory factory;
-        public LettersWalkableArea walkableArea { get { return factory.walkableArea; } }
-        public AnturaRunnerController antura { get { return factory.antura; } }
+
+        public LettersWalkableArea walkableArea
+        {
+            get { return factory.walkableArea; }
+        }
+
+        public AnturaRunnerController antura
+        {
+            get { return factory.antura; }
+        }
 
         void Awake()
         {
@@ -53,7 +63,9 @@ namespace EA4S.Intro
                 var oldPos = transform.position;
 
                 if (oldPos.y != 0)
+                {
                     oldPos.y = 0;
+                }
                 transform.position = oldPos;
             }
 
@@ -104,15 +116,18 @@ namespace EA4S.Intro
             ScaredState.ScaredDuration = scareTime;
             ScaredState.ScareSource = scareSource;
 
-            if (GetCurrentState() == IdleState ||
-                GetCurrentState() == WalkingState)
+            if (GetCurrentState() == IdleState || GetCurrentState() == WalkingState)
+            {
                 SetCurrentState(ScaredState);
+            }
         }
 
         void OnDestroy()
         {
             if (onDestroy != null)
+            {
                 onDestroy();
+            }
         }
 
         public void DropOnArea(DropAreaWidget area)
@@ -124,7 +139,9 @@ namespace EA4S.Intro
                 bool matching = GetComponent<LivingLetterController>().Data == currentData;
 
                 if (onDropped != null)
+                {
                     onDropped(matching);
+                }
             }
         }
     }

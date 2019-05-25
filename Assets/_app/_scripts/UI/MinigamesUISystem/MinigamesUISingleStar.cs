@@ -1,7 +1,8 @@
-﻿using DG.Tweening;
+﻿using Antura.Audio;
+using DG.Tweening;
 using UnityEngine;
 
-namespace EA4S.UI
+namespace Antura.UI
 {
     /// <summary>
     /// A single star icon for the MinigamesUIStarbar script.
@@ -10,8 +11,9 @@ namespace EA4S.UI
     {
         public Transform Star;
 
-        bool hasStar;
-        Tween loseTween, gainTween;
+        private bool hasStar;
+        private Tween loseTween;
+        private Tween gainTween;
 
         #region Unity
 
@@ -19,7 +21,7 @@ namespace EA4S.UI
         {
             // Tweens
             loseTween = Star.DOScale(0.001f, 0.25f).SetAutoKill(false).Pause()
-                .OnComplete(()=> Star.gameObject.SetActive(false));
+                .OnComplete(() => Star.gameObject.SetActive(false));
             loseTween.ForceInit();
             gainTween = Star.DOScale(0.001f, 0.5f).From().SetEase(Ease.OutElastic, 1.70f, 0.5f).SetAutoKill(false).Pause();
 
@@ -38,8 +40,8 @@ namespace EA4S.UI
 
         public void Gain()
         {
-            if (hasStar) return;
-
+            if (hasStar) { return; }
+            AudioManager.I.PlaySound(Sfx.ScoreUp);
             hasStar = true;
             loseTween.Rewind();
             Star.gameObject.SetActive(true);
@@ -48,7 +50,7 @@ namespace EA4S.UI
 
         public void Lose()
         {
-            if (!hasStar) return;
+            if (!hasStar) { return; }
 
             hasStar = false;
             gainTween.Complete();

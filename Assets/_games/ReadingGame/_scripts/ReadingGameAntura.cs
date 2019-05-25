@@ -1,7 +1,8 @@
-﻿using UnityEngine;
-using EA4S.Antura;
+using Antura.Dog;
+using Antura.FSM;
+using UnityEngine;
 
-namespace EA4S.Minigames.ReadingGame
+namespace Antura.Minigames.ReadingGame
 {
     public class ReadingGameAntura : MonoBehaviour
     {
@@ -15,28 +16,24 @@ namespace EA4S.Minigames.ReadingGame
         [HideInInspector]
         public AnturaAnimationController animator;
 
-        StateManager stateManager = new StateManager();
+        StateMachineManager stateManager = new StateMachineManager();
 
         public WalkAnturaState WalkingState { get; private set; }
         public IdleAnturaState IdleState { get; private set; }
 
 
         AnturaMood mood;
-        public AnturaMood Mood
-        {
-            get
-            {
+        public AnturaMood Mood {
+            get {
                 return mood;
             }
 
-            set
-            {
+            set {
                 if (this.mood == value)
                     return;
 
                 mood = value;
-                if (value == ReadingGameAntura.AnturaMood.ANGRY)
-                {
+                if (value == ReadingGameAntura.AnturaMood.ANGRY) {
                     if (animator.State == AnturaAnimationStates.sitting)
                         animator.State = AnturaAnimationStates.idle;
 

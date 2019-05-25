@@ -1,26 +1,31 @@
 ﻿using System;
+using Antura.Animation;
+using Antura.Audio;
 using DG.Tweening;
-using EA4S.Audio;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace EA4S.UI
+namespace Antura.UI
 {
     public enum ContinueScreenMode
     {
         /// <summary>Just background, just touch the screen to continue</summary>
         FullscreenBg,
+
         /// <summary>Button with no background, that needs to be clicked directly</summary>
         Button,
+
         /// <summary>Button with no background, the whole screen can be clicked (button will be placed on the side)</summary>
         ButtonFullscreen,
+
         /// <summary>Button with background, that needs to be clicked directly</summary>
         ButtonWithBg,
+
         /// <summary>Button with background, the whole screen can be clicked</summary>
         ButtonWithBgFullscreen
     }
 
-    [System.Serializable]
+    [Serializable]
     public struct ButtonSnapshot
     {
         public Vector2 AnchoredPos, AnchorMin, AnchorMax, SizeDelta;
@@ -44,6 +49,7 @@ namespace EA4S.UI
             _ico.anchoredPosition = IcoAnchoredPos;
         }
     }
+
     /// <summary>
     /// Shows a Continue screen, used to navigate forward in the application flow. 
     /// </summary>
@@ -51,20 +57,23 @@ namespace EA4S.UI
     {
         [Header("Settings")]
         public ButtonSnapshot CenterSnapshot;
+
         public ButtonSnapshot SideSnapshot;
+
         [Header("References")]
         public Button Bg;
+
         public Button BtContinue;
         public RectTransform IcoContinue;
 
         public static bool IsShown { get; private set; }
 
-        RectTransform btRT;
-        ContinueScreenMode currMode;
-        bool pulseLoop;
-        Action onContinueCallback;
-        bool clicked;
-        Tween showTween, showBgTween, btClickTween, btIdleTween, btPulseTween;
+        private RectTransform btRT;
+        private ContinueScreenMode currMode;
+        private bool pulseLoop;
+        private Action onContinueCallback;
+        private bool clicked;
+        private Tween showTween, showBgTween, btClickTween, btIdleTween, btPulseTween;
 
         // ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
         // ■■■ PUBLIC METHODS
@@ -82,7 +91,7 @@ namespace EA4S.UI
 
         void DoShow(Action _onContinue, ContinueScreenMode _mode = ContinueScreenMode.ButtonWithBg, bool _pulseLoop = false)
         {
-            Debug.Log("ContinueScreen DoShow " + _onContinue);
+            //Debug.Log("ContinueScreen DoShow " + _onContinue);
             IsShown = true;
             clicked = false;
             currMode = _mode;
@@ -90,11 +99,25 @@ namespace EA4S.UI
             onContinueCallback = _onContinue;
             Bg.gameObject.SetActive(_mode != ContinueScreenMode.Button);
             BtContinue.gameObject.SetActive(_mode != ContinueScreenMode.FullscreenBg);
-            if (btIdleTween != null) btIdleTween.Rewind();
-            btIdleTween = btRT.DOAnchorPosX(10, 0.5f).SetRelative().SetEase(Ease.InOutQuad).SetLoops(-1, LoopType.Yoyo)
-                .SetUpdate(true).SetAutoKill(false).Pause();
-            btPulseTween = btRT.DOScale(Vector3.one * 0.1f, 0.3f).SetRelative().SetAutoKill(false).SetUpdate(true).Pause()
-                .SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutQuad);
+
+            if (btIdleTween != null) { btIdleTween.Rewind(); }
+
+            btIdleTween = btRT.DOAnchorPosX(10, 0.5f)
+                              .SetRelative()
+                              .SetEase(Ease.InOutQuad)
+                              .SetLoops(-1, LoopType.Yoyo)
+                              .SetUpdate(true)
+                              .SetAutoKill(false)
+                              .Pause();
+
+            btPulseTween = btRT.DOScale(Vector3.one * 0.1f, 0.3f)
+                               .SetRelative()
+                               .SetAutoKill(false)
+                               .SetUpdate(true)
+                               .Pause()
+                               .SetLoops(-1, LoopType.Yoyo)
+                               .SetEase(Ease.InOutQuad);
+
             if (_mode == ContinueScreenMode.ButtonFullscreen) {
                 SideSnapshot.Apply(btRT, IcoContinue);
             } else {
@@ -102,9 +125,13 @@ namespace EA4S.UI
             }
             showBgTween.Rewind();
             showTween.Restart();
-            if (_mode != ContinueScreenMode.Button && _mode != ContinueScreenMode.ButtonFullscreen)
+            if (_mode != ContinueScreenMode.Button && _mode != ContinueScreenMode.ButtonFullscreen) {
                 showBgTween.PlayForward();
+            }
             this.gameObject.SetActive(true);
+
+            // Retry button
+            BtRetry.gameObject.SetActive(false);
         }
 
         /// <summary>
@@ -118,8 +145,9 @@ namespace EA4S.UI
 
         void DoClose(bool _immediate)
         {
-            if (!IsShown && !_immediate)
+            if (!IsShown && !_immediate) {
                 return;
+            }
 
             IsShown = false;
             clicked = false;
@@ -128,8 +156,9 @@ namespace EA4S.UI
                 showTween.Rewind();
                 showBgTween.Rewind();
                 this.gameObject.SetActive(false);
-            } else
+            } else {
                 showTween.PlayBackwards();
+            }
             showBgTween.PlayBackwards();
         }
 
@@ -148,21 +177,28 @@ namespace EA4S.UI
                 .OnRewind(() => {
                     this.gameObject.SetActive(false);
                     btIdleTween.Rewind();
-                    if (btPulseTween.IsPlaying()) btPulseTween.Rewind();
+                    if (btPulseTween.IsPlaying()) { btPulseTween.Rewind(); }
                 })
                 .OnComplete(() => {
-                    if (currMode == ContinueScreenMode.ButtonFullscreen) btIdleTween.Restart();
-                    if (pulseLoop) btPulseTween.Restart();
+                    if (currMode == ContinueScreenMode.ButtonFullscreen) { btIdleTween.Restart(); }
+                    if (pulseLoop) { btPulseTween.Restart(); }
                 });
 
-            showBgTween = Bg.image.DOFade(0, duration).From().SetEase(Ease.InSine)
-                .SetUpdate(true).SetAutoKill(false).Pause();
+            showBgTween = Bg.image.DOFade(0, duration)
+                            .From()
+                            .SetEase(Ease.InSine)
+                            .SetUpdate(true)
+                            .SetAutoKill(false)
+                            .Pause();
 
-            btClickTween = btRT.DOPunchRotation(new Vector3(0, 0, 20), 0.3f, 12, 0.5f).SetUpdate(true).SetAutoKill(false).Pause()
-                .OnComplete(Continue);
+            btClickTween = btRT.DOPunchRotation(new Vector3(0, 0, 20), 0.3f, 12, 0.5f)
+                               .SetUpdate(true)
+                               .SetAutoKill(false)
+                               .Pause()
+                               .OnComplete(Continue);
 
-//            btIdleTween = btRT.DOAnchorPosX(10, 0.5f).SetRelative().SetEase(Ease.InOutQuad).SetLoops(-1, LoopType.Yoyo)
-//                .SetUpdate(true).SetAutoKill(false).Pause();
+            //            btIdleTween = btRT.DOAnchorPosX(10, 0.5f).SetRelative().SetEase(Ease.InOutQuad).SetLoops(-1, LoopType.Yoyo)
+            //                .SetUpdate(true).SetAutoKill(false).Pause();
 
             CenterSnapshot.Apply(btRT, IcoContinue);
             this.gameObject.SetActive(false);
@@ -185,16 +221,18 @@ namespace EA4S.UI
 
         void Continue()
         {
-            if (onContinueCallback != null)
+            if (onContinueCallback != null) {
                 onContinueCallback();
+            }
             showTween.PlayBackwards();
             showBgTween.PlayBackwards();
         }
 
         void OnClick(bool _isButton)
         {
-            if (clicked)
+            if (clicked) {
                 return;
+            }
 
             if (_isButton || currMode == ContinueScreenMode.ButtonWithBgFullscreen || currMode == ContinueScreenMode.ButtonFullscreen) {
                 clicked = true;
@@ -208,6 +246,25 @@ namespace EA4S.UI
                 AudioManager.I.PlaySound(Sfx.UIButtonClick);
             }
         }
-    }
 
+        #region Retry Button
+
+        public Button BtRetry;
+        AutoAnimator retryAnimator;
+        public static void SetRetryAction(Action a, bool pulseButton = false)
+        {
+            GlobalUI.ContinueScreen.BtRetry.gameObject.SetActive(true);
+            //GlobalUI.ContinueScreen.BtRetry.onClick.RemoveAllListeners();
+            GlobalUI.ContinueScreen.BtRetry.onClick.AddListener(() =>
+            {
+                GlobalUI.ContinueScreen.retryAnimator.enabled = false;
+                a();
+            });
+            if (GlobalUI.ContinueScreen.retryAnimator == null) GlobalUI.ContinueScreen.retryAnimator = GlobalUI.ContinueScreen.BtRetry.GetComponent<AutoAnimator>();
+            if (pulseButton) GlobalUI.ContinueScreen.retryAnimator.Play();
+            else GlobalUI.ContinueScreen.retryAnimator.Rewind();
+        }
+
+        #endregion
+    }
 }

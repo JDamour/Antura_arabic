@@ -1,7 +1,7 @@
-﻿using UnityEngine;
-using EA4S.LivingLetters;
+﻿using Antura.LivingLetters;
+using UnityEngine;
 
-namespace EA4S.Minigames.FastCrowd
+namespace Antura.Minigames.FastCrowd
 {
     [RequireComponent(typeof(StrollingLivingLetter))]
     [RequireComponent(typeof(LivingLetterController))]
@@ -143,8 +143,9 @@ namespace EA4S.Minigames.FastCrowd
                     currentDropAreaWidget = dropArea;
                     currentDropArea = singleArea;
 
-                    //bool matching = dropArea.GetActiveData().Key == GetComponent<LetterObjectView>().Model.Data.Key;
-                    bool matching = dropArea.GetActiveData().Equals(GetComponent<LivingLetterController>().Data);
+                    var activeData = dropArea.GetActiveData();
+                    var draggedData = GetComponent<LivingLetterController>().Data;
+                    bool matching = FastCrowdConfiguration.Instance.IsDataMatching(activeData, draggedData);
 
                     dropArea.SetMatchingOutline(true, matching);
                 }

@@ -1,6 +1,6 @@
-﻿namespace EA4S.Minigames.TakeMeHome
+﻿namespace Antura.Minigames.TakeMeHome
 {
-	public class TakeMeHomeEndState : IState {
+	public class TakeMeHomeEndState : FSM.IState {
 
 		TakeMeHomeGame game;
 

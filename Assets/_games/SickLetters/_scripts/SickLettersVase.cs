@@ -3,7 +3,7 @@ using System.Collections;
 using TMPro;
 using DG.Tweening;
 
-namespace EA4S.Minigames.SickLetters
+namespace Antura.Minigames.SickLetters
 {
     public class SickLettersVase : MonoBehaviour
     {
@@ -155,7 +155,7 @@ namespace EA4S.Minigames.SickLetters
 
             game.LLPrefab.LLStatus = letterStatus.angry;
             game.LLPrefab.letterView.DoAngry();
-            SickLettersConfiguration.Instance.Context.GetAudioManager().PlayLetterData(game.LLPrefab.letterView.Data, true);
+            SickLettersConfiguration.Instance.Context.GetAudioManager().PlayVocabularyData(game.LLPrefab.letterView.Data, true, soundType: SickLettersConfiguration.Instance.GetVocabularySoundType());
 
             
 

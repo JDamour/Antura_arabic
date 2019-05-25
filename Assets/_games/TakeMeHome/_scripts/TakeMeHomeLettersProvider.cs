@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
-using EA4S.Core;
-using EA4S.MinigamesAPI;
+using Antura.LivingLetters;
+using Antura.Core;
 
-namespace EA4S.Minigames.TakeMeHome
+namespace Antura.Minigames.TakeMeHome
 {
     /// <summary>
     /// Letter provider sample

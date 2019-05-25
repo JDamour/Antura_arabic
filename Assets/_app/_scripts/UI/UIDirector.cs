@@ -1,22 +1,21 @@
-﻿using System.Collections.Generic;
-using DG.Tweening;
-using EA4S.Core;
+﻿using Antura.Core;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace EA4S.UI
+namespace Antura.UI
 {
     /// <summary>
     /// Manages the activation/deactivation of UIButtons on certain conditions
     /// </summary>
     public static class UIDirector
     {
-        static bool initialized;
-        static readonly List<UIButton> allActiveUIButtons = new List<UIButton>();
+        private static bool initialized;
+        private static readonly List<UIButton> allActiveUIButtons = new List<UIButton>();
 
         public static void Init()
         {
-            if (initialized) return;
+            if (initialized) { return; }
 
             initialized = true;
             AppManager.I.NavigationManager.OnSceneStartTransition += OnSceneStartTransition;
@@ -26,7 +25,7 @@ namespace EA4S.UI
 
         public static void Add(UIButton button)
         {
-            if (!allActiveUIButtons.Contains(button)) allActiveUIButtons.Add(button);
+            if (!allActiveUIButtons.Contains(button)) { allActiveUIButtons.Add(button); }
         }
 
         public static void Remove(UIButton button)
@@ -40,10 +39,12 @@ namespace EA4S.UI
 
         static void DeactivateAllUI()
         {
-            foreach (UIButton bt in allActiveUIButtons) bt.Bt.interactable = false;
+            foreach (UIButton bt in allActiveUIButtons) {
+                bt.Bt.interactable = false;
+            }
             // NOTE: would be nicer and faster to just set EventSystem.current.enabled to FALSE, but there's non-UI elements that rely on it apparently,
             // and will throw a NullReferenceException if it's disabled (for example the MAP)
-//            EventSystem.current.enabled = false;
+            //            EventSystem.current.enabled = false;
         }
 
         #endregion

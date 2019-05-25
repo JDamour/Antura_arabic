@@ -2,11 +2,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using System;
-using EA4S.MinigamesAPI;
+using Antura.LivingLetters;
 using Random = UnityEngine.Random;
 using DG.Tweening;
 
-namespace EA4S.Minigames.MixedLetters
+namespace Antura.Minigames.MixedLetters
 {
     public class SeparateLettersSpawnerController : MonoBehaviour
     {
@@ -107,7 +107,7 @@ namespace EA4S.Minigames.MixedLetters
                 throwLetterToTheRight = !throwLetterToTheRight;
 
                 MixedLettersConfiguration.Instance.Context.GetAudioManager().PlaySound(Sfx.ThrowObj);
-                MixedLettersConfiguration.Instance.Context.GetAudioManager().PlayLetterData(letterToSpawn);
+                MixedLettersConfiguration.Instance.Context.GetAudioManager().PlayVocabularyData(letterToSpawn);
 
                 yield return new WaitForSeconds(0.75f);
             }
@@ -239,9 +239,9 @@ namespace EA4S.Minigames.MixedLetters
             VictimLLController.instance.DoHooray();
             VictimLLController.instance.ShowVictoryRays();
 
-            if (MixedLettersConfiguration.Instance.Variation == MixedLettersConfiguration.MixedLettersVariation.Spelling)
+            if (MixedLettersConfiguration.Instance.Variation == MixedLettersVariation.BuildWord)
             {
-                MixedLettersConfiguration.Instance.Context.GetAudioManager().PlayLetterData(VictimLLController.instance.letterObjectView.Data);
+                MixedLettersConfiguration.Instance.Context.GetAudioManager().PlayVocabularyData(VictimLLController.instance.letterObjectView.Data);
             }
 
             yield return new WaitForSeconds(WIN_ANIMATION_BIG_LL_TWIRL_DELAY);

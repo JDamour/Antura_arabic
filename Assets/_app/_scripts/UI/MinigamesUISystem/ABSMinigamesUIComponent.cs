@@ -1,11 +1,19 @@
 ﻿using UnityEngine;
 
-namespace EA4S.UI
+namespace Antura.UI
 {
     public class ABSMinigamesUIComponent : MonoBehaviour
     {
         public bool IsSetup { get; protected set; }
-        public RectTransform RectTransform { get { if (rt == null) rt = this.GetComponent<RectTransform>(); return rt; } }
+
+        public RectTransform RectTransform
+        {
+            get {
+                if (rt == null) { rt = this.GetComponent<RectTransform>(); }
+                return rt;
+            }
+        }
+
         RectTransform rt;
 
         #region Methods

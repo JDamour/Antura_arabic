@@ -1,7 +1,7 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 
-namespace EA4S.Rewards
+namespace Antura.Rewards
 {
     /// <summary>
     /// Represents a minigame in the End Session Results panel
@@ -10,8 +10,10 @@ namespace EA4S.Rewards
     {
         [Tooltip("Alpha will be ignored")]
         public Color StarOffColor = Color.red;
+
         [Header("References")]
         public Transform Bubble;
+
         public Image Ico;
         public Image[] Stars;
 

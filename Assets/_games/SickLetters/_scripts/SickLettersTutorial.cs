@@ -1,9 +1,9 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
-using EA4S.Audio;
-using EA4S.Tutorial;
+using Antura.Audio;
+using Antura.Tutorial;
 
-namespace EA4S.Minigames.SickLetters
+namespace Antura.Minigames.SickLetters
 {
     public class SickLettersTutorial : MonoBehaviour {
 
@@ -60,7 +60,7 @@ namespace EA4S.Minigames.SickLetters
         void onTutStart()
         {
             game.disableInput = false;
-            AudioManager.I.PlayDialogue(Database.LocalizationDataId.SickLetters_Tuto, ()=>{ game.buttonRepeater.SetActive(true); });//, () => { WidgetSubtitles.I.gameObject.SetActive(false); });
+            AudioManager.I.PlayDialogue(Database.LocalizationDataId.SickLetters_lettername_Tuto, ()=>{ game.buttonRepeater.SetActive(true); });//, () => { WidgetSubtitles.I.gameObject.SetActive(false); });
             //WidgetSubtitles.I.DisplaySentence(Db.LocalizationDataId.SickLetters_Tuto, 5, false);
         }
 

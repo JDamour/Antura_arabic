@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
-using EA4S.Core;
-using EA4S.Helpers;
+using Antura.Core;
+using Antura.Database;
+using Antura.Helpers;
+using System.Collections.Generic;
 
-namespace EA4S.Teacher
+namespace Antura.Teacher
 {
     /// <summary>
     /// Selects words inside / related to a phrase
@@ -32,7 +33,10 @@ namespace EA4S.Teacher
             bool useAllCorrectWords = false, bool usePhraseAnswersIfFound = false,
             QuestionBuilderParameters parameters = null)
         {
-            if (parameters == null) parameters = new QuestionBuilderParameters();
+            if (parameters == null)
+            {
+                parameters = new QuestionBuilderParameters();
+            }
 
             this.nPacks = nPacks;
             this.nCorrect = nCorrect;
@@ -47,7 +51,7 @@ namespace EA4S.Teacher
         public List<QuestionPackData> CreateAllQuestionPacks()
         {
             previousPacksIDs.Clear();
-            List<QuestionPackData> packs = new List<QuestionPackData>();
+            var packs = new List<QuestionPackData>();
             for (int pack_i = 0; pack_i < nPacks; pack_i++)
             {
                 packs.Add(CreateSingleQuestionPackData());
@@ -67,12 +71,14 @@ namespace EA4S.Teacher
                     parameters.wordFilters,
                     parameters.phraseFilters),
                     new SelectionParameters(parameters.correctSeverity, nToUse, useJourney: parameters.useJourneyForCorrect,
-                        packListHistory: parameters.correctChoicesHistory, filteringIds: previousPacksIDs));
+                        packListHistory: parameters.correctChoicesHistory, filteringIds: previousPacksIDs)
+            );
             var question = usablePhrases[0];
 
             // Get words related to the phrase
-            var correctWords = new List<Database.WordData>();
-            List<Database.WordData> relatedWords = null;
+            var correctWords = new List<WordData>();
+            List<WordData> relatedWords = null;
+
             if (usePhraseAnswersIfFound && question.Answers.Length > 0)
             {
                 relatedWords = vocabularyHelper.GetAnswersToPhrase(question, parameters.wordFilters);
@@ -83,15 +89,20 @@ namespace EA4S.Teacher
             }
 
             correctWords.AddRange(relatedWords);
-            if (!useAllCorrectWords) correctWords = correctWords.RandomSelect(nCorrect);
+
+            if (!useAllCorrectWords)
+            {
+                correctWords = correctWords.RandomSelect(nCorrect);
+            }
 
             var wrongWords = teacher.VocabularyAi.SelectData(
                   () => vocabularyHelper.GetWordsNotIn(parameters.wordFilters, relatedWords.ToArray()),
                         new SelectionParameters(parameters.correctSeverity, nWrong, useJourney: parameters.useJourneyForCorrect,
-                        packListHistory: parameters.correctChoicesHistory, filteringIds: previousPacksIDs,
-                        journeyFilter: SelectionParameters.JourneyFilter.UpToFullCurrentStage));
+                        packListHistory: PackListHistory.NoFilter,
+                        journeyFilter: SelectionParameters.JourneyFilter.CurrentJourney)
+            );
 
-            if (ConfigAI.verboseQuestionPacks)
+            if (ConfigAI.VerboseQuestionPacks)
             {
                 string debugString = "--------- TEACHER: question pack result ---------";
                 debugString += "\nQuestion: " + question;

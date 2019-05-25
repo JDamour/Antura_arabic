@@ -1,7 +1,7 @@
-﻿using UnityEngine;
-using EA4S.Antura;
+﻿using Antura.Dog;
+using UnityEngine;
 
-namespace EA4S.Minigames.Balloons
+namespace Antura.Minigames.Balloons
 {
     public class RunningAnturaController : MonoBehaviour
     {
@@ -23,6 +23,7 @@ namespace EA4S.Minigames.Balloons
                 transform.rotation = Quaternion.Euler(0f, 90f, 0f);
                 gameObject.SetActive(false);
             }
+
             if (transform.position.x < startingPosition1.x)
             {
                 transform.position = startingPosition1;

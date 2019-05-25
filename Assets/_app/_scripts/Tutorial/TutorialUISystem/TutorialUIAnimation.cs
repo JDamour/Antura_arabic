@@ -1,7 +1,7 @@
 ﻿using System;
 using DG.Tweening;
 
-namespace EA4S.Tutorial
+namespace Antura.Tutorial
 {
     /// <summary>
     /// Used internally by TutorialUI to store and control animations
@@ -19,8 +19,8 @@ namespace EA4S.Tutorial
 
         public TutorialUIAnimation OnComplete(Action _callback)
         {
-            if (_callback == null) MainTween.OnComplete(null);
-            else MainTween.OnComplete(()=> _callback());
+            if (_callback == null) { MainTween.OnComplete(null); }
+            else { MainTween.OnComplete(() => _callback()); }
             return this;
         }
 

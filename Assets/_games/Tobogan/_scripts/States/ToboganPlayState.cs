@@ -1,9 +1,9 @@
-﻿using EA4S.MinigamesAPI;
-using EA4S.MinigamesCommon;
+using Antura.LivingLetters;
+using Antura.Minigames;
 
-namespace EA4S.Minigames.Tobogan
+namespace Antura.Minigames.Tobogan
 {
-    public class ToboganPlayState : IState
+    public class ToboganPlayState : FSM.IState
     {
         CountdownTimer gameTime = new CountdownTimer(90.0f);
         ToboganGame game;

@@ -1,8 +1,8 @@
-﻿using EA4S.MinigamesCommon;
+using Antura.Minigames;
 
-namespace EA4S.Minigames.Tobogan
+namespace Antura.Minigames.Tobogan
 {
-    public class ToboganQuestionState : IState
+    public class ToboganQuestionState : FSM.IState
     {
         ToboganGame game;
 
@@ -20,7 +20,7 @@ namespace EA4S.Minigames.Tobogan
             nextState = false;
             playIntro = false;
 
-            if (ToboganConfiguration.Instance.Variation == ToboganVariation.LetterInAWord)
+            if (ToboganConfiguration.Instance.Variation == ToboganVariation.LetterInWord)
             {
                 game.Context.GetAudioManager().PlayDialogue(Database.LocalizationDataId.Tobogan_letters_Title, delegate ()
                 {
@@ -59,7 +59,7 @@ namespace EA4S.Minigames.Tobogan
             {
                 playIntro = false;
 
-                if (ToboganConfiguration.Instance.Variation == ToboganVariation.LetterInAWord)
+                if (ToboganConfiguration.Instance.Variation == ToboganVariation.LetterInWord)
                 {
                     game.Context.GetAudioManager().PlayDialogue(Database.LocalizationDataId.Tobogan_letters_Intro, delegate ()
                     {

@@ -1,10 +1,10 @@
-﻿using DG.Tweening;
-using EA4S.Audio;
-using EA4S.Core;
+﻿using Antura.Audio;
+using Antura.Core;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace EA4S.UI
+namespace Antura.UI
 {
     /// <summary>
     /// Shows and controls the Pause menu.
@@ -16,9 +16,16 @@ namespace EA4S.UI
 
         [Header("Buttons")]
         public MenuButton BtPause;
-        public MenuButton BtExit, BtMusic, BtFx, BtCredits, BtResume, BtEnglish;
+        public MenuButton BtExit;
+        public MenuButton BtMusic;
+        public MenuButton BtFx;
+        public MenuButton BtCredits;
+        public MenuButton BtResume;
+        public MenuButton BtSubtitles;
+
         [Header("Other")]
         public GameObject PauseMenuContainer;
+
         public Sprite AltPauseIconSprite;
         public Image MenuBg;
         public RectTransform SubButtonsContainer;
@@ -27,17 +34,17 @@ namespace EA4S.UI
 
         public bool IsMenuOpen { get; private set; }
         public bool typeSet;
-        Sprite defPauseIconSprite;
-        MenuButton[] menuBts;
-        //float timeScaleAtMenuOpen = 1;
-        Sequence openMenuTween;
-        Tween logoBobTween;
+
+        private Sprite defPauseIconSprite;
+        private MenuButton[] menuBts;
+        private Sequence openMenuTween;
+        private Tween logoBobTween;
 
         void Awake()
         {
             I = this;
             defPauseIconSprite = BtPause.Bt.image.sprite;
-            if (!Credits.HasAwoken) Credits.gameObject.SetActive(true);
+            if (!Credits.HasAwoken) { Credits.gameObject.SetActive(true); }
         }
 
         void Start()
@@ -50,10 +57,12 @@ namespace EA4S.UI
             logoBobTween.OnRewind(() => logoBobTween.SetEase(Ease.OutQuad))
                 .OnStepComplete(() => logoBobTween.SetEase(Ease.InOutQuad));
             logoBobTween.ForceInit();
+
             // Tweens - menu
             CanvasGroup[] cgButtons = new CanvasGroup[menuBts.Length];
-            for (int i = 0; i < menuBts.Length; i++)
+            for (int i = 0; i < menuBts.Length; i++) {
                 cgButtons[i] = menuBts[i].GetComponent<CanvasGroup>();
+            }
             openMenuTween = DOTween.Sequence().SetUpdate(true).SetAutoKill(false).Pause()
                 .OnPlay(() => PauseMenuContainer.SetActive(true))
                 .OnRewind(() => {
@@ -63,6 +72,7 @@ namespace EA4S.UI
             openMenuTween.Append(MenuBg.DOFade(0, 0.5f).From())
                 .Join(Logo.DOAnchorPosY(750f, 0.4f).From().SetEase(Ease.OutQuad).OnComplete(() => logoBobTween.Play()))
                 .Join(SubButtonsContainer.DORotate(new Vector3(0, 0, 180), 0.4f).From());
+
             const float btDuration = 0.3f;
             for (int i = 0; i < menuBts.Length; ++i) {
                 CanvasGroup cgButton = cgButtons[i];
@@ -73,7 +83,7 @@ namespace EA4S.UI
             // Deactivate pause menu
             PauseMenuContainer.SetActive(false);
 
-            if (!typeSet) SetType(PauseMenuType.GameScreen);
+            if (!typeSet) { SetType(PauseMenuType.GameScreen); }
 
             // Listeners
             BtPause.Bt.onClick.AddListener(() => OnClick(BtPause));
@@ -111,7 +121,7 @@ namespace EA4S.UI
             // Set toggles
             BtMusic.Toggle(AudioManager.I.MusicEnabled);
             BtFx.Toggle(AppManager.I.AppSettings.HighQualityGfx);
-            BtEnglish.Toggle(AppManager.I.AppSettings.EnglishSubtitles);
+            BtSubtitles.Toggle(AppManager.I.AppSettings.SubtitlesEnabled);
 
             if (_open) {
                 //timeScaleAtMenuOpen = Time.timeScale;
@@ -142,23 +152,24 @@ namespace EA4S.UI
         /// </summary>
         void OnClick(MenuButton _bt)
         {
-            if (SceneTransitioner.IsPlaying) return;
+            if (SceneTransitioner.IsPlaying) { return; }
 
             if (_bt == BtPause) {
                 OpenMenu(!IsMenuOpen);
-            } else if (!openMenuTween.IsPlaying()) { // Ignores pause menu clicks when opening/closing menu
+            } else if (!openMenuTween.IsPlaying()) {
+                // Ignores pause menu clicks when opening/closing menu
                 switch (_bt.Type) {
                     case MenuButtonType.Back: // Exit
                         if (AppManager.I.NavigationManager.NavData.CurrentScene == AppScene.MiniGame) {
                             // Prompt
                             GlobalUI.ShowPrompt(Database.LocalizationDataId.UI_AreYouSure, () => {
                                 OpenMenu(false);
-                                AppManager.I.NavigationManager.ExitDuringPause();
+                                AppManager.I.NavigationManager.ExitToMainMenu();
                             }, () => { });
                         } else {
                             // No prompt
                             OpenMenu(false);
-                            AppManager.I.NavigationManager.ExitDuringPause();
+                            AppManager.I.NavigationManager.ExitToMainMenu();
                         }
                         break;
                     case MenuButtonType.MusicToggle: // Music on/off
@@ -166,12 +177,12 @@ namespace EA4S.UI
                         BtMusic.Toggle(AudioManager.I.MusicEnabled);
                         break;
                     case MenuButtonType.FxToggle: // FX on/off
-                        AppManager.I.ToggleQualitygfx();
+                        AppManager.I.AppSettingsManager.ToggleQualitygfx();
                         BtFx.Toggle(AppManager.I.AppSettings.HighQualityGfx);
                         break;
-                    case MenuButtonType.EnglishToggle:
-                        AppManager.I.ToggleEnglishSubtitles();
-                        BtEnglish.Toggle(AppManager.I.AppSettings.EnglishSubtitles);
+                    case MenuButtonType.SubtitlesToggle:
+                        AppManager.I.AppSettingsManager.ToggleSubtitles();
+                        BtSubtitles.Toggle(AppManager.I.AppSettings.SubtitlesEnabled);
                         break;
                     case MenuButtonType.Credits:
                         Credits.Show(true);

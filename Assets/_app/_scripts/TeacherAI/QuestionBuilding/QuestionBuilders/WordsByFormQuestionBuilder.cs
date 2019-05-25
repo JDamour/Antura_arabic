@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
-using EA4S.Core;
-using EA4S.Helpers;
+using System.Collections.Generic;
+using Antura.Core;
+using Antura.Helpers;
 
-namespace EA4S.Teacher
+namespace Antura.Teacher
 {
     /// <summary>
     /// Categorize words based on their form
@@ -26,7 +26,10 @@ namespace EA4S.Teacher
 
         public WordsByFormQuestionBuilder(int nPacks, QuestionBuilderParameters parameters = null)
         {
-            if (parameters == null) parameters = new QuestionBuilderParameters();
+            if (parameters == null)
+            {
+                parameters = new QuestionBuilderParameters();
+            }
 
             this.nPacks = nPacks;
             this.parameters = parameters;
@@ -37,7 +40,7 @@ namespace EA4S.Teacher
 
         public List<QuestionPackData> CreateAllQuestionPacks()
         {
-            List<QuestionPackData> packs = new List<QuestionPackData>();
+            var packs = new List<QuestionPackData>();
             var teacher = AppManager.I.Teacher;
             var vocabularyHelper = AppManager.I.VocabularyHelper;
 
@@ -102,9 +105,9 @@ namespace EA4S.Teacher
             // Shuffle the packs at the end
             packs.Shuffle();
 
-            if (ConfigAI.verboseQuestionPacks)
+            if (ConfigAI.VerboseQuestionPacks)
             {
-                foreach(var pack in packs)
+                foreach (var pack in packs)
                 {
                     string debugString = "--------- TEACHER: question pack result ---------";
                     debugString += "\nQuestion: " + pack.question;

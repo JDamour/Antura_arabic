@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-using EA4S.Core;
+using System.Collections.Generic;
+using Antura.Core;
 
-namespace EA4S.Teacher
+namespace Antura.Teacher
 {
     /// <summary>
     /// Categorize words based on their sun/moon status
@@ -25,7 +25,10 @@ namespace EA4S.Teacher
 
         public WordsBySunMoonQuestionBuilder(int nPacks, QuestionBuilderParameters parameters = null)
         {
-            if (parameters == null) parameters = new QuestionBuilderParameters();
+            if (parameters == null)
+            {
+                parameters = new QuestionBuilderParameters();
+            }
 
             this.nPacks = nPacks;
             this.parameters = parameters;
@@ -36,7 +39,7 @@ namespace EA4S.Teacher
 
         public List<QuestionPackData> CreateAllQuestionPacks()
         {
-            List<QuestionPackData> packs = new List<QuestionPackData>();
+            var packs = new List<QuestionPackData>();
             var teacher = AppManager.I.Teacher;
             var vocabularyHelper = AppManager.I.VocabularyHelper;
 
@@ -55,6 +58,7 @@ namespace EA4S.Teacher
                 var letterAfterArticle = vocabularyHelper.GetLettersInWord(wordWithArticle)[articleLength];
                 var correctWords = new List<Database.WordData>();
                 var wrongWords = new List<Database.WordData>();
+
                 switch (letterAfterArticle.SunMoon)
                 {
                     case Database.LetterDataSunMoon.Sun:
@@ -69,7 +73,7 @@ namespace EA4S.Teacher
                 }
 
                 // Debug
-                if (ConfigAI.verboseQuestionPacks)
+                if (ConfigAI.VerboseQuestionPacks)
                 {
                     string debugString = "--------- TEACHER: question pack result ---------";
                     debugString += "\nQuestion: " + wordWithArticle;

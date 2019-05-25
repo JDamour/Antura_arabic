@@ -1,9 +1,9 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Linq;
-using EA4S.MinigamesAPI;
+using Antura.LivingLetters;
 
-namespace EA4S.Minigames.Balloons
+namespace Antura.Minigames.Balloons
 {
     public class FloatingLetterController : MonoBehaviour
     {
@@ -295,24 +295,21 @@ namespace EA4S.Minigames.Balloons
             if (Letter.isRequired)
             {
                 BalloonsGame.instance.OnPoppedRequiredBalloon(Letter.associatedPromptIndex);
-                if (BalloonsConfiguration.Instance.Variation == BalloonsVariation.Letter)
+                if (BalloonsConfiguration.Instance.Variation == BalloonsVariation.LetterInWord)
                 {
                     Letter.FlashLetterInWord(((LL_LetterData)BalloonsGame.instance.question).Data, Color.red);
                 }
             }
-
-            else if (BalloonsGame.instance.ActiveGameVariation != BalloonsVariation.Counting)
+            else if (BalloonsConfiguration.Instance.Variation != BalloonsVariation.Counting)
             {
                 BalloonsGame.instance.OnPoppedNonRequiredBalloon();
             }
-
             else
             {
                 if (Letter.letterData.Id != BalloonsGame.instance.correctAnswers.ToList()[BalloonsGame.instance.countingIndex].Id)
                 {
                     BalloonsGame.instance.OnPoppedRequiredBalloon(-1);
                 }
-
                 else
                 {
                     BalloonsGame.instance.OnPoppedNonRequiredBalloon();

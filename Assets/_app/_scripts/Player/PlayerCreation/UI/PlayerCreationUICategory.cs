@@ -1,11 +1,10 @@
-﻿using System;
-using DG.DeExtensions;
+using Antura.Core;
+using Antura.UI;
 using DG.Tweening;
-using EA4S.Core;
-using EA4S.UI;
+using System;
 using UnityEngine;
 
-namespace EA4S.Profile
+namespace Antura.Profile
 {
     /// <summary>
     /// Player creation category
@@ -14,17 +13,17 @@ namespace EA4S.Profile
     {
         #region Events
 
-        public event Action<PlayerCreationUICategory,UIButton> OnSelect;
+        public event Action<PlayerCreationUICategory, UIButton> OnSelect;
         public event Action<PlayerCreationUICategory> OnDeselectAll;
 
         void DispatchOnSelect(PlayerCreationUICategory category, UIButton uiButton)
         {
-            if (OnSelect != null) OnSelect(category, uiButton);
+            if (OnSelect != null) { OnSelect(category, uiButton); }
         }
 
         void DispatchOnDeselectAll(PlayerCreationUICategory category)
         {
-            if (OnDeselectAll != null) OnDeselectAll(category);
+            if (OnDeselectAll != null) { OnDeselectAll(category); }
         }
 
         #endregion
@@ -37,7 +36,10 @@ namespace EA4S.Profile
 
         /// <summary>If nothing is selected, returns -1</summary>
         public int SelectedIndex { get; private set; }
-        [NonSerialized] public UIButton[] UIButtons;
+
+        [NonSerialized]
+        public UIButton[] UIButtons;
+
         Sequence _ageAppearanceTween;
 
         #region Unity
@@ -49,7 +51,7 @@ namespace EA4S.Profile
             foreach (UIButton uiButton in UIButtons)
             {
                 UIButton bt = uiButton;
-                bt.Bt.onClick.AddListener(()=> OnClick(bt));
+                bt.Bt.onClick.AddListener(() => OnClick(bt));
             }
 
             switch (CategoryType)
@@ -75,14 +77,16 @@ namespace EA4S.Profile
 
         void OnEnable()
         {
-            if (CategoryType == PlayerCreationUI.CategoryType.Age) {
+            if (CategoryType == PlayerCreationUI.CategoryType.Age)
+            {
                 _ageAppearanceTween.Restart();
             }
         }
 
         void OnDisable()
         {
-            if (CategoryType == PlayerCreationUI.CategoryType.Age) {
+            if (CategoryType == PlayerCreationUI.CategoryType.Age)
+            {
                 _ageAppearanceTween.Rewind();
             }
         }
@@ -90,7 +94,8 @@ namespace EA4S.Profile
         void OnDestroy()
         {
             _ageAppearanceTween.Kill();
-            foreach (UIButton uiButton in UIButtons) {
+            foreach (UIButton uiButton in UIButtons)
+            {
                 uiButton.Bt.onClick.RemoveAllListeners();
             }
         }
@@ -117,7 +122,8 @@ namespace EA4S.Profile
                     foreach (var uiButton in UIButtons)
                     {
                         uiButton.Toggle(true);
-                        if (CategoryType == PlayerCreationUI.CategoryType.Color) {
+                        if (CategoryType == PlayerCreationUI.CategoryType.Color)
+                        {
                             uiButton.transform.localScale = Vector3.one;
                         }
                     }
@@ -132,7 +138,8 @@ namespace EA4S.Profile
                 {
                     var bt = UIButtons[i];
                     bt.Toggle(i == index);
-                    if (CategoryType == PlayerCreationUI.CategoryType.Color) {
+                    if (CategoryType == PlayerCreationUI.CategoryType.Color)
+                    {
                         bt.transform.localScale = Vector3.one * (i == index ? 1 : 0.75f);
                     }
                 }
@@ -141,14 +148,16 @@ namespace EA4S.Profile
 
         public void SetColor(Color color)
         {
-            foreach (var uiButton in UIButtons) {
+            foreach (var uiButton in UIButtons)
+            {
                 uiButton.ChangeDefaultColors(color);
             }
         }
 
         public void ResetColor()
         {
-            foreach (UIButton uiButton in UIButtons) {
+            foreach (UIButton uiButton in UIButtons)
+            {
                 uiButton.ChangeDefaultColors(Color.white);
             }
         }
@@ -159,7 +168,7 @@ namespace EA4S.Profile
             // TODO use different avatars
             for (var i = 0; i < UIButtons.Length; ++i)
             {
-                var sprite = Resources.Load<Sprite>(AppConstants.AvatarsResourcesDir + (isFemale ? "F" : "M") + (i + 1));
+                var sprite = Resources.Load<Sprite>(AppConfig.RESOURCES_DIR_AVATARS + (isFemale ? "F" : "M") + (i + 1));
                 UIButtons[i].Ico.sprite = sprite;
             }
         }
@@ -170,13 +179,16 @@ namespace EA4S.Profile
 
         void OnClick(UIButton bt)
         {
-            if (_ageAppearanceTween != null && _ageAppearanceTween.IsPlaying()) {
+            if (_ageAppearanceTween != null && _ageAppearanceTween.IsPlaying())
+            {
                 return;
             }
 
             var deselect = bt.IsToggled && SelectedIndex >= 0
-                            && (CategoryType != PlayerCreationUI.CategoryType.Avatar || PlayerCreationUI.State == PlayerCreationUI.UIState.AvatarCreation);
-            if (deselect) {
+                           && (CategoryType != PlayerCreationUI.CategoryType.Avatar ||
+                               PlayerCreationUI.State == PlayerCreationUI.UIState.AvatarCreation);
+            if (deselect)
+            {
                 Select(-1);
             }
             else

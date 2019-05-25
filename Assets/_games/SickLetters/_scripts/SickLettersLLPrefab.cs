@@ -1,12 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using EA4S.LivingLetters;
-using EA4S.MinigamesAPI;
-using EA4S.UI;
+using Antura.LivingLetters;
+using Antura.UI;
 using TMPro;
 
-namespace EA4S.Minigames.SickLetters
+namespace Antura.Minigames.SickLetters
 {
 
     public enum letterStatus { idle, angry, horry}
@@ -76,7 +75,7 @@ namespace EA4S.Minigames.SickLetters
                 game.tut.doTutorial(thisLLWrongDDs[Random.Range(0, thisLLWrongDDs.Count-1)].transform);
             }
             else
-                SickLettersConfiguration.Instance.Context.GetAudioManager().PlayLetterData(letterView.Data, true);          
+                SickLettersConfiguration.Instance.Context.GetAudioManager().PlayVocabularyData(letterView.Data, true, soundType: SickLettersConfiguration.Instance.GetVocabularySoundType());          
             
         }
 

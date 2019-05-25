@@ -1,7 +1,7 @@
 ﻿using DG.Tweening;
 using UnityEngine;
 
-namespace EA4S.Animation
+namespace Antura.Animation
 {
     public class MoodBackgroundAnimations : MonoBehaviour
     {
@@ -10,10 +10,11 @@ namespace EA4S.Animation
         public float MaxRotationOffset = 24;
         public float MinDuration = 4;
         public float MaxDuration = 8;
+
         [Header("References")]
         public RectTransform[] Ferns;
 
-        Tween[] fernTweens;
+        private Tween[] fernTweens;
 
         void Start()
         {
@@ -24,14 +25,19 @@ namespace EA4S.Animation
                 Vector3 rot = rt.eulerAngles;
                 float toZ = rot.z + rotDiff;
                 rot.z -= rotDiff;
-                fernTweens[i] = Ferns[i].DORotate(new Vector3(0, 0, toZ), UnityEngine.Random.Range(MinDuration, MaxDuration), RotateMode.FastBeyond360)
-                    .SetEase(Ease.InOutSine).SetLoops(-1, LoopType.Yoyo);
+                fernTweens[i] = Ferns[i].DORotate(
+                    new Vector3(0, 0, toZ),
+                    UnityEngine.Random.Range(MinDuration, MaxDuration),
+                    RotateMode.FastBeyond360
+                ).SetEase(Ease.InOutSine).SetLoops(-1, LoopType.Yoyo);
             }
         }
 
         void OnDestroy()
         {
-            foreach (Tween t in fernTweens) t.Kill();
+            foreach (Tween t in fernTweens) {
+                t.Kill();
+            }
         }
     }
 }

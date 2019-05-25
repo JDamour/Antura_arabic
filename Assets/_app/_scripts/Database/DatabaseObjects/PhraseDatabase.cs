@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace EA4S.Database
+namespace Antura.Database
 {
     /// <summary>
     /// Custom asset container for PhraseData. 
@@ -10,5 +10,4 @@ namespace EA4S.Database
         [SerializeField]
         public PhraseTable table;
     }
-
 }

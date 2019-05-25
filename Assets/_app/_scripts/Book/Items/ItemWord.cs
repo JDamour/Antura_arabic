@@ -1,55 +1,69 @@
-﻿using EA4S.Core;
+﻿using Antura.Database;
+using Antura.Helpers;
+using Antura.UI;
+using Antura.Core;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
-using EA4S.Database;
-using EA4S.Helpers;
-using EA4S.UI;
-using EA4S.Utilities;
 
-namespace EA4S.Book
+namespace Antura.Book
 {
-
     /// <summary>
     /// Displays a Word item in the Dictionary page of the Player Book.
     /// </summary>
     public class ItemWord : MonoBehaviour, IPointerClickHandler
     {
-        WordInfo info;
         public TextRender Title;
         public TextRender SubTitle;
         public TextRender Drawing;
-        public Image LockIcon;
+        public Image OkIcon;
 
-        VocabularyPanel manager;
+        private WordsPage myManager;
+        private WordInfo myWordInfo;
+        private UIButton uIButton;
 
-        public void Init(VocabularyPanel _manager, WordInfo _info)
+        public void Init(WordsPage _manager, WordInfo _wordInfo, bool _selected)
         {
-            info = _info;
-            manager = _manager;
+            myWordInfo = _wordInfo;
+            myManager = _manager;
+            uIButton = GetComponent<UIButton>();
 
-            if (info.unlocked || AppManager.I.Player.IsDemoUser) {
-                LockIcon.enabled = false;
+            if (myWordInfo.unlocked || AppManager.I.Player.IsDemoUser) {
+                OkIcon.enabled = true;
             } else {
-                LockIcon.enabled = true;
+                OkIcon.enabled = false;
             }
 
-            Title.text = info.data.Arabic;
-            SubTitle.text = info.data.Id;
+            Title.text = myWordInfo.data.Arabic;
+            SubTitle.text = myWordInfo.data.Id;
 
-            if (info.data.Drawing != "") {
-                Drawing.text = AppManager.I.VocabularyHelper.GetWordDrawing(info.data);
-                if (info.data.Category == Database.WordDataCategory.Color) {
-                    Drawing.SetColor(GenericHelper.GetColorFromString(info.data.Value));
+            if (myWordInfo.data.Drawing != "") {
+                Drawing.text = AppManager.I.VocabularyHelper.GetWordDrawing(myWordInfo.data);
+                if (myWordInfo.data.Category == WordDataCategory.Color) {
+                    Drawing.SetColor(GenericHelper.GetColorFromString(myWordInfo.data.Value));
                 }
             } else {
                 Drawing.text = "";
             }
+
+            hightlight(_selected);
         }
 
         public void OnPointerClick(PointerEventData eventData)
         {
-            manager.DetailWord(info);
+            myManager.DetailWord(myWordInfo);
+        }
+
+        public void Select(string code)
+        {
+            if (myWordInfo != null) {
+                hightlight(code == myWordInfo.data.Id);
+            }
+        }
+
+        private void hightlight(bool _status)
+        {
+            uIButton.Toggle(_status);
         }
     }
 }

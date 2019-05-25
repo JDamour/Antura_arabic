@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-using EA4S.Core;
+using System.Collections.Generic;
+using Antura.Core;
 
-namespace EA4S.Teacher
+namespace Antura.Teacher
 {
     /// <summary>
     /// Selects words in a given order
@@ -15,23 +15,28 @@ namespace EA4S.Teacher
 
         private Database.WordDataCategory category;
         private QuestionBuilderParameters parameters;
+        private bool skipWordZero;
 
         public QuestionBuilderParameters Parameters
         {
             get { return this.parameters; }
         }
 
-        public OrderedWordsQuestionBuilder(Database.WordDataCategory category, QuestionBuilderParameters parameters = null)
+        public OrderedWordsQuestionBuilder(Database.WordDataCategory category, QuestionBuilderParameters parameters = null, bool skipWordZero = false)
         {
-            if (parameters == null) parameters = new QuestionBuilderParameters();
+            if (parameters == null)
+            {
+                parameters = new QuestionBuilderParameters();
+            }
 
             this.category = category;
             this.parameters = parameters;
+            this.skipWordZero = skipWordZero;
         }
 
         public List<QuestionPackData> CreateAllQuestionPacks()
         {
-            List<QuestionPackData> packs = new List<QuestionPackData>();
+            var packs = new List<QuestionPackData>();
             packs.Add(CreateSingleQuestionPackData());
             return packs;
         }
@@ -44,7 +49,7 @@ namespace EA4S.Teacher
             // Ordered words
             var words = teacher.VocabularyAi.SelectData(
                  () => vocabularyHelper.GetWordsByCategory(category, parameters.wordFilters),
-                 new SelectionParameters(parameters.correctSeverity, getMaxData:true, useJourney:parameters.useJourneyForCorrect) 
+                 new SelectionParameters(parameters.correctSeverity, getMaxData: true, useJourney: parameters.useJourneyForCorrect)
                );
 
             // sort by id
@@ -53,11 +58,18 @@ namespace EA4S.Teacher
                     return x.Id.CompareTo(y.Id);
                 }
             );
+            if (skipWordZero)
+            {
+                words.RemoveAt(0);
+            }
 
-            if (ConfigAI.verboseQuestionPacks)
+            if (ConfigAI.VerboseQuestionPacks)
             {
                 string debugString = "Words: " + words.Count;
-                foreach (var w in words) debugString += " " + w;
+                foreach (var w in words)
+                {
+                    debugString += " " + w;
+                }
                 ConfigAI.AppendToTeacherReport(debugString);
             }
 

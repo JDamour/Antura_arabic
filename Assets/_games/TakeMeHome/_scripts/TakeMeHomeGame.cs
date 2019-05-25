@@ -1,17 +1,14 @@
 ﻿using System.Collections.Generic;
-using EA4S.MinigamesAPI;
-using EA4S.MinigamesCommon;
-using EA4S.UI;
+using Antura.LivingLetters;
+using Antura.Minigames;
+using Antura.UI;
 using TMPro;
 using UnityEngine;
 
-namespace EA4S.Minigames.TakeMeHome
+namespace Antura.Minigames.TakeMeHome
 {
-    public class TakeMeHomeGame : MiniGame
+    public class TakeMeHomeGame : MiniGameController
 	{
-		
-		public TextMeshProUGUI timerText;
-		public TextMeshProUGUI roundText;
 		public GameObject tubes;
 		public TakeMeHomeSpwanTube spawnTube;
 		public Transform LLSpawnPosition;
@@ -132,13 +129,9 @@ namespace EA4S.Minigames.TakeMeHome
             
 			CurrentScore++;
             //update stars:
-            TakeMeHomeConfiguration.Instance.Context.GetOverlayWidget().SetStarsThresholds(2, 4, 6);
             TakeMeHomeConfiguration.Instance.Context.GetOverlayWidget().SetStarsScore(CurrentScore);
 
             return;
-            //int stars = CurrentStars;
-            //if (stars > 0)
-            //MinigamesUI.Starbar.GotoStar(stars - 1);
         }
 
         public void IncrementRound()
@@ -151,9 +144,6 @@ namespace EA4S.Minigames.TakeMeHome
 				
 				return;
 			}
-			
-
-			roundText.text = "#"+currentRound.ToString ();
 
 			spawnLetteAtTube ();
 		}
@@ -178,7 +168,7 @@ namespace EA4S.Minigames.TakeMeHome
 			return TakeMeHomeConfiguration.Instance;
 		}
 
-		protected override IState GetInitialState()
+		protected override FSM.IState GetInitialState()
 		{
 			return TutorialIntroState;
 		}
@@ -196,15 +186,11 @@ namespace EA4S.Minigames.TakeMeHome
 			ResetState = new TakeMeHomeResetState (this);
 			AntureState = new TakeMeHomeAnturaState (this);
 
-			timerText.gameObject.SetActive(false);
-			roundText.gameObject.SetActive(false);
-
 			InitTubes ();
 
 
 			//setup timer and round info:
 			currentRound = 0;
-			roundText.text = "#"+currentRound.ToString ();
 
 			Context.GetAudioManager().PlayMusic(Music.Lullaby);
 
@@ -249,6 +235,7 @@ namespace EA4S.Minigames.TakeMeHome
             //ui:
             //MinigamesUI.Init(MinigamesUIElement.Starbar | MinigamesUIElement.Timer);
             Context.GetOverlayWidget().Initialize(true, true, false);
+            Context.GetOverlayWidget().SetStarsThresholds(2, 4, 6);
             //Context.GetOverlayWidget().SetClockTime( UnityEngine.Mathf.Lerp(90.0f, 60.0f, TakeMeHomeConfiguration.Instance.Difficulty));
 
             MinigamesUI.Timer.Setup( UnityEngine.Mathf.Lerp(90.0f, 60.0f, TakeMeHomeConfiguration.Instance.Difficulty));

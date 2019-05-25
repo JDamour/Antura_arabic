@@ -2,13 +2,15 @@
 using DG.Tweening;
 using UnityEngine;
 
-namespace EA4S.Tutorial
+namespace Antura.Tutorial
 {
     public class TutorialUIProp : MonoBehaviour
     {
         public bool IsPooled;
 
-        [System.NonSerialized] public SpriteRenderer Img;
+        [System.NonSerialized]
+        public SpriteRenderer Img;
+
         protected Transform DefParent;
         int defSortingOrder;
         protected Tween ShowTween;
@@ -62,8 +64,11 @@ namespace EA4S.Tutorial
 
         public void Hide(bool _immediate = false)
         {
-            if (_immediate) ShowTween.Rewind();
-            else ShowTween.PlayBackwards();
+            if (_immediate) {
+                ShowTween.Rewind();
+            } else {
+                ShowTween.PlayBackwards();
+            }
         }
 
         #endregion

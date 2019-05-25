@@ -1,7 +1,7 @@
-﻿using EA4S.Antura;
+﻿using Antura.Dog;
 using UnityEngine;
 
-namespace EA4S.Minigames.Tobogan
+namespace Antura.Minigames.Tobogan
 {
     [RequireComponent(typeof(AnturaAnimationController))]
     public class AnturaAngerController : MonoBehaviour

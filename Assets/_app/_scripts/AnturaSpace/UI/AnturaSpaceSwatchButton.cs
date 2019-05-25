@@ -1,8 +1,9 @@
-﻿using EA4S.Rewards;
+using Antura.Rewards;
+using Antura.UI;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace EA4S.UI
+namespace Antura.AnturaSpace.UI
 {
     /// <summary>
     /// Button used to select a color for an item in the Antura Space scene.
@@ -13,9 +14,8 @@ namespace EA4S.UI
         public GameObject IcoNew;
         public Image[] ColorImgs;
 
-        [System.NonSerialized] public RewardColorItem Data;
-
-        #region Public Methods
+        [System.NonSerialized]
+        public RewardColorItem Data;
 
         public override void Lock(bool _doLock)
         {
@@ -23,8 +23,7 @@ namespace EA4S.UI
 
             IcoLock.SetActive(_doLock);
             if (_doLock) IcoNew.SetActive(false);
-            if (AnturaSpaceUI.I.HideLockedSwatchesColors)
-            {
+            if (AnturaSpaceUI.I.HideLockedSwatchesColors) {
                 ColorImgs[0].gameObject.SetActive(!_doLock);
                 ColorImgs[1].gameObject.SetActive(!_doLock);
             }
@@ -42,7 +41,5 @@ namespace EA4S.UI
             ColorImgs[0].color = _color0;
             ColorImgs[1].color = _color1;
         }
-
-        #endregion
     }
 }

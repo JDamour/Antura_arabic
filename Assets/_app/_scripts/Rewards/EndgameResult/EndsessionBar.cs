@@ -1,8 +1,8 @@
-﻿using DG.Tweening;
-using EA4S.Audio;
+using Antura.Audio;
+using DG.Tweening;
 using UnityEngine;
 
-namespace EA4S.Rewards
+namespace Antura.Rewards
 {
     /// <summary>
     /// Bar that fills up to show the results of a play session
@@ -13,9 +13,11 @@ namespace EA4S.Rewards
         public RectTransform Bar;
         public EndsessionAchievement[] Achievements;
 
-        [System.NonSerialized] public Tween ShowTween;
+        [System.NonSerialized]
+        public Tween ShowTween;
+
         Vector2 barSizeDelta;
-        float[] achievementsPercent = new[]{ 0.333f, 0.666f, 1 };
+        float[] achievementsPercent = new[] { 0.333f, 0.666f, 1 };
         float singleMinigameStarPercent;
         int totMinigameStarsGained;
         Tween barTween, shakeTween;

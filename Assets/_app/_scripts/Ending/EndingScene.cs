@@ -1,14 +1,15 @@
-﻿using EA4S.Antura;
-using EA4S.Animation;
-using EA4S.CameraEffects;
-using EA4S.Core;
-using EA4S.UI;
-using EA4S.LivingLetters;
-using EA4S.Helpers;
+﻿using Antura.Animation;
+using Antura.Core;
+using Antura.Dog;
+using Antura.CameraEffects;
+using Antura.Keeper;
+using Antura.Helpers;
+using Antura.LivingLetters;
+using Antura.UI;
 using System.Collections;
 using UnityEngine;
 
-namespace EA4S.Scenes
+namespace Antura.Scenes
 {
     /// <summary>
     /// Manages the Ending scene, which shows a non-interactive introduction to the game.
@@ -16,8 +17,8 @@ namespace EA4S.Scenes
     public class EndingScene : SceneBase
     {
         [Header("References")]
-
         public LivingLetterController[] Letters;
+
         public AnturaAnimationController Antura;
 
         public float m_StateDelay = 1.0f;
@@ -53,20 +54,19 @@ namespace EA4S.Scenes
         {
             base.Start();
             GlobalUI.ShowPauseMenu(false);
-            
+
             m_CameraEndPosition = Camera.main.transform.position;
             m_CameraStartPosition = m_CameraEndPosition + cameraOffset;
             autoMoveObjects = environment.GetComponentsInChildren<AutoMove>();
 
             var lettersData = AppManager.I.Teacher.GetAllTestLetterDataLL();
-            foreach (var l in Letters)
-            {
+            foreach (var l in Letters) {
                 l.Init(lettersData.GetRandom());
                 l.State = LLAnimationStates.LL_dancing;
             }
 
             Antura.State = AnturaAnimationStates.dancing;
-            
+
             text.SetSentence(Database.LocalizationDataId.End_Scene_2);
             text.Alpha = 0;
             panel.SetAlpha(0);
@@ -94,30 +94,23 @@ namespace EA4S.Scenes
             time += Time.deltaTime * m_CameraVelocity;
             float t = cameraAnimationCurve.Evaluate(time);
 
-            if (fadeIn)
-            {
+            if (fadeIn) {
                 vignetting.fadeOut = Mathf.Pow((1 - t), 2);
-            }
-            else
-            {
+            } else {
                 fadeOutTime += Time.deltaTime;
-                vignetting.fadeOut = Mathf.Lerp(0, 1, fadeOutTime/FadeTime);
+                vignetting.fadeOut = Mathf.Lerp(0, 1, fadeOutTime / FadeTime);
             }
 
             for (int i = 0; i < autoMoveObjects.Length; ++i)
                 autoMoveObjects[i].SetTime(t);
 
-            if (m_Start)
-            {
+            if (m_Start) {
                 m_Start = false;
                 Debug.Log("Start Ending");
-               
+
                 StartCoroutine(DoEnding());
-            }
-            else
-            {
-                if (m_End)
-                {
+            } else {
+                if (m_End) {
                     AppManager.I.NavigationManager.GoToNextScene();
                     m_End = false;
                     return;
@@ -128,8 +121,7 @@ namespace EA4S.Scenes
 
             var newAlpha = Mathf.Lerp(lastAlpha, showText ? 1 : 0, Time.deltaTime);
 
-            if (lastAlpha != newAlpha)
-            {
+            if (lastAlpha != newAlpha) {
                 text.Alpha = newAlpha;
                 panel.SetAlpha(newAlpha);
                 lastAlpha = newAlpha;
@@ -141,8 +133,7 @@ namespace EA4S.Scenes
         {
             bool completed = false;
             System.Func<bool> CheckIfCompleted = () => {
-                if (completed)
-                {
+                if (completed) {
                     // Reset it
                     completed = false;
                     return true;
@@ -158,7 +149,7 @@ namespace EA4S.Scenes
 
             yield return new WaitUntil(CheckIfCompleted);
             yield return new WaitForSeconds(m_StateDelay);
-            
+
             KeeperManager.I.PlayDialog(Database.LocalizationDataId.End_Scene_1_1, false, true, OnCompleted);
             yield return new WaitUntil(CheckIfCompleted);
             KeeperManager.I.PlayDialog(Database.LocalizationDataId.End_Scene_1_2, false, true, OnCompleted);

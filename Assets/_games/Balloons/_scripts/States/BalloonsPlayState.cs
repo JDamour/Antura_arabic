@@ -1,8 +1,8 @@
-﻿using EA4S.UI;
+﻿using Antura.UI;
 
-namespace EA4S.Minigames.Balloons
+namespace Antura.Minigames.Balloons
 {
-    public class BalloonsPlayState : IState
+    public class BalloonsPlayState : FSM.IState
     {
         BalloonsGame game;
 
@@ -13,7 +13,8 @@ namespace EA4S.Minigames.Balloons
 
         public void EnterState()
         {
-            MinigamesUI.Init(MinigamesUIElement.Starbar | MinigamesUIElement.Timer);
+            game.InitializeMinigameUI();
+            
             game.PlayIntroVoiceOver();
             game.Play();
         }

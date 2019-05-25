@@ -1,18 +1,18 @@
-﻿using UnityEngine;
+﻿using Antura.LivingLetters;
+using UnityEngine;
 using System.Collections.Generic;
-using EA4S.MinigamesAPI;
 
-namespace EA4S.Minigames.Egg
+namespace Antura.Minigames.Egg
 {
     public class EggRunLettersBox : MonoBehaviour
     {
         public Transform[] leftOutPositions;
         public Transform[] rightOutPositions;
 
-        List<EggRunLetter> runLetters = new List<EggRunLetter>();
+        private List<EggRunLetter> runLetters = new List<EggRunLetter>();
 
-        GameObject letterObjectPrefab;
-        GameObject shadowPrefab;
+        private GameObject letterObjectPrefab;
+        private GameObject shadowPrefab;
 
         public void Initialize(GameObject letterObjectPrefab, GameObject shadowPrefab)
         {
@@ -34,8 +34,7 @@ namespace EA4S.Minigames.Egg
 
         public void RemoveAllRunLetters()
         {
-            for (int i = 0; i < runLetters.Count; i++)
-            {
+            for (int i = 0; i < runLetters.Count; i++) {
                 runLetters[i].DestroyRunLetter();
             }
 

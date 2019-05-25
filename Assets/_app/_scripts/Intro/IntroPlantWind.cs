@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace EA4S.Intro
+namespace Antura.Intro
 {
     /// <summary>
     /// Controls the animation of plants in the Intro scene.
@@ -16,7 +16,7 @@ namespace EA4S.Intro
         {
             startRotation = transform.rotation;
             cameraForward = Camera.main.transform.forward;
-            
+
             max = Random.Range(2f, 6f);
         }
 

@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-using EA4S.MinigamesAPI;
+using Antura.LivingLetters;
 
-namespace EA4S.Minigames.Tobogan
+namespace Antura.Minigames.Tobogan
 {
     public class PipesAnswerController : MonoBehaviour
     {
@@ -164,7 +164,7 @@ namespace EA4S.Minigames.Tobogan
                     RaycastHit hitInfo;
                     if (pipe.signCollider.Raycast(screenRay, out hitInfo, game.tubesCamera.farClipPlane))
                     {
-                        game.Context.GetAudioManager().PlayLetterData(pipe.Data, true);
+                        game.Context.GetAudioManager().PlayVocabularyData(pipe.Data, true);
                     }
                 }
             }

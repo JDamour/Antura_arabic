@@ -1,14 +1,14 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using Antura.Audio;
+using Antura.Core;
+using Antura.Database;
 using DG.Tweening;
-using EA4S.Audio;
-using EA4S.Core;
-using EA4S.Database;
-using EA4S.Teacher;
+using Antura.Teacher;
 using UnityEngine;
 
-namespace EA4S.GamesSelector
+namespace Antura.GamesSelector
 {
     /// <summary>
     /// Handles the GamesSelector logic, showing bubbles for all mini-games that should be played next.
@@ -23,49 +23,57 @@ namespace EA4S.GamesSelector
         #region Events
 
         public static event Action OnComplete;
-        static void DispatchOnComplete() { if (OnComplete != null) OnComplete(); }
+
+        static void DispatchOnComplete()
+        {
+            if (OnComplete != null) {
+                OnComplete();
+            }
+        }
 
         #endregion
 
         [Tooltip("Automatically grabs the minigames list from the teacher on startup, unless Show was called directly")]
         public bool AudoLoadMinigamesOnStartup = true;
+
         [Tooltip("Distance to keep from camera")]
         public float DistanceFromCamera = 14;
+
         [Tooltip("Delay between the moment the last bubble is opened and the OnComplete event is dispatched")]
         public float EndDelay = 2;
+
         [Header("Debug")]
         public bool SimulateForDebug; // If TRUE creates games list for debug
 
         const string ResourceID = "GamesSelector";
         const string ResourcePath = "Prefabs/UI/" + ResourceID;
-        static GamesSelector instance;
-        GamesSelectorTrailsManager trailsManager;
-        GamesSelectorTutorial tutorial;
-        List<MiniGameData> games; // Set by Show
-        GamesSelectorBubble mainBubble;
-        readonly List<GamesSelectorBubble> bubbles = new List<GamesSelectorBubble>();
-        TrailRenderer currTrail;
-        Camera cam;
-        Transform camT;
-        bool cutAllowed = true;
-        bool isDragging;
-        int totOpenedBubbles;
-        Sequence showTween;
+        private static GamesSelector instance;
+        private GamesSelectorTrailsManager trailsManager;
+        private GamesSelectorTutorial tutorial;
+        private List<MiniGameData> games;
+        private GamesSelectorBubble mainBubble;
+        private readonly List<GamesSelectorBubble> bubbles = new List<GamesSelectorBubble>();
+        private TrailRenderer currTrail;
+        private Camera cam;
+        private Transform camT;
+        private bool cutAllowed = true;
+        private bool isDragging;
+        private int totOpenedBubbles;
+        private Sequence showTween;
 
         #region Unity
 
         void Awake()
         {
             instance = this;
-            trailsManager = this.GetComponent<GamesSelectorTrailsManager>();
-            tutorial = this.GetComponentInChildren<GamesSelectorTutorial>(true);
+            trailsManager = GetComponent<GamesSelectorTrailsManager>();
+            tutorial = GetComponentInChildren<GamesSelectorTutorial>(true);
         }
 
         void Start()
         {
-
             if (mainBubble == null) {
-                mainBubble = this.GetComponentInChildren<GamesSelectorBubble>();
+                mainBubble = GetComponentInChildren<GamesSelectorBubble>();
                 mainBubble.gameObject.SetActive(false);
             }
             if (cam == null) {
@@ -73,13 +81,15 @@ namespace EA4S.GamesSelector
                 camT = Camera.main.transform;
             }
 
-            if (AudoLoadMinigamesOnStartup && games == null) AutoLoadMinigames();
+            if (AudoLoadMinigamesOnStartup && games == null) {
+                AutoLoadMinigames();
+            }
         }
 
         void OnDestroy()
         {
-            if (instance == this) instance = null;
-            this.StopAllCoroutines();
+            if (instance == this) { instance = null; }
+            StopAllCoroutines();
             showTween.Kill(true);
             OnComplete -= GoToMinigame;
         }
@@ -88,26 +98,15 @@ namespace EA4S.GamesSelector
         {
             if (Time.timeScale <= 0) {
                 // Prevent actions when pause menu is open
-                if (isDragging) StopDrag();
+                if (isDragging) {
+                    StopDrag();
+                }
                 return;
             }
 
-#if UNITY_EDITOR
-            if (Input.GetKeyDown(KeyCode.R)) {
-                Destroy(this.gameObject);
-                instance = null;
-                Show(new List<MiniGameData>() {
-                    new MiniGameData() { Main = MiniGameCode.Maze.ToString(), Variation = "letters" },
-                    new MiniGameData() { Main = MiniGameCode.DancingDots.ToString(), Variation = "words" },
-                    new MiniGameData() { Main = MiniGameCode.MakeFriends.ToString(), Variation = "spelling" },
-                    new MiniGameData() { Main = MiniGameCode.Egg_letters.ToString(), Variation = "sunmoon" },
-                    new MiniGameData() { Main = MiniGameCode.DancingDots.ToString(), Variation = "counting" }
-                });
+            if (!Input.GetMouseButton(0) && !Input.GetMouseButtonUp(0)) {
                 return;
             }
-#endif
-
-            if (!Input.GetMouseButton(0) && !Input.GetMouseButtonUp(0)) return;
 
             Vector3 mouseP = cam.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, cam.nearClipPlane + 10));
             if (Input.GetMouseButtonDown(0)) {
@@ -115,7 +114,9 @@ namespace EA4S.GamesSelector
                 isDragging = true;
                 currTrail = trailsManager.Spawn(mouseP);
             }
-            if (isDragging) Update_Dragging(mouseP);
+            if (isDragging) {
+                Update_Dragging(mouseP);
+            }
             if (Input.GetMouseButtonUp(0)) {
                 // Stop drag/click
                 StopDrag();
@@ -125,38 +126,48 @@ namespace EA4S.GamesSelector
         void Update_Dragging(Vector3 _mouseP)
         {
             trailsManager.SetPosition(currTrail, _mouseP);
-            if (cutAllowed) Update_CheckHitBubble(_mouseP);
+            if (cutAllowed) {
+                Update_CheckHitBubble(_mouseP);
+            }
         }
 
         void Update_CheckHitBubble(Vector3 _mouseP)
         {
             _mouseP += -camT.forward * 3;
             RaycastHit hit;
-            if (!Physics.Raycast(new Ray(_mouseP, camT.forward), out hit)) return;
+            if (!Physics.Raycast(new Ray(_mouseP, camT.forward), out hit)) {
+                return;
+            }
 
             GamesSelectorBubble hitBubble = null;
             foreach (GamesSelectorBubble bubble in bubbles) {
-                if (hit.transform != bubble.Cover.transform) continue;
+                if (hit.transform != bubble.Cover.transform) {
+                    continue;
+                }
                 hitBubble = bubble;
                 break;
             }
-            if (hitBubble == null) return;
+            if (hitBubble == null) {
+                return;
+            }
 
-            if (tutorial.isPlaying) tutorial.Stop();
+            if (tutorial.isPlaying) {
+                tutorial.Stop();
+            }
             hitBubble.Open();
             totOpenedBubbles++;
             if (totOpenedBubbles == bubbles.Count) {
                 // All bubbles opened: final routine
                 cutAllowed = false;
-                this.StartCoroutine(CO_EndCoroutine());
+                StartCoroutine(CO_EndCoroutine());
             }
         }
 
         void LateUpdate()
         {
             // Adapt to camera
-            this.transform.rotation = camT.rotation;
-            this.transform.position = camT.position + camT.forward * DistanceFromCamera;
+            transform.rotation = camT.rotation;
+            transform.position = camT.position + camT.forward * DistanceFromCamera;
         }
 
         #endregion
@@ -195,9 +206,13 @@ namespace EA4S.GamesSelector
         void ResetAndLayout()
         {
             // Reset
-            if (mainBubble == null) mainBubble = this.GetComponentInChildren<GamesSelectorBubble>();
+            if (mainBubble == null) {
+                mainBubble = this.GetComponentInChildren<GamesSelectorBubble>();
+            }
             foreach (GamesSelectorBubble bubble in bubbles) {
-                if (bubble != mainBubble) Destroy(bubble.gameObject);
+                if (bubble != mainBubble) {
+                    Destroy(bubble.gameObject);
+                }
             }
             bubbles.Clear();
 
@@ -208,7 +223,7 @@ namespace EA4S.GamesSelector
             float area = totBubbles * bubbleW + (totBubbles - 1) * bubblesDist;
             float startX = -area * 0.5f + bubbleW * 0.5f;
             for (int i = 0; i < totBubbles; ++i) {
-                MiniGameData mgData = games[i];
+                MiniGameData mgData = games[totBubbles - i - 1];
                 GamesSelectorBubble bubble = i == 0 ? mainBubble : (GamesSelectorBubble)Instantiate(mainBubble, this.transform);
                 bubble.Setup(mgData.GetIconResourcePath(), mgData.GetBadgeIconResourcePath(), startX + (bubbleW + bubblesDist) * i);
                 bubbles.Add(bubble);
@@ -232,8 +247,9 @@ namespace EA4S.GamesSelector
 
             // TODO refactor: the current list of minigames should be injected by the navigation manager instead
             var minigames = AppManager.I.NavigationManager.CurrentPlaySessionMiniGames;
-            if (minigames.Count > 0)
+            if (minigames.Count > 0) {
                 Show(minigames);
+            }
         }
 
         // TODO refactor: this should be injected
@@ -246,7 +262,9 @@ namespace EA4S.GamesSelector
 
         IEnumerator CO_AnimateEntrance()
         {
-            foreach (GamesSelectorBubble bubble in bubbles) bubble.gameObject.SetActive(false);
+            foreach (GamesSelectorBubble bubble in bubbles) {
+                bubble.gameObject.SetActive(false);
+            }
             yield return null;
             yield return null;
 
@@ -259,13 +277,17 @@ namespace EA4S.GamesSelector
             }
             yield return showTween.WaitForCompletion();
 
-            if (totOpenedBubbles == 0) tutorial.Play(bubbles);
+            if (totOpenedBubbles == 0) {
+                tutorial.Play(bubbles);
+            }
         }
 
         IEnumerator CO_EndCoroutine()
         {
             yield return new WaitForSeconds(EndDelay);
-            if (AppConstants.VerboseLogging) Debug.Log("<b>GamesSelector</b> > Complete");
+            if (AppConfig.DebugLogEnabled) {
+                Debug.Log("<b>GamesSelector</b> > Complete");
+            }
             DispatchOnComplete();
         }
 

@@ -1,23 +1,22 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Antura.Database;
 
-using EA4S.Database;
-
-namespace EA4S.Core
+namespace Antura.Minigames
 {
-	public class MainMiniGame
-	{
-		public string id;
-		public List<MiniGameInfo> variations;
+    public class MainMiniGame
+    {
+        public string MainId;
+        public List<MiniGameInfo> variations;
 
-		public string GetIconResourcePath()
-		{
-			return variations[0].data.GetIconResourcePath();
-		}
+        public string GetIconResourcePath()
+        {
+            return variations[0].data.GetIconResourcePath();
+        }
 
-		public MiniGameCode GetFirstVariationMiniGameCode()
-		{
-			return variations[0].data.Code;
-		}
-	}
+        public MiniGameCode GetFirstVariationMiniGameCode()
+        {
+            return variations[0].data.Code;
+        }
+    }
 }

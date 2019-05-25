@@ -1,11 +1,11 @@
-﻿namespace EA4S.Core
+﻿namespace Antura.Core
 {
     /// <summary>
     /// we refer to app scenes by these enums, and not by scene names, that could change anytime
     /// </summary>
-
     public enum AppScene
     {
+        Bootstrap = 15,
         Home = 1,
         AnturaSpace = 2,
         Book = 3,
@@ -18,6 +18,10 @@
         PlaySessionResult = 10,
         PlayerCreation = 11,
         Rewards = 12,
-        Ending = 13
+        Ending = 13,
+        DailyReward = 14,
+        Kiosk = 16,
+
+        NONE = 100
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace EA4S.Database.Management
+namespace Antura.Database.Management
 {
     /// <summary>
     /// Custom JSON parser for RewardData
@@ -14,7 +14,7 @@ namespace EA4S.Database.Management
 
             data.Id = ToString(dict["Id"]);
             data.Title = ToString(dict["Title"]);
-            data.Category = ParseEnum<RewardDataCategory>(data, dict["Category"]);
+            //data.Category = ParseEnum<RewardDataCategory>(data, dict["Category"]);
 
             return data;
         }

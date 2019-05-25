@@ -3,13 +3,12 @@ using UnityEngine.Assertions;
 using DG.Tweening;
 using System;
 using System.Collections.Generic;
+using Antura.LivingLetters;
 using DG.Tweening.Core;
 using DG.Tweening.Plugins.Options;
 using DG.Tweening.Plugins.Core.PathCore;
-using EA4S.LivingLetters;
-using EA4S.MinigamesAPI;
 
-namespace EA4S.Minigames.MissingLetter
+namespace Antura.Minigames.MissingLetter
 {
 
     public class LetterBehaviour : MonoBehaviour
@@ -156,11 +155,11 @@ namespace EA4S.Minigames.MissingLetter
                 mbIsSpeaking = true;
                 if(m_sInPhrase != null)
                 {
-                    MissingLetterConfiguration.Instance.Context.GetAudioManager().PlayLetterData(m_sInPhrase, true);
+                    MissingLetterConfiguration.Instance.Context.GetAudioManager().PlayVocabularyData(m_sInPhrase, true);
                 }
                 else
                 {
-                    MissingLetterConfiguration.Instance.Context.GetAudioManager().PlayLetterData(mLetterData, true);
+                    MissingLetterConfiguration.Instance.Context.GetAudioManager().PlayVocabularyData(mLetterData, true);
                 }
                 StartCoroutine(Utils.LaunchDelay(0.8f, SetIsSpeaking, false));
             }

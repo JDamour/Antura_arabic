@@ -1,19 +1,19 @@
+﻿using Antura.Core;
 using Kore.Coroutines;
 using System.Collections;
-using EA4S.Core;
 
-namespace EA4S.Assessment
+namespace Antura.Assessment
 {
     /// <summary>
     /// Result state. notify the LogManager of game ended and play final animation.
     /// Also teleport to main map.
     /// </summary>
-    public class AssessmentResultState : IState
+    public class AssessmentResultState : FSM.IState
     {
         private AssessmentGame assessmentGame;
         private AssessmentAudioManager dialogueManager;
 
-        public AssessmentResultState( AssessmentGame assessmentGame, AssessmentAudioManager dialogueManager)
+        public AssessmentResultState(AssessmentGame assessmentGame, AssessmentAudioManager dialogueManager)
         {
             this.assessmentGame = assessmentGame;
             this.dialogueManager = dialogueManager;
@@ -22,19 +22,25 @@ namespace EA4S.Assessment
         public void EnterState()
         {
             AssessmentConfiguration.Instance.Context.GetLogManager().OnGameEnded(3);
+            LogManager.I.LogPlaySessionScore(AppManager.I.JourneyHelper.GetCurrentPlaySessionData().Id, 3);
 
             var audioManager = assessmentGame.Context.GetAudioManager();
 
-            audioManager.PlayMusic( Music.Relax);
-            audioManager.PlaySound( Sfx.TickAndWin);
-            dialogueManager.PlayAssessmentCompleteSound();
+            audioManager.PlayMusic(Music.Relax);
+            audioManager.PlaySound(Sfx.TickAndWin);
 
-            Koroutine.Run( QuitAfterSomeTime( seconds: 2));
+            Koroutine.Run(QuitAfterYieldable(dialogueManager.PlayAssessmentCompleteSound()));
+        }
+
+        IEnumerator QuitAfterYieldable(IYieldable yieldable)
+        {
+            yield return yieldable;
+            ExitState();
         }
 
         IEnumerator QuitAfterSomeTime(float seconds)
         {
-            yield return Wait.For( seconds);
+            yield return Wait.For(seconds);
             ExitState();
         }
 
@@ -47,12 +53,12 @@ namespace EA4S.Assessment
             }
         }
 
-        public void Update( float delta)
+        public void Update(float delta)
         {
 
         }
 
-        public void UpdatePhysics( float delta)
+        public void UpdatePhysics(float delta)
         {
 
         }

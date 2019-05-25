@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 
-namespace EA4S.Minigames.ColorTickle
+namespace Antura.Minigames.ColorTickle
 {
-    public class ResultGameState : IState
+    public class ResultGameState : FSM.IState
     {
         ColorTickleGame game;
 

@@ -1,11 +1,10 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
-using EA4S.MinigamesCommon;
 using Random = UnityEngine.Random;
 
-namespace EA4S.Minigames.MixedLetters
+namespace Antura.Minigames.MixedLetters
 {
-    public class TutorialGameState : IState
+    public class TutorialGameState : FSM.IState
     {
         MixedLettersGame game;
 
@@ -18,13 +17,12 @@ namespace EA4S.Minigames.MixedLetters
             this.game = game;
             audioManager = game.Context.GetAudioManager();
 
-            isSpelling = MixedLettersConfiguration.Instance.Variation == MixedLettersConfiguration.MixedLettersVariation.Spelling;
+            isSpelling = MixedLettersConfiguration.Instance.Variation == MixedLettersVariation.BuildWord;
         }
 
         public void EnterState()
         {
-            if (game.TutorialEnabled)
-            {
+            if (game.TutorialEnabled) {
                 game.DisableRepeatPromptButton();
                 game.GenerateNewWord();
 
@@ -37,13 +35,12 @@ namespace EA4S.Minigames.MixedLetters
                 VictimLLController.instance.SetPosition(victimLLPosition);
             }
 
-            audioManager.PlayDialogue(isSpelling ? Database.LocalizationDataId.MixedLetters_spelling_Title : Database.LocalizationDataId.MixedLetters_alphabet_Title, OnTitleVoiceOverDone);
+            audioManager.PlayDialogue(isSpelling ? Database.LocalizationDataId.MixedLetters_buildword_Title : Database.LocalizationDataId.MixedLetters_alphabet_Title, OnTitleVoiceOverDone);
         }
 
         private void OnTitleVoiceOverDone()
         {
-            if (!game.TutorialEnabled)
-            {
+            if (!game.TutorialEnabled) {
                 game.SetCurrentState(game.IntroductionState);
                 return;
             }
@@ -58,7 +55,7 @@ namespace EA4S.Minigames.MixedLetters
 
         private IEnumerator OnQuestionOverCoroutine()
         {
-            yield return new WaitForSeconds(MixedLettersConfiguration.Instance.Variation == MixedLettersConfiguration.MixedLettersVariation.Alphabet ? 1.5f : 3f);
+            yield return new WaitForSeconds(MixedLettersConfiguration.Instance.Variation == MixedLettersVariation.Alphabet ? 1.5f : 3f);
 
             MixedLettersConfiguration.Instance.Context.GetAudioManager().PlaySound(Sfx.DogBarking);
             AnturaController.instance.PrepareToEnterScene();
@@ -97,14 +94,14 @@ namespace EA4S.Minigames.MixedLetters
 
         private void OnAnturaExitedScene()
         {
-            audioManager.PlayDialogue(isSpelling ? Database.LocalizationDataId.MixedLetters_spelling_Intro : Database.LocalizationDataId.MixedLetters_alphabet_Intro, OnIntroVoiceOverDone);
+            audioManager.PlayDialogue(isSpelling ? Database.LocalizationDataId.MixedLetters_buildword_Intro : Database.LocalizationDataId.MixedLetters_alphabet_Intro, OnIntroVoiceOverDone);
         }
 
         private void OnIntroVoiceOverDone()
         {
             MixedLettersGame.instance.OnRoundStarted();
             game.EnableRepeatPromptButton();
-            audioManager.PlayDialogue(isSpelling ? Database.LocalizationDataId.MixedLetters_spelling_Tuto : Database.LocalizationDataId.MixedLetters_alphabet_Tuto);
+            audioManager.PlayDialogue(isSpelling ? Database.LocalizationDataId.MixedLetters_buildword_Tuto : Database.LocalizationDataId.MixedLetters_alphabet_Tuto);
         }
 
         public void ExitState()
@@ -114,8 +111,7 @@ namespace EA4S.Minigames.MixedLetters
 
         public void Update(float delta)
         {
-            if (game.WasLastRoundWon)
-            {
+            if (game.WasLastRoundWon) {
                 game.SetCurrentState(game.ResultState);
             }
         }

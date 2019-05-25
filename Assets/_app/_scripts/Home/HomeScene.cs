@@ -1,11 +1,12 @@
-﻿using EA4S.Antura;
-using EA4S.Audio;
-using EA4S.Core;
-using EA4S.LivingLetters;
-using EA4S.UI;
+﻿using Antura.Audio;
+using Antura.Core;
+using Antura.Database;
+using Antura.Dog;
+using Antura.LivingLetters;
+using Antura.UI;
 using UnityEngine;
 
-namespace EA4S.Scenes
+namespace Antura.Scenes
 {
     /// <summary>
     /// Controls the _Start scene, providing an entry point for all users prior to having selected a player profile. 
@@ -14,13 +15,17 @@ namespace EA4S.Scenes
     {
         [Header("Setup")]
         public AnturaAnimationStates AnturaAnimation = AnturaAnimationStates.sitting;
+
         public LLAnimationStates LLAnimation = LLAnimationStates.LL_dancing;
 
-        [Header("References")] 
+        [Header("References")]
         public AnturaAnimationController AnturaAnimController;
+
         public LivingLetterController LLAnimController;
         public GameObject DialogReservedArea;
         public GameObject ProfileSelectorUI;
+
+        public GameObject PanelAppUpdate;
 
         protected override void Start()
         {
@@ -38,7 +43,7 @@ namespace EA4S.Scenes
         void TutorCreateProfile()
         {
             if (AppManager.I.PlayerProfileManager.GetPlayersIconData().Count < 1) {
-                AudioManager.I.PlayDialogue(Database.LocalizationDataId.Action_Createprofile);
+                AudioManager.I.PlayDialogue(LocalizationDataId.Action_Createprofile);
             }
         }
 
@@ -47,14 +52,10 @@ namespace EA4S.Scenes
         /// </summary>
         public void Play()
         {
-            Debug.Log("Play with Player ID: " + AppManager.I.Player.Uuid);
-
+            // Debug.Log("Play with Player: " + AppManager.I.Player);
             GlobalUI.ShowPauseMenu(true);
 
-            // TODO refactor: move this initialisation logic to the AppManager
-            LogManager.I.InitNewSession();
-            LogManager.I.LogInfo(InfoEvent.AppPlay, JsonUtility.ToJson(new DeviceInfo()));
-
+            AppManager.I.StartNewPlaySession();
             AppManager.I.NavigationManager.GoToNextScene();
         }
 
@@ -62,41 +63,37 @@ namespace EA4S.Scenes
 
         private bool reservedAreaIsOpen = false;
 
-        public void OnClickReservedAreaButton()
+        public void OnBtnReservedArea()
         {
             if (reservedAreaIsOpen) {
-                OnCloseReservedArea();
+                CloseReservedAreaPanel();
             } else {
-                OnOpenReservedArea();
+                OpenReservedAreaPanel();
             }
         }
 
-        public void OnOpenReservedArea()
+        public void OnBtnQuit()
+        {
+            AppManager.I.QuitApplication();
+        }
+
+        public void OpenReservedAreaPanel()
         {
             AudioManager.I.PlaySound(Sfx.UIButtonClick);
-            // HACK: hide LL And Antura since they cover the Arabic TMpro (incredible but true!)
-            LLAnimController.gameObject.SetActive(false);
-            AnturaAnimController.gameObject.SetActive(false);
-
             DialogReservedArea.SetActive(true);
             ProfileSelectorUI.SetActive(false);
             GlobalUI.ShowPauseMenu(false);
             reservedAreaIsOpen = true;
         }
 
-        public void OnCloseReservedArea()
+        public void CloseReservedAreaPanel()
         {
             AudioManager.I.PlaySound(Sfx.UIButtonClick);
-            // HACK: show LL And Antura since they cover the Arabic TMpro (incredible but true!)
-            LLAnimController.gameObject.SetActive(true);
-            AnturaAnimController.gameObject.SetActive(true);
-
             DialogReservedArea.SetActive(false);
             ProfileSelectorUI.SetActive(true);
             GlobalUI.ShowPauseMenu(true, PauseMenuType.StartScreen);
             reservedAreaIsOpen = false;
         }
-
         #endregion
     }
 }

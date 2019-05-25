@@ -1,11 +1,11 @@
-﻿using UnityEngine;
+﻿using Antura.LivingLetters;
+using Antura.UI;
+using DG.Tweening;
+using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
-using EA4S.MinigamesAPI;
-using EA4S.UI;
-using DG.Tweening;
 
-namespace EA4S.Minigames.ThrowBalls
+namespace Antura.Minigames.ThrowBalls
 {
     public class UIController : MonoBehaviour
     {
@@ -50,9 +50,10 @@ namespace EA4S.Minigames.ThrowBalls
 
         public void OnLetterHintClicked()
         {
-            if (livingLetterData != null && ThrowBallsGame.instance.GameState.isRoundOngoing)
-            {
-                ThrowBallsConfiguration.Instance.Context.GetAudioManager().PlayLetterData(livingLetterData, true);
+            if (livingLetterData != null && ThrowBallsGame.instance.GameState.isRoundOngoing) {
+                ThrowBallsConfiguration.Instance.Context.GetAudioManager().PlayVocabularyData(
+                    livingLetterData, true, soundType: ThrowBallsConfiguration.Instance.GetVocabularySoundType()
+                );
                 WobbleLetterHint();
             }
         }
@@ -95,8 +96,7 @@ namespace EA4S.Minigames.ThrowBalls
             float crackFadeStartTime = Time.time;
             float sinFactor = 2 * Mathf.PI * Mathf.Pow(CRACK_FADE_DURATION, -1);
 
-            while (crackImageColor.a > 0)
-            {
+            while (crackImageColor.a > 0) {
                 crackImageColor.a = Mathf.Cos(sinFactor * (Time.time - crackFadeStartTime));
                 crackImage.color = crackImageColor;
 
@@ -114,4 +114,3 @@ namespace EA4S.Minigames.ThrowBalls
         }
     }
 }
-

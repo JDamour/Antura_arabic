@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace EA4S.UI
+namespace Antura.UI
 {
     /// <summary>
     /// Shows the number of current and max lives available in a minigame.
@@ -11,7 +11,7 @@ namespace EA4S.UI
 
         public int MaxLives { get; private set; }
         public int CurrLives { get; private set; }
-        readonly List<MinigamesUISingleLife> lives = new List<MinigamesUISingleLife>();
+        private readonly List<MinigamesUISingleLife> lives = new List<MinigamesUISingleLife>();
 
         #region Unity
 
@@ -52,17 +52,26 @@ namespace EA4S.UI
         /// new life objects are created and <see cref="MaxLives"/> is modified accordingly.</param>
         public int SetCurrLives(int _to, bool _canExceedMax = false)
         {
-            if (!Validate("MinigamesUILives")) return 0;
+            if (!Validate("MinigamesUILives")) { return 0; }
 
-            if (!_canExceedMax && _to > MaxLives) _to = MaxLives;
-            if (CurrLives == _to) return CurrLives;
+            if (!_canExceedMax && _to > MaxLives) {
+                _to = MaxLives;
+            }
+            if (CurrLives == _to) {
+                return CurrLives;
+            }
 
-            if (_to < 0) _to = 0;
+            if (_to < 0) {
+                _to = 0;
+            }
             CurrLives = _to;
             for (int i = 0; i < lives.Count; i++) {
                 MinigamesUISingleLife life = lives[i];
-                if (i < _to) life.Gain();
-                else life.Lose();
+                if (i < _to) {
+                    life.Gain();
+                } else {
+                    life.Lose();
+                }
             }
             _to -= lives.Count;
             while (_to > 0) {
@@ -72,7 +81,9 @@ namespace EA4S.UI
                 lives.Add(life);
             }
             int actualMaxLives = lives.Count;
-            if (MaxLives < actualMaxLives) MaxLives = actualMaxLives;
+            if (MaxLives < actualMaxLives) {
+                MaxLives = actualMaxLives;
+            }
             return _to;
         }
 

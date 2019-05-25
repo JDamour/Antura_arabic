@@ -1,15 +1,15 @@
-﻿using DG.DeAudio;
-using EA4S.MinigamesCommon;
+﻿using Antura.Minigames;
+using DG.DeAudio;
 using UnityEngine;
 
-namespace EA4S.Audio
+namespace Antura.Audio
 {
     public class AudioSourceWrapper : IAudioSource
     {
         public DeAudioGroup Group { get; private set; }
+        public DeAudioSource CurrentSource;
 
         AudioClip clip;
-        DeAudioSource source;
         AudioManager manager;
 
         bool paused = false;
@@ -18,141 +18,133 @@ namespace EA4S.Audio
         {
             get
             {
-                if (source == null || source.audioSource == null)
+                if (CurrentSource == null || CurrentSource.audioSource == null) {
                     return false;
+                }
 
-                return source.isPlaying;
+                return CurrentSource.isPlaying;
             }
         }
 
         bool loop;
+
         public bool Loop
         {
-            get
-            {
-                return loop;
-            }
+            get { return loop; }
 
             set
             {
                 loop = value;
 
-                if (source != null)
-                    source.loop = value;
+                if (CurrentSource != null) {
+                    CurrentSource.loop = value;
+                }
             }
         }
 
         float pitch;
+
         public float Pitch
         {
-            get
-            {
-                return pitch;
-            }
+            get { return pitch; }
 
             set
             {
                 pitch = value;
 
-                if (source != null)
-                    source.pitch = value;
+                if (CurrentSource != null) {
+                    CurrentSource.pitch = value;
+                }
             }
         }
 
         float volume;
+
         public float Volume
         {
-            get
-            {
-                return volume;
-            }
+            get { return volume; }
 
             set
             {
                 volume = value;
 
-                if (source != null)
-                    source.volume = value;
+                if (CurrentSource != null) {
+                    CurrentSource.volume = value;
+                }
             }
         }
 
         float duration;
+
         public float Duration
         {
-            get
-            {
-                return duration;
-            }
+            get { return duration; }
         }
-        
+
         public float Position
         {
             get
             {
-                if (source == null || source.audioSource == null)
+                if (CurrentSource == null || CurrentSource.audioSource == null) {
                     return 0;
+                }
 
-                return source.time;
+                return CurrentSource.time;
             }
             set
             {
-                if (source != null)
-                    source.time = value;
+                if (CurrentSource != null) {
+                    CurrentSource.time = value;
+                }
             }
         }
 
         public void Stop()
         {
-            if (source != null && source.audioSource != null)
-            {
-                source.loop = false;
-                source.Stop();
+            if (CurrentSource != null && CurrentSource.audioSource != null) {
+                CurrentSource.loop = false;
+                CurrentSource.Stop();
             }
 
-            source = null;
+            CurrentSource = null;
             paused = false;
         }
 
         public void Play()
         {
-            if (paused && source != null)
-            {
-                source.Resume();
-            }
-            else
-            {
+            if (paused && CurrentSource != null) {
+                CurrentSource.Resume();
+            } else {
                 paused = false;
 
-                if (source != null)
-                {
-                    source.Stop();
+                if (CurrentSource != null) {
+                    CurrentSource.Stop();
                 }
 
-                source = Group.Play(clip);
-                source.locked = true;
-                
-                source.pitch = pitch;
-                source.volume = volume;
-                source.loop = loop;
+                CurrentSource = Group.Play(clip);
+                CurrentSource.locked = true;
+
+                CurrentSource.pitch = pitch;
+                CurrentSource.volume = volume;
+                CurrentSource.loop = loop;
                 manager.OnAudioStarted(this);
             }
         }
 
         public void Pause()
         {
-            if (source != null && source.Pause())
+            if (CurrentSource != null && CurrentSource.Pause()) {
                 paused = true;
+            }
         }
 
         public bool Update()
         {
-            if (source != null)
-            {
-                if (!source.isPlaying && !source.isPaused && source.time == 0 && !manager.IsAppPaused)
-                {
-                    source.Stop();
-                    source.locked = false;
-                    source = null;
+            if (CurrentSource != null) {
+                if (!CurrentSource.isPlaying && !CurrentSource.isPaused && CurrentSource.time == 0 && !manager.IsAppPaused) {
+                    CurrentSource.Stop();
+                    CurrentSource.locked = false;
+                    CurrentSource = null;
                     return true;
                 }
             }
@@ -161,7 +153,7 @@ namespace EA4S.Audio
 
         public AudioSourceWrapper(DeAudioSource source, DeAudioGroup group, AudioManager manager)
         {
-            this.source = source;
+            this.CurrentSource = source;
             this.Group = group;
             this.manager = manager;
             this.clip = source.clip;

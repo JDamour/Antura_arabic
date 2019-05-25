@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace EA4S.CameraEffects
+namespace Antura.CameraEffects
 {
     [RequireComponent(typeof(Camera))]
     [ExecuteInEditMode]
@@ -13,8 +13,7 @@ namespace EA4S.CameraEffects
 
         bool UpdateTexture()
         {
-            if (output == null || Screen.width != lastWidth || Screen.height != lastHeight)
-            {
+            if (output == null || Screen.width != lastWidth || Screen.height != lastHeight) {
                 output = new RenderTexture(Screen.width, Screen.height, 24, RenderTextureFormat.ARGB32);
                 output.hideFlags = HideFlags.HideAndDontSave;
                 lastWidth = Screen.width;
@@ -31,8 +30,7 @@ namespace EA4S.CameraEffects
 
         void Update()
         {
-            if (UpdateTexture())
-                GetComponent<Camera>().targetTexture = output;
+            if (UpdateTexture()) { GetComponent<Camera>().targetTexture = output; }
         }
     }
 }

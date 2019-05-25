@@ -1,4 +1,4 @@
-﻿namespace EA4S
+﻿namespace Antura
 {
     /// <summary>
     /// Defines a type of app-wide event that may happen.
@@ -20,7 +20,10 @@
         Reward = 50,
         AnturaCustomization = 51,
         AnturaSpace = 60,
+
+        DailyRewardReceived = 70,
     }
+
     /// <summary>
     /// Defines a type of play-related skill that may be measured.
     /// Used for logging.

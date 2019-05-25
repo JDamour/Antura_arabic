@@ -1,7 +1,10 @@
-﻿using EA4S.Rewards;
+using Antura.Core;
+using Antura.Rewards;
+using Antura.Tutorial;
+using Antura.UI;
 using UnityEngine;
 
-namespace EA4S.UI
+namespace Antura.AnturaSpace.UI
 {
     /// <summary>
     /// Button for a category in the Antura Space scene.
@@ -24,15 +27,24 @@ namespace EA4S.UI
 
         public AnturaSpaceCategory Category;
 
-        public bool IsNew { get { return isNew && !isNewForceHidden; } }
-        GameObject icoNew;
-        bool isNew, isNewForceHidden;
+        public bool IsNew {
+            get { return isNew && !isNewForceHidden; }
+        }
+
+        public bool Unlocked { get; set; }
+
+        private GameObject icoNew;
+        private bool isNew, isNewForceHidden;
 
         public void SetAsNew(bool _isNew)
         {
             isNew = _isNew;
-            if (icoNew == null) icoNew = this.GetComponentInChildren<AnturaSpaceNewIcon>().gameObject;
-            if (!isNewForceHidden) icoNew.SetActive(_isNew);
+            if (icoNew == null) {
+                icoNew = GetComponentInChildren<AnturaSpaceNewIcon>().gameObject;
+            }
+            if (!isNewForceHidden) {
+                icoNew.SetActive(_isNew);
+            }
         }
 
         public override void Toggle(bool _activate, bool _animateClick = false)
@@ -44,7 +56,9 @@ namespace EA4S.UI
         void ForceHideNewIcon(bool _forceHide)
         {
             isNewForceHidden = _forceHide;
-            if (icoNew == null) icoNew = this.GetComponentInChildren<AnturaSpaceNewIcon>().gameObject;
+            if (icoNew == null) {
+                icoNew = GetComponentInChildren<AnturaSpaceNewIcon>().gameObject;
+            }
             icoNew.SetActive(!_forceHide && isNew);
         }
     }

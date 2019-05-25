@@ -1,8 +1,8 @@
-﻿using EA4S.MinigamesCommon;
+﻿using Antura.Minigames;
 
-namespace EA4S.Minigames.FastCrowd
+namespace Antura.Minigames.FastCrowd
 {
-    public class FastCrowdResultState : IState
+    public class FastCrowdResultState : FSM.IState
     {
         FastCrowdGame game;
 

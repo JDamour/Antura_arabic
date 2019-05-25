@@ -1,11 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
-using EA4S.LivingLetters;
-using EA4S.MinigamesAPI;
-using EA4S.MinigamesCommon;
-using EA4S.Tutorial;
+using Antura.LivingLetters;
+using Antura.Minigames;
+using Antura.Tutorial;
 
-namespace EA4S.Minigames.MixedLetters
+namespace Antura.Minigames.MixedLetters
 {
     public class SeparateLetterController : MonoBehaviour
     {
@@ -97,7 +96,7 @@ namespace EA4S.Minigames.MixedLetters
                         droppedZone = null;
                     }
 
-                    MixedLettersConfiguration.Instance.Context.GetAudioManager().PlayLetterData(letterData, true);
+                    MixedLettersConfiguration.Instance.Context.GetAudioManager().PlayVocabularyData(letterData, true);
                 }
             }
         }
@@ -297,6 +296,16 @@ namespace EA4S.Minigames.MixedLetters
         public void Disable()
         {
             gameObject.SetActive(false);
+        }
+
+        public void EnableCollider()
+        {
+            boxCollider.enabled = true;
+        }
+
+        public void DisableCollider()
+        {
+            boxCollider.enabled = false;
         }
 
         public void SetLetter(LL_LetterData letterData)

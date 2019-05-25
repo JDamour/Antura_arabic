@@ -1,11 +1,9 @@
-﻿using EA4S.MinigamesCommon;
-
-namespace EA4S.Minigames.MakeFriends
+namespace Antura.Minigames.MakeFriends
 {
-    public class MakeFriendsQuestionState : IState
+    public class MakeFriendsQuestionState : FSM.IState
     {
         MakeFriendsGame game;
-        
+
         public MakeFriendsQuestionState(MakeFriendsGame game)
         {
             this.game = game;
@@ -27,10 +25,10 @@ namespace EA4S.Minigames.MakeFriends
             game.Context.GetPopupWidget().Hide();
         }
 
-//        void OnQuestionCompleted()
-//        {
-//            game.SetCurrentState(game.PlayState);
-//        }
+        //        void OnQuestionCompleted()
+        //        {
+        //            game.SetCurrentState(game.PlayState);
+        //        }
 
         public void Update(float delta)
         {

@@ -1,8 +1,7 @@
-﻿using UnityEngine;
-using EA4S.LivingLetters;
-using EA4S.MinigamesAPI;
+﻿using Antura.LivingLetters;
+using UnityEngine;
 
-namespace EA4S.Minigames.TakeMeHome
+namespace Antura.Minigames.TakeMeHome
 {
 
     public class TakeMeHomeLetterManager : MonoBehaviour {

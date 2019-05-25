@@ -1,20 +1,19 @@
-﻿#if UNITY_EDITOR
+#if UNITY_EDITOR
 
+using Antura.Core;
+using Antura.Helpers;
+using Antura.Profile;
+using Antura.Rewards;
+using Antura.Teacher;
+using Antura.UI;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
-using EA4S.Core;
-using EA4S.Helpers;
-using EA4S.Profile;
-using EA4S.Rewards;
-using EA4S.Teacher;
-using EA4S.UI;
-using PlayerProfile = EA4S.Profile.PlayerProfile;
 
 // refactor: standardize random use across the codebase
 using RND = UnityEngine.Random;
 
-namespace EA4S.Database.Management
+namespace Antura.Database.Management
 {
     /// <summary>
     /// Helps in managing and testing database contents.
@@ -30,20 +29,22 @@ namespace EA4S.Database.Management
         public Text OutputText;
         public TextRender OutputTextArabic;
 
+        private VocabularyHelper vocabularyHelper;
         private ScoreHelper scoreHelper;
+
+        public static string DEBUG_PLAYER_UUID = "TEST";
 
         void Awake()
         {
             this.dbLoader = GetComponentInChildren<DatabaseLoader>();
 
             dbManager = new DatabaseManager();
-            var vocabularyHelper = new VocabularyHelper(dbManager);
-            var journeyHelper = new JourneyHelper(dbManager);
+            vocabularyHelper = new VocabularyHelper(dbManager);
             scoreHelper = new ScoreHelper(dbManager);
-            teacherAI = new TeacherAI(dbManager, vocabularyHelper, journeyHelper, scoreHelper);
+            teacherAI = new TeacherAI(dbManager, vocabularyHelper, scoreHelper);
 
             // Load the first profile
-            LoadProfile("1");
+            LoadProfile(DEBUG_PLAYER_UUID);
         }
 
         #region Main Actions
@@ -252,12 +253,12 @@ namespace EA4S.Database.Management
             }
 
             foreach (var w in dbManager.StaticDatabase.GetWordTable().GetValuesTyped()) {
-                Helpers.ArabicAlphabetHelper.AnalyzeData(dbManager, w, false, false);
+                Helpers.ArabicAlphabetHelper.SplitWord(dbManager, w, false, false);
             }
 
 
             foreach (var w in dbManager.StaticDatabase.GetPhraseTable().GetValuesTyped()) {
-                Helpers.ArabicAlphabetHelper.AnalyzeData(dbManager, w, false, false);
+                Helpers.ArabicAlphabetHelper.SplitPhrase(dbManager, w, false, false);
             }
 
             /*
@@ -282,6 +283,24 @@ namespace EA4S.Database.Management
 
             //LL_WordData newWordData = new LL_WordData(AppManager.I.DB.GetWordDataById("wolf"));
             */
+
+        }
+
+        public void TestVocabularyHelper()
+        {
+            var allWords = vocabularyHelper.GetAllWords(new WordFilters());
+            var testWord = allWords[2];
+            Debug.Log("N words: " + allWords.Count);
+            Debug.Log("TEST Word: " + testWord);
+            var lettersInWord = vocabularyHelper.GetLettersInWord(testWord);
+            Debug.Log("Letters in that word: " + lettersInWord.ToDebugString());
+
+            var testLetter = lettersInWord[0];
+            var wordsWithLetters = vocabularyHelper.GetWordsWithLetter(new WordFilters(), testLetter, LetterEqualityStrictness.LetterOnly);
+            Debug.Log("Words with unstrict letter " + testLetter + ": \n" + wordsWithLetters.ToDebugStringNewline());
+
+            wordsWithLetters = vocabularyHelper.GetWordsWithLetter(new WordFilters(), testLetter, LetterEqualityStrictness.WithActualForm);
+            Debug.Log("Words with strict letter " + testLetter + ": \n" + wordsWithLetters.ToDebugStringNewline());
 
         }
 
@@ -323,7 +342,7 @@ namespace EA4S.Database.Management
             newData.Stage = 1;
             newData.LearningBlock = 1;
             newData.PlaySession = 1;
-            newData.MiniGameCode = MiniGameCode.Assessment_LetterForm;
+            newData.MiniGameCode = MiniGameCode.Assessment_LetterAny;
 
             newData.VocabularyDataType = RandomHelper.GetRandomEnum<VocabularyDataType>();
 
@@ -530,7 +549,7 @@ namespace EA4S.Database.Management
             var scores = scoreHelper.GetLatestScoresForMiniGame(MiniGameCode.Balloons_counting, 3);
 
             string output = "Scores:\n";
-            foreach (var score in scores) output += score.ToString() + "\n";
+            foreach (var score in scores) { output += score.ToString() + "\n"; }
             PrintOutput(output);
         }
 
@@ -539,13 +558,13 @@ namespace EA4S.Database.Management
             var list = scoreHelper.GetCurrentScoreForAllPlaySessions();
 
             string output = "All play session scores:\n";
-            foreach (var data in list) output += data.ElementId + ": " + data.GetScore() + "\n";
+            foreach (var data in list) { output += data.ElementId + ": " + data.GetScore() + "\n"; }
             PrintOutput(output);
         }
 
         public void Teacher_FailedAssessmentLetters()
         {
-            var list = teacherAI.GetFailedAssessmentLetters(MiniGameCode.Assessment_LetterForm);
+            var list = teacherAI.GetFailedAssessmentLetters(MiniGameCode.Assessment_LetterAny);
 
             string output = "Failed letters for assessment 'Letters':\n";
             foreach (var data in list) output += data.ToString() + "\n";
@@ -554,7 +573,7 @@ namespace EA4S.Database.Management
 
         public void Teacher_FailedAssessmentWords()
         {
-            var list = teacherAI.GetFailedAssessmentWords(MiniGameCode.Assessment_LetterForm);
+            var list = teacherAI.GetFailedAssessmentWords(MiniGameCode.Assessment_LetterAny);
 
             string output = "Failed words for assessment 'Letters':\n";
             foreach (var data in list) output += data.ToString() + "\n";
@@ -604,7 +623,7 @@ namespace EA4S.Database.Management
         {
             dbManager.LoadDatabaseForPlayer(playerUuid);
             playerProfile = new PlayerProfile();
-            playerProfile.CurrentJourneyPosition = new JourneyPosition(1, 2, 2);    // test
+            playerProfile.SetCurrentJourneyPosition(new JourneyPosition(1, 2, 2), _save: false);    // test
             teacherAI.SetPlayerProfile(playerProfile);
             PrintOutput("Loading profile " + playerUuid);
         }
@@ -623,7 +642,11 @@ namespace EA4S.Database.Management
 
         public void TestDynamicProfileData()
         {
-            dbManager.UpdatePlayerProfileData(new PlayerProfileData(new PlayerIconData("1", 1, PlayerGender.M, PlayerTint.Blue, false, false, false), 5, 8, 0));
+            dbManager.UpdatePlayerProfileData(
+                new PlayerProfileData(DEBUG_PLAYER_UUID, 1, PlayerGender.M, PlayerTint.Blue, false, false, false, false,
+                                      5, 8, 0, "", 0, new AnturaSpace.ShopState(), new FirstContactState()
+                                     )
+            );
             var playerProfileData = dbManager.GetPlayerProfileData();
             PrintOutput(playerProfileData.ToString());
         }
@@ -635,9 +658,9 @@ namespace EA4S.Database.Management
         public void TestRewardUnlocks()
         {
             var jp = new JourneyPosition(1, 1, 2);
-            dbManager.UpdateRewardPackUnlockData(new RewardPackUnlockData(0, "aaa", "black", RewardTypes.decal, jp));
-            dbManager.UpdateRewardPackUnlockData(new RewardPackUnlockData(0, "bbb", "black", RewardTypes.decal, jp));
-            dbManager.UpdateRewardPackUnlockData(new RewardPackUnlockData(0, "ccc", "black", RewardTypes.decal, jp));
+            dbManager.UpdateRewardPackUnlockData(new RewardPackUnlockData(0, "aaa_black", jp));
+            dbManager.UpdateRewardPackUnlockData(new RewardPackUnlockData(0, "bbb_black", jp));
+            dbManager.UpdateRewardPackUnlockData(new RewardPackUnlockData(0, "ccc_black", jp));
             var rewardPackUnlockDatas = dbManager.GetAllRewardPackUnlockData();
             DumpAllData(rewardPackUnlockDatas);
         }

@@ -1,12 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-using EA4S.Core;
-using EA4S.Helpers;
-using EA4S.LivingLetters;
-using EA4S.Minigames.FastCrowd;
-using EA4S.MinigamesAPI;
+using Antura.LivingLetters;
+using Antura.Minigames.FastCrowd;
+using Antura.Core;
+using Antura.Helpers;
 
-namespace EA4S.Intro
+namespace Antura.Intro
 {
     /// <summary>
     /// Controls the instantiation of game objects in the Intro scene.
@@ -28,12 +27,15 @@ namespace EA4S.Intro
 
         Queue<IntroStrollingLetter> toDestroy = new Queue<IntroStrollingLetter>();
 
-        [HideInInspector] public bool StartSpawning = false;
+        [HideInInspector]
+        public bool StartSpawning = false;
 
         public void GetNearLetters(List<IntroStrollingLetter> output, Vector3 position, float radius)
         {
-            for (int i = 0, count = letters.Count; i < count; ++i) {
-                if (Vector3.Distance(letters[i].transform.position, position) < radius) {
+            for (int i = 0, count = letters.Count; i < count; ++i)
+            {
+                if (Vector3.Distance(letters[i].transform.position, position) < radius)
+                {
                     output.Add(letters[i]);
                 }
             }
@@ -44,7 +46,9 @@ namespace EA4S.Intro
             //toAdd.Clear();
 
             foreach (var l in letters)
+            {
                 toDestroy.Enqueue(l);
+            }
 
             letters.Clear();
             letterGOs.Clear();
@@ -65,7 +69,8 @@ namespace EA4S.Intro
 
             LLController.gameObject.AddComponent<Rigidbody>().isKinematic = true;
 
-            foreach (var collider in LLController.gameObject.GetComponentsInChildren<Collider>()) {
+            foreach (var collider in LLController.gameObject.GetComponentsInChildren<Collider>())
+            {
                 collider.isTrigger = true;
             }
 
@@ -87,14 +92,17 @@ namespace EA4S.Intro
 
             livingLetter.onDropped += (result) =>
             {
-                if (result) {
+                if (result)
+                {
                     letters.Remove(livingLetter);
                     letterGOs.Remove(livingLetter.gameObject);
                     toDestroy.Enqueue(livingLetter);
                 }
 
                 if (onDropped != null)
+                {
                     onDropped(LLController.Data, result);
+                }
             };
 
             return LLController;
@@ -102,8 +110,10 @@ namespace EA4S.Intro
 
         void Update()
         {
-            if (StartSpawning) {
-                if (letters.Count < MaxConcurrentLetters) {
+            if (StartSpawning)
+            {
+                if (letters.Count < MaxConcurrentLetters)
+                {
                     SpawnLetter();
                 }
             }

@@ -1,36 +1,24 @@
-﻿using EA4S.MinigamesAPI;
-using EA4S.MinigamesAPI.Sample;
-using EA4S.MinigamesCommon;
-using EA4S.Teacher;
+using System;
+using Antura.LivingLetters.Sample;
+using Antura.Teacher;
 
-namespace EA4S.Minigames.Tobogan
+namespace Antura.Minigames.Tobogan
 {
-    public enum ToboganVariation : int
+    public enum ToboganVariation
     {
-        LetterInAWord = 1,
-        SunMoon = 2
+        LetterInWord = MiniGameCode.Tobogan_letterinword,
+        SunMoon = MiniGameCode.Tobogan_sunmoon
     }
 
-    public class ToboganConfiguration : IGameConfiguration
+    public class ToboganConfiguration : AbstractGameConfiguration
     {
-        // Game configuration
-        public IGameContext Context { get; set; }
-        public IQuestionProvider Questions { get; set; }
+        public ToboganVariation Variation { get; private set; }
 
-        public float Difficulty { get; set; }
-        public bool TutorialEnabled { get; set; }
-        public ToboganVariation Variation { get; set; }
-
-        public int GetDiscreteDifficulty(int maximum)
+        public override void SetMiniGameCode(MiniGameCode code)
         {
-            int d = (int) Difficulty * (maximum + 1);
-
-            if (d > maximum)
-                return maximum;
-            return d;
+            Variation = (ToboganVariation)code;
         }
 
-        /////////////////
         // Singleton Pattern
         static ToboganConfiguration instance;
         public static ToboganConfiguration Instance
@@ -38,53 +26,54 @@ namespace EA4S.Minigames.Tobogan
             get
             {
                 if (instance == null)
+                {
                     instance = new ToboganConfiguration();
+                }
                 return instance;
             }
         }
-        /////////////////
 
         private ToboganConfiguration()
         {
             // Default values
-            // THESE SETTINGS ARE FOR SAMPLE PURPOSES, THESE VALUES MUST BE SET BY GAME CORE
             Questions = new SampleQuestionProvider();
             //Questions = new SunMoonQuestionProvider();
-            
-            //Variation = ToboganVariation.SunMoon;
-            Variation = ToboganVariation.LetterInAWord;
 
-            Context = new MinigamesGameContext(MiniGameCode.Tobogan_letters, System.DateTime.Now.Ticks.ToString());
+            //Variation = ToboganVariation.SunMoon;
+            Variation = ToboganVariation.LetterInWord;
+
+            Context = new MinigamesGameContext(MiniGameCode.Tobogan_letterinword, System.DateTime.Now.Ticks.ToString());
             Difficulty = 0.0f;
             TutorialEnabled = true;
         }
 
-        public IQuestionBuilder SetupBuilder() {
+        public override IQuestionBuilder SetupBuilder()
+        {
             IQuestionBuilder builder = null;
 
             int nPacks = 10;
             int nCorrect = 1;
             int nWrong = 5;
 
-            var builderParams = new Teacher.QuestionBuilderParameters();
+            var builderParams = new QuestionBuilderParameters();
             switch (Variation)
             {
-                case ToboganVariation.LetterInAWord:
+                case ToboganVariation.LetterInWord:
                     builderParams.wordFilters.excludeLetterVariations = true;
+                    builderParams.wordFilters.excludeDipthongs = true;
                     builder = new LettersInWordQuestionBuilder(nPacks, nCorrect: nCorrect, nWrong: nWrong, parameters: builderParams);
                     break;
                 case ToboganVariation.SunMoon:
                     builder = new WordsBySunMoonQuestionBuilder(nPacks, parameters: builderParams);
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
-
-            if (builder == null)
-                throw new System.Exception("No question builder defined for variation " + Variation.ToString());
 
             return builder;
         }
 
-        public MiniGameLearnRules SetupLearnRules()
+        public override MiniGameLearnRules SetupLearnRules()
         {
             var rules = new MiniGameLearnRules();
             // example: a.minigameVoteSkewOffset = 1f;

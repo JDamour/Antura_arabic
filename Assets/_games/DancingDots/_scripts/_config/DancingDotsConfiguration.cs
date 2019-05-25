@@ -1,58 +1,45 @@
-﻿using EA4S.MinigamesAPI;
-using EA4S.MinigamesCommon;
-using EA4S.Teacher;
+using System;
+using Antura.Teacher;
 
-namespace EA4S.Minigames.DancingDots {
-
-    public class DancingDotsConfiguration : IGameConfiguration
+namespace Antura.Minigames.DancingDots
+{
+    public enum DancingDotsVariation
     {
-        // Game configuration
-        public IGameContext Context { get; set; }
-        public IQuestionProvider Questions { get; set; }
+        LetterName = MiniGameCode.DancingDots_lettername,
+        LetterAny = MiniGameCode.DancingDots_letterany
+    }
 
-        #region Game configurations
-        public float Difficulty { get; set; }
-        public bool TutorialEnabled { get; set; }
-        public DancingDotsVariation Variation { get; set; }
-        #endregion
+    public class DancingDotsConfiguration : AbstractGameConfiguration
+    {
+        private DancingDotsVariation Variation { get; set; }
 
-        /////////////////
+        public override void SetMiniGameCode(MiniGameCode code)
+        {
+            Variation = (DancingDotsVariation)code;
+        }
+
         // Singleton Pattern
         static DancingDotsConfiguration instance;
         public static DancingDotsConfiguration Instance
         {
-            get
-            {
-                if (instance == null)
+            get {
+                if (instance == null) {
                     instance = new DancingDotsConfiguration();
+                }
                 return instance;
             }
         }
-        /////////////////
 
         private DancingDotsConfiguration()
         {
             // Default values
-            // THESE SETTINGS ARE FOR SAMPLE PURPOSES, THESE VALUES MUST BE SET BY GAME CORE
-			Context = new MinigamesGameContext(MiniGameCode.DancingDots, System.DateTime.Now.Ticks.ToString());
-
-            Variation = DancingDotsVariation.V_1;
-			Questions = new DancingDotsQuestionProvider();
+            Context = new MinigamesGameContext(MiniGameCode.DancingDots_lettername, DateTime.Now.Ticks.ToString());
+            Variation = DancingDotsVariation.LetterName;
+            Questions = new DancingDotsQuestionProvider();
             TutorialEnabled = true;
         }
 
-        #region external configuration call
-        public static void SetConfiguration(float _difficulty, int _variation)
-        {
-            instance = new DancingDotsConfiguration()
-            {
-                Difficulty = _difficulty,
-                Variation = (DancingDotsVariation)_variation,
-            };
-        }
-        #endregion
-
-        public IQuestionBuilder SetupBuilder()
+        public override IQuestionBuilder SetupBuilder()
         {
             IQuestionBuilder builder = null;
 
@@ -60,18 +47,25 @@ namespace EA4S.Minigames.DancingDots {
             int nCorrect = 1;
             int nWrong = 0;
 
-            var builderParams = new Teacher.QuestionBuilderParameters();
-            builderParams.letterFilters.excludeDiacritics = LetterFilters.ExcludeDiacritics.AllButMain;
-            builderParams.letterFilters.excludeLetterVariations = LetterFilters.ExcludeLetterVariations.All;
-            builderParams.wordFilters.excludeDiacritics = false;
-            builderParams.wordFilters.excludeLetterVariations = true;
-            builderParams.letterFilters.excludeDiphthongs = true;
-            builder = new RandomLettersQuestionBuilder(nPacks, nCorrect, nWrong, parameters:builderParams);
+            var builderParams = new QuestionBuilderParameters();
 
+            switch (Variation) {
+                case DancingDotsVariation.LetterName:
+                    throw new NotImplementedException("This variation has been removed!");
+                case DancingDotsVariation.LetterAny:
+                    // This variation selects the main diacritics only
+                    builderParams.letterFilters.excludeDiacritics = LetterFilters.ExcludeDiacritics.AllButMain;
+                    builderParams.letterFilters.excludeLetterVariations = LetterFilters.ExcludeLetterVariations.All;
+                    builderParams.letterFilters.requireDiacritics = true;
+                    builder = new RandomLettersQuestionBuilder(nPacks, nCorrect, nWrong, parameters: builderParams);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
             return builder;
         }
 
-        public MiniGameLearnRules SetupLearnRules()
+        public override MiniGameLearnRules SetupLearnRules()
         {
             var rules = new MiniGameLearnRules();
             // example: a.minigameVoteSkewOffset = 1f;
@@ -79,4 +73,5 @@ namespace EA4S.Minigames.DancingDots {
         }
 
     }
+
 }

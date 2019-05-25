@@ -1,8 +1,9 @@
-﻿using EA4S.MinigamesCommon;
+﻿using Antura.Core;
+using Antura.Keeper;
 
-namespace EA4S.Minigames.FastCrowd
+namespace Antura.Minigames.FastCrowd
 {
-    public class FastCrowdIntroductionState : IState
+    public class FastCrowdIntroductionState : FSM.IState
     {
         FastCrowdGame game;
 
@@ -18,25 +19,18 @@ namespace EA4S.Minigames.FastCrowd
         {
             nextState = false;
             playIntro = false;
-
-            if (FastCrowdConfiguration.Instance.Variation == FastCrowdVariation.Alphabet) {
-                game.Context.GetAudioManager().PlayDialogue(Database.LocalizationDataId.FastCrowd_alphabet_Title, () => { playIntro = true; });
-            } else if (FastCrowdConfiguration.Instance.Variation == FastCrowdVariation.Counting) {
-                game.Context.GetAudioManager().PlayDialogue(Database.LocalizationDataId.FastCrowd_counting_Title, () => { playIntro = true; });
-            } else if (FastCrowdConfiguration.Instance.Variation == FastCrowdVariation.Letter) {
-                game.Context.GetAudioManager().PlayDialogue(Database.LocalizationDataId.FastCrowd_letter_Title, () => { playIntro = true; });
-            } else if (FastCrowdConfiguration.Instance.Variation == FastCrowdVariation.Spelling) {
-                game.Context.GetAudioManager().PlayDialogue(Database.LocalizationDataId.FastCrowd_spelling_Title, () => { playIntro = true; });
-            } else if (FastCrowdConfiguration.Instance.Variation == FastCrowdVariation.Words) {
-                game.Context.GetAudioManager().PlayDialogue(Database.LocalizationDataId.FastCrowd_words_Title, () => { playIntro = true; });
+            if (AppManager.I.AppSettings.EnglishSubtitles) {
+                KeeperManager.I.PlayDialog(FastCrowdConfiguration.Instance.TitleLocalizationId, true, true, () => { playIntro = true; });
             } else {
-                nextState = true;
+                game.Context.GetAudioManager().PlayDialogue(FastCrowdConfiguration.Instance.TitleLocalizationId, () => { playIntro = true; });
             }
 
             game.Context.GetAudioManager().PlayMusic(Music.Theme10);
         }
 
-        public void ExitState() { }
+        public void ExitState()
+        {
+        }
 
         public void Update(float delta)
         {
@@ -48,16 +42,10 @@ namespace EA4S.Minigames.FastCrowd
             if (playIntro) {
                 playIntro = false;
 
-                if (FastCrowdConfiguration.Instance.Variation == FastCrowdVariation.Alphabet) {
-                    game.Context.GetAudioManager().PlayDialogue(Database.LocalizationDataId.FastCrowd_alphabet_Intro, () => { nextState = true; });
-                } else if (FastCrowdConfiguration.Instance.Variation == FastCrowdVariation.Counting) {
-                    game.Context.GetAudioManager().PlayDialogue(Database.LocalizationDataId.FastCrowd_counting_Intro, () => { nextState = true; });
-                } else if (FastCrowdConfiguration.Instance.Variation == FastCrowdVariation.Letter) {
-                    game.Context.GetAudioManager().PlayDialogue(Database.LocalizationDataId.FastCrowd_letter_Intro, () => { nextState = true; });
-                } else if (FastCrowdConfiguration.Instance.Variation == FastCrowdVariation.Spelling) {
-                    game.Context.GetAudioManager().PlayDialogue(Database.LocalizationDataId.FastCrowd_spelling_Intro, () => { nextState = true; });
-                } else if (FastCrowdConfiguration.Instance.Variation == FastCrowdVariation.Words) {
-                    game.Context.GetAudioManager().PlayDialogue(Database.LocalizationDataId.FastCrowd_words_Intro, () => { nextState = true; });
+                if (AppManager.I.AppSettings.EnglishSubtitles) {
+                    KeeperManager.I.PlayDialog(FastCrowdConfiguration.Instance.IntroLocalizationId, true, true, () => { nextState = true; });
+                } else {
+                    game.Context.GetAudioManager().PlayDialogue(FastCrowdConfiguration.Instance.IntroLocalizationId, () => { nextState = true; });
                 }
             }
         }

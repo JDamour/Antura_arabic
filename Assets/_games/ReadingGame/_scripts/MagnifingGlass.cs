@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace EA4S.Minigames.ReadingGame
+namespace Antura.Minigames.ReadingGame
 {
     public class MagnifingGlass : MonoBehaviour
     {
@@ -58,6 +58,7 @@ namespace EA4S.Minigames.ReadingGame
 
         void Start()
         {
+            spriteRenderer.sharedMaterial = ((ReadingGameGame)ReadingGameGame.I).magnifyingGlassMaterial;
             Update();
         }
 

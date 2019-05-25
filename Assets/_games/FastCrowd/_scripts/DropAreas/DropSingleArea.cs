@@ -1,11 +1,10 @@
-﻿using EA4S.Helpers;
-using EA4S.MinigamesAPI;
-using EA4S.UI;
+﻿using Antura.Helpers;
+using Antura.LivingLetters;
+using Antura.UI;
 using UnityEngine;
-using EA4S.Utilities;
 using TMPro;
 
-namespace EA4S.Minigames.FastCrowd
+namespace Antura.Minigames.FastCrowd
 {
     public class DropSingleArea : MonoBehaviour
     {
@@ -20,17 +19,16 @@ namespace EA4S.Minigames.FastCrowd
         Vector3 enabledPos, disabledPos;
 
         #region Api
-        public void Init(ILivingLetterData _data, DropContainer _dropContainer, bool asImage) {
+        public void Init(ILivingLetterData _data, DropContainer _dropContainer, bool asImage)
+        {
             DropContain = _dropContainer;
             Data = _data;
-            if (asImage && !(_data is LL_LetterData))
-            {
+            if (asImage && !(_data is LL_LetterData)) {
                 LetterLable.text = string.Empty;
                 DrawText.gameObject.SetActive(true);
-                
+
                 DrawText.text = Data.DrawingCharForLivingLetter;
-            } else
-            {
+            } else {
                 LetterLable.font = normalFont;
                 LetterLable.GetComponent<TextRender>().SetLetterData(Data);
                 DrawText.gameObject.SetActive(false);
@@ -66,47 +64,54 @@ namespace EA4S.Minigames.FastCrowd
         /// <summary>
         /// 
         /// </summary>
-        public void SetDisbled() {
+        public void SetDisbled()
+        {
             AreaState = State.disabled;
         }
 
         /// <summary>
         /// 
         /// </summary>
-        public void SetEnabled() {
+        public void SetEnabled()
+        {
             AreaState = State.enabled;
         }
 
         /// <summary>
         /// Set Matching state.
         /// </summary>
-        public void SetMatching() {
+        public void SetMatching()
+        {
             AreaState = State.matching;
         }
 
         /// <summary>
         /// Set Matching state.
         /// </summary>
-        public void SetMatchingWrong() {
+        public void SetMatchingWrong()
+        {
             AreaState = State.matching_wrong;
         }
 
         /// <summary>
         /// Automatically return to state pre matching.
         /// </summary>
-        public void DeactivateMatching() {
+        public void DeactivateMatching()
+        {
 
-            if (GetComponent<Collider>().enabled)
+            if (GetComponent<Collider>().enabled) {
                 AreaState = State.enabled;
-            else
+            } else {
                 AreaState = State.disabled;
+            }
         }
         #endregion
 
         /// <summary>
         /// Stete of drop Area.
         /// </summary>
-        public State AreaState {
+        public State AreaState
+        {
             get { return areaState; }
             protected set {
                 if (areaState != value) {
@@ -124,31 +129,31 @@ namespace EA4S.Minigames.FastCrowd
         /// <summary>
         /// Effects to state change.
         /// </summary>
-        void areaStateChanged() {
+        void areaStateChanged()
+        {
             switch (AreaState) {
                 case State.enabled:
                     GetComponent<Collider>().enabled = true;
-                    GetComponent<MeshRenderer>().materials[0].SetColor("_EmissionColor", Color.yellow);
+                    GetComponent<MeshRenderer>().materials[0].color = Color.yellow;
                     break;
                 case State.disabled:
                     GetComponent<Collider>().enabled = false;
-                    GetComponent<MeshRenderer>().materials[0].SetColor("_EmissionColor", Color.gray);
+                    GetComponent<MeshRenderer>().materials[0].color = Color.gray;
                     break;
                 case State.matching:
                     // Matching preview right
-                    GetComponent<MeshRenderer>().materials[0].SetColor("_EmissionColor", Color.green);
+                    GetComponent<MeshRenderer>().materials[0].color = Color.green;
                     break;
                 case State.matching_wrong:
                     // Matching preview wrong
-                    GetComponent<MeshRenderer>().materials[0].SetColor("_EmissionColor", new Color(248,0,0));
-                    break;
-                default:
+                    GetComponent<MeshRenderer>().materials[0].color = new Color(248, 0, 0);
                     break;
             }
         }
 
 
-        public enum State {
+        public enum State
+        {
             isnull,
             disabled,
             enabled,

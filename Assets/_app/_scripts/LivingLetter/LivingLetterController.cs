@@ -1,11 +1,12 @@
-﻿using EA4S.Helpers;
-using EA4S.MinigamesAPI;
-using EA4S.MinigamesCommon;
-using EA4S.Utilities;
+﻿using Antura.Helpers;
+using Antura.LivingLetters;
+using Antura.Minigames;
+using Antura.Utilities;
 using UnityEngine;
 using TMPro;
+using System.Collections.Generic;
 
-namespace EA4S.LivingLetters
+namespace Antura.LivingLetters
 {
     /// <summary>
     /// Controller of Living Letter characters. Functions as a view for learning data.
@@ -16,12 +17,13 @@ namespace EA4S.LivingLetters
         public const float WALKING_SPEED = 0.0f;
         public const float RUN_SPEED = 1.0f;
 
-        float idleTimer = 3;
+        private float idleTimer = 3;
 
         #region public properties
 
         [Header("References")]
         public Transform innerTransform;
+
         public Transform contentTransform;
         public RectTransform textTransform;
 
@@ -31,8 +33,8 @@ namespace EA4S.LivingLetters
         public TextMeshPro Drawing;
         public SpriteRenderer ImageSprite;
 
-        Vector3 startScale;
-        Vector2 startTextScale;
+        private Vector3 startScale;
+        private Vector2 startTextScale;
 
         [Range(1, 2)]
         public float Scale = 1.0f;
@@ -42,26 +44,25 @@ namespace EA4S.LivingLetters
         public GameObject poofPrefab;
 
         public float DancingSpeed = 1;
-        int dancingRefs = 0;
+        private int dancingRefs = 0;
 
-        LLAnimationStates backState = LLAnimationStates.LL_idle;
-        bool hasToGoBackState = false;
-        bool inIdleAlternative = false;
-        bool started = false;
+        private LLAnimationStates backState = LLAnimationStates.LL_idle;
+        private bool hasToGoBackState;
+        private bool inIdleAlternative;
+        private bool started;
 
         #endregion
 
         #region runtime variables
+
         /// <summary>
         /// Gets the data.
         /// </summary>
         ILivingLetterData data;
+
         public ILivingLetterData Data
         {
-            get
-            {
-                return data;
-            }
+            get { return data; }
             private set
             {
                 data = value;
@@ -136,6 +137,7 @@ namespace EA4S.LivingLetters
                 hasToGoBackState = false;
             }
         }
+
         private LLAnimationStates state = LLAnimationStates.LL_idle;
 
         Animator animator
@@ -143,11 +145,14 @@ namespace EA4S.LivingLetters
             get
             {
                 if (!anim)
+                {
                     anim = GetComponentInChildren<Animator>();
+                }
                 return anim;
             }
             set { anim = value; }
         }
+
         private Animator anim;
 
         System.Action onTwirlCallback;
@@ -155,6 +160,7 @@ namespace EA4S.LivingLetters
         #endregion
 
         #region Unity events
+
         void Awake()
         {
             startScale = transform.localScale;
@@ -183,21 +189,20 @@ namespace EA4S.LivingLetters
         /// <summary>
         /// Manually initializes object with the specified text.
         /// </summary>
-        /// <param name="data">Used as data reference.</param>
-        /// <param name="customText">The text.</param>
-        /// <param name="scale">The scale used to resize the LL.</param>
-        public void Init(ILivingLetterData data, string customText, float scale)
+        /// <param name="_data">Used as data reference.</param>
+        /// <param name="_customText">The text.</param>
+        /// <param name="_scale">The scale used to resize the LL.</param>
+        public void Init(ILivingLetterData _data, string _customText, float _scale)
         {
             idleTimer = Random.Range(3, 8);
-
-            Data = data;
+            Data = _data;
             ImageSprite.enabled = false;
             Drawing.enabled = false;
             Label.enabled = true;
-
-            Label.text = customText;
-            Scale = scale;
+            Label.text = _customText;
+            Scale = _scale;
         }
+
         #endregion
 
         #region events handlers
@@ -219,12 +224,18 @@ namespace EA4S.LivingLetters
             {
                 // going limbless
                 if (started)
+                {
                     Poof();
+                }
 
                 for (int i = 0; i < normalGraphics.Length; ++i)
+                {
                     normalGraphics[i].SetActive(false);
+                }
                 for (int i = 0; i < limblessGraphics.Length; ++i)
+                {
                     limblessGraphics[i].SetActive(true);
+                }
             }
             else if (_oldState == LLAnimationStates.LL_limbless && _newState != LLAnimationStates.LL_limbless)
             {
@@ -232,9 +243,13 @@ namespace EA4S.LivingLetters
                     Poof();
 
                 for (int i = 0; i < normalGraphics.Length; ++i)
+                {
                     normalGraphics[i].SetActive(true);
+                }
                 for (int i = 0; i < limblessGraphics.Length; ++i)
+                {
                     limblessGraphics[i].SetActive(false);
+                }
             }
 
             switch (_newState)
@@ -279,7 +294,6 @@ namespace EA4S.LivingLetters
                     animator.SetFloat("random", Random.value);
                     animator.SetTrigger("doAlternative");
                 }
-
             }
 
             float oldSpeed = animator.GetFloat("walkSpeed");
@@ -287,9 +301,13 @@ namespace EA4S.LivingLetters
             animator.SetFloat("walkSpeed", Mathf.Lerp(oldSpeed, walkingSpeed, Time.deltaTime * 6.0f));
 
             if (dancingRefs > 0)
+            {
                 animator.speed = Mathf.Lerp(animator.speed, DancingSpeed, Time.deltaTime * 10.0f);
+            }
             else
+            {
                 animator.speed = Mathf.Lerp(animator.speed, 1, Time.deltaTime * 10.0f);
+            }
         }
 
         void LateUpdate()
@@ -319,6 +337,7 @@ namespace EA4S.LivingLetters
         }
 
         bool crouch;
+
         public bool Crouching
         {
             get { return crouch; }
@@ -326,12 +345,12 @@ namespace EA4S.LivingLetters
             {
                 crouch = value;
                 animator.SetBool("crouch", value);
-
             }
         }
 
         bool jumping;
         bool falling;
+
         public bool Falling
         {
             get { return falling; }
@@ -339,11 +358,11 @@ namespace EA4S.LivingLetters
             {
                 falling = value;
                 animator.SetBool("falling", value);
-
             }
         }
 
         bool fear;
+
         public bool HasFear
         {
             get { return fear; }
@@ -356,6 +375,7 @@ namespace EA4S.LivingLetters
 
 
         bool hooraying;
+
         public bool Horraying
         {
             get { return hooraying; }
@@ -384,6 +404,7 @@ namespace EA4S.LivingLetters
         /// Speed is 0 (walk) to 1 (running).
         /// </summary>
         float walkingSpeed;
+
         public void SetWalkingSpeed(float speed = WALKING_SPEED)
         {
             walkingSpeed = speed;
@@ -402,7 +423,9 @@ namespace EA4S.LivingLetters
                 (State != LLAnimationStates.LL_rocketing))
             {
                 if (!hasToGoBackState)
+                {
                     backState = State;
+                }
                 SetState(LLAnimationStates.LL_still);
                 hasToGoBackState = true;
             }
@@ -410,7 +433,9 @@ namespace EA4S.LivingLetters
             if (!hooraying)
             {
                 if (inIdleAlternative)
+                {
                     animator.SetTrigger("stopAlternative");
+                }
                 animator.SetTrigger("doHorray");
             }
         }
@@ -421,14 +446,37 @@ namespace EA4S.LivingLetters
                 (State != LLAnimationStates.LL_idle))
             {
                 if (!hasToGoBackState)
+                {
                     backState = State;
+                }
                 SetState(LLAnimationStates.LL_still);
                 hasToGoBackState = true;
             }
 
             if (inIdleAlternative)
+            {
                 animator.SetTrigger("stopAlternative");
+            }
             animator.SetTrigger("doChestStop");
+        }
+
+        public void MarkLetters(List<LL_LetterData> toMark, Color color)
+        {
+            var word = Data as LL_WordData;
+            if (word != null)
+            {
+                //string text = ArabicAlphabetHelper.ProcessArabicString(word.Data.Arabic);
+
+                List<ArabicAlphabetHelper.ArabicStringPart> parts = new List<ArabicAlphabetHelper.ArabicStringPart>();
+
+                foreach (var markedLetter in toMark)
+                    parts.AddRange(ArabicAlphabetHelper.FindLetter(Core.AppManager.I.DB, word.Data, markedLetter.Data, true));
+
+                if (parts.Count > 0)
+                {
+                    Label.text = Antura.UI.ArabicTextUtilities.GetWordWithMarkedLettersText(word.Data, parts, color);
+                }
+            }
         }
 
         public void DoAngry()
@@ -437,13 +485,17 @@ namespace EA4S.LivingLetters
                 (State != LLAnimationStates.LL_idle))
             {
                 if (!hasToGoBackState)
+                {
                     backState = State;
+                }
                 SetState(LLAnimationStates.LL_still);
                 hasToGoBackState = true;
             }
 
             if (inIdleAlternative)
+            {
                 animator.SetTrigger("stopAlternative");
+            }
             animator.SetFloat("random", Random.value);
             animator.SetTrigger("doAngry");
         }
@@ -454,13 +506,17 @@ namespace EA4S.LivingLetters
                 (State != LLAnimationStates.LL_idle))
             {
                 if (!hasToGoBackState)
+                {
                     backState = State;
+                }
                 SetState(LLAnimationStates.LL_still);
                 hasToGoBackState = true;
             }
 
             if (inIdleAlternative)
+            {
                 animator.SetTrigger("stopAlternative");
+            }
             animator.SetTrigger("doHighFive");
         }
 
@@ -490,7 +546,6 @@ namespace EA4S.LivingLetters
         /// onLetterShowingBack is called when the letter is twirling and it shows you the back;
         /// so you can swap letter in that moment!
         /// </summary>
-
         public void DoTwirl(System.Action onLetterShowingBack)
         {
             if ((State != LLAnimationStates.LL_still) &&
@@ -498,13 +553,17 @@ namespace EA4S.LivingLetters
                 (State != LLAnimationStates.LL_dancing))
             {
                 if (!hasToGoBackState)
+                {
                     backState = State;
+                }
                 SetState(LLAnimationStates.LL_still);
                 hasToGoBackState = true;
             }
 
             if (inIdleAlternative)
+            {
                 animator.SetTrigger("stopAlternative");
+            }
 
             onTwirlCallback = onLetterShowingBack;
             animator.SetTrigger("doTwirl");
@@ -523,13 +582,17 @@ namespace EA4S.LivingLetters
                 (State != LLAnimationStates.LL_walking))
             {
                 if (!hasToGoBackState)
+                {
                     backState = State;
+                }
                 SetState(LLAnimationStates.LL_still);
                 hasToGoBackState = true;
             }
 
             if (inIdleAlternative)
+            {
                 animator.SetTrigger("stopAlternative");
+            }
             animator.SetBool("jumping", true);
             animator.SetBool("falling", true);
         }
@@ -552,13 +615,17 @@ namespace EA4S.LivingLetters
                 (State != LLAnimationStates.LL_idle))
             {
                 if (!hasToGoBackState)
+                {
                     backState = State;
+                }
                 SetState(LLAnimationStates.LL_still);
                 hasToGoBackState = true;
             }
 
             if (inIdleAlternative)
+            {
                 animator.SetTrigger("stopAlternative");
+            }
             animator.SetTrigger("doSmallJump");
         }
 
@@ -567,7 +634,7 @@ namespace EA4S.LivingLetters
         /// </summary>
         public void Poof(float verticalOffset = 0)
         {
-            var puffGo = GameObject.Instantiate(poofPrefab);
+            var puffGo = Instantiate(poofPrefab);
             puffGo.AddComponent<AutoDestroy>().duration = 2;
             puffGo.SetActive(true);
             var position = transform.position + transform.up * 3 + transform.forward * 2;

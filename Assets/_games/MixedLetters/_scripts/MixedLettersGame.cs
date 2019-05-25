@@ -2,14 +2,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using EA4S.MinigamesAPI;
-using EA4S.MinigamesCommon;
+using Antura.LivingLetters;
+using Antura.Minigames;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace EA4S.Minigames.MixedLetters
+namespace Antura.Minigames.MixedLetters
 {
-    public class MixedLettersGame : MiniGame
+    public class MixedLettersGame : MiniGameController
     {
         public static MixedLettersGame instance;
 
@@ -24,6 +24,24 @@ namespace EA4S.Minigames.MixedLetters
             get
             {
                 return difficulty;
+            }
+        }
+
+        public int STARS_1_THRESHOLD { get { return Mathf.CeilToInt(0.33f * TotalNumRounds); } }
+        public int STARS_2_THRESHOLD { get { return Mathf.CeilToInt(0.66f * TotalNumRounds); } }
+        public int STARS_3_THRESHOLD { get { return TotalNumRounds; } }
+
+        public int CurrentStars
+        {
+            get
+            {
+                if (numRoundsWon < STARS_1_THRESHOLD)
+                    return 0;
+                if (numRoundsWon < STARS_2_THRESHOLD)
+                    return 1;
+                if (numRoundsWon < STARS_3_THRESHOLD)
+                    return 2;
+                return 3;
             }
         }
 
@@ -141,7 +159,7 @@ namespace EA4S.Minigames.MixedLetters
 
             entireAlphabet = new List<ILivingLetterData>();
 
-            isSpelling = MixedLettersConfiguration.Instance.Variation == MixedLettersConfiguration.MixedLettersVariation.Spelling;
+            isSpelling = MixedLettersConfiguration.Instance.Variation == MixedLettersVariation.BuildWord;
 
             if (!isSpelling)
             {
@@ -192,7 +210,7 @@ namespace EA4S.Minigames.MixedLetters
             }
         }
 
-        protected override IState GetInitialState()
+        protected override FSM.IState GetInitialState()
         {
             return TutorialState;
         }
@@ -297,7 +315,7 @@ namespace EA4S.Minigames.MixedLetters
 
                 for (int i = 0; i < PromptLettersInOrder.Count; i++)
                 {
-                    victimLLWord += ((LL_LetterData)PromptLettersInOrder[i]).Data.GetChar();
+                    victimLLWord += ((LL_LetterData)PromptLettersInOrder[i]).Data.GetStringForDisplay();
 
                     if (i != PromptLettersInOrder.Count - 1)
                     {
@@ -316,9 +334,9 @@ namespace EA4S.Minigames.MixedLetters
 
         public void SayQuestion(Action onQuestionOver)
         {
-            if (MixedLettersConfiguration.Instance.Variation == MixedLettersConfiguration.MixedLettersVariation.Spelling)
+            if (MixedLettersConfiguration.Instance.Variation == MixedLettersVariation.BuildWord)
             {
-                MixedLettersConfiguration.Instance.Context.GetAudioManager().PlayLetterData(question);
+                MixedLettersConfiguration.Instance.Context.GetAudioManager().PlayVocabularyData(question);
 
                 if (onQuestionOver != null)
                 {
@@ -338,7 +356,7 @@ namespace EA4S.Minigames.MixedLetters
 
             foreach (ILivingLetterData letterData in PromptLettersInOrder)
             {
-                audioManager.PlayLetterData(letterData);
+                audioManager.PlayVocabularyData(letterData);
 
                 yield return new WaitForSeconds(0.75f);
             }
@@ -349,29 +367,50 @@ namespace EA4S.Minigames.MixedLetters
             }
         }
 
+
+
         public void VerifyLetters()
         {
+            bool isValid = true;
+
             for (int i = 0; i < PromptLettersInOrder.Count; i++)
             {
                 DropZoneController dropZone = dropZoneControllers[i];
                 
                 if (dropZone.droppedLetter == null
-                    || dropZone.droppedLetter.GetLetter().Id != PromptLettersInOrder[i].Id
+                    || !MixedLettersConfiguration.Instance.IsDataMatching(dropZone.droppedLetter.GetLetter(), PromptLettersInOrder[i])
                       || Mathf.Abs(dropZone.droppedLetter.transform.rotation.z) > 0.1f)
                 {
-                    for (int j = 0; j < PromptLettersInOrder.Count; j++)
-                    {
-                        SeparateLetterController letter = SeparateLettersSpawnerController.instance.separateLetterControllers[j];
-                        letter.SetIsSubjectOfTutorial(
-                            roundNumber == 0 && TutorialEnabled 
-                            &&  letter == dropZone.correctLetter);
-                    }
+                    if (isValid)
+                        for (int j = 0; j < PromptLettersInOrder.Count; j++)
+                        {
+                            SeparateLetterController letter = SeparateLettersSpawnerController.instance.separateLetterControllers[j];
+                            letter.SetIsSubjectOfTutorial(
+                                roundNumber == 0 && TutorialEnabled 
+                                &&  letter == dropZone.correctLetter);
+                        }
 
-                    return;
+                    isValid = false;
+                }
+                else
+                {
+                    if (dropZone.gameObject.activeInHierarchy)
+                    {
+                        dropZone.droppedLetter.DisableCollider();
+                        dropZone.Disable();
+                        dropZone.DisableCollider();
+                        dropZone.ShowGreenTick();
+                    }
                 }
             }
 
-            OnRoundWon();
+            if (isValid)
+            {
+                for (int i = 0; i < PromptLettersInOrder.Count; i++)
+                    dropZoneControllers[i].droppedLetter.EnableCollider();
+
+                OnRoundWon();
+            }
         }
 
         private void OnRoundWon()
@@ -379,6 +418,7 @@ namespace EA4S.Minigames.MixedLetters
             _wasLastRoundWon = true;
 
             numRoundsWon++;
+            Context.GetOverlayWidget().SetStarsScore(numRoundsWon);
             
             HideRotationButtons();
             ShowGreenTicks();
@@ -392,28 +432,6 @@ namespace EA4S.Minigames.MixedLetters
         public void DisableRepeatPromptButton()
         {
             repeatPromptButton.gameObject.SetActive(false);
-        }
-
-        public int GetNumStarsAsOfCurrentRound()
-        {
-            float progress = (numRoundsWon + 0f) / TotalNumRounds;
-
-            if (progress < 0.33f)
-            {
-                return 0;
-            }
-
-            else if (progress < 0.67f)
-            {
-                return 1;
-            }
-
-            else if (progress < 1f)
-            {
-                return 2;
-            }
-
-            else return 3;
         }
     }
 }

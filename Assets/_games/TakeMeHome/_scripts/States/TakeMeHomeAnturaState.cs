@@ -1,8 +1,8 @@
-﻿using EA4S.MinigamesCommon;
+using Antura.Minigames;
 
-namespace EA4S.Minigames.TakeMeHome
+namespace Antura.Minigames.TakeMeHome
 {
-	public class TakeMeHomeAnturaState : IState
+	public class TakeMeHomeAnturaState : FSM.IState
 	{
 		TakeMeHomeGame game;
 

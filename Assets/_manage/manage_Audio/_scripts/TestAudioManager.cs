@@ -1,11 +1,12 @@
-﻿using EA4S.Audio;
-using EA4S.Helpers;
-using EA4S.MinigamesCommon;
-using EA4S.UI;
+using Antura.Audio;
+using Antura.Core;
+using Antura.Helpers;
+using Antura.Minigames;
+using Antura.UI;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace EA4S.Test
+namespace Antura.Test
 {
     /// <summary>
     /// Test class for testing the audio manager.
@@ -27,10 +28,10 @@ namespace EA4S.Test
 
             InitUI();
 
-            foreach (var l in AppManager.I.DB.StaticDatabase.GetLetterTable().GetValuesTyped())
-            {
-                if (AudioManager.I.GetAudioClip(l) == null)
+            foreach (var l in AppManager.I.DB.StaticDatabase.GetLetterTable().GetValuesTyped()) {
+                if (AudioManager.I.GetAudioClip(l) == null) {
                     Debug.LogError("Cannot find audio file: " + l);
+                }
             }
         }
 
@@ -98,7 +99,8 @@ namespace EA4S.Test
 
         #region music
 
-        public GameObject PanelMusic1 {
+        public GameObject PanelMusic1
+        {
             get { return PanelMusic; }
             set { PanelMusic = value; }
         }
@@ -169,9 +171,9 @@ namespace EA4S.Test
         public void StopAll()
         {
             AudioManager.I.StopMusic();
-            AudioManager.I.StopSounds();
+            AudioManager.I.StopSfxGroup();
             AudioManager.I.StopDialogue(true);
-            AudioManager.I.StopLettersWordsPhrases();
+            AudioManager.I.StopVocabularyGroup();
         }
     }
 }

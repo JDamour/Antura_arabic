@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-namespace EA4S.Minigames.Tobogan
+namespace Antura.Minigames.Tobogan
 {
     public class HeightMeter : MonoBehaviour
     {
@@ -20,6 +20,12 @@ namespace EA4S.Minigames.Tobogan
         public float targetAnimationSpeed = 5.0f;
 
         List<GameObject> dots = new List<GameObject>();
+
+        void Awake()
+        {
+            // Instantiate a runtime material
+            dotsMaterial = new Material(dotsMaterial);
+        }
 
         void Update()
         {
@@ -54,6 +60,7 @@ namespace EA4S.Minigames.Tobogan
                     {
                         var newDot = Instantiate(dotPrefab);
                         newDot.SetActive(true);
+                        newDot.GetComponent<MeshRenderer>().material = dotsMaterial;
                         newDot.transform.SetParent(transform);
                         dots.Add(newDot);
                     }

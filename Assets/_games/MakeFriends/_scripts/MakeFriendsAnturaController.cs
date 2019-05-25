@@ -1,7 +1,7 @@
-﻿using UnityEngine;
-using EA4S.Antura;
+﻿using Antura.Dog;
+using UnityEngine;
 
-namespace EA4S.Minigames.MakeFriends
+namespace Antura.Minigames.MakeFriends
 {
     public class MakeFriendsAnturaController : MonoBehaviour
     {
@@ -29,6 +29,7 @@ namespace EA4S.Minigames.MakeFriends
         public void ReactNegatively()
         {
             animationController.DoShout();
+            Audio.AudioManager.I.PlaySound(Sfx.DogBarking);
         }
 
         public void ReactPositively()

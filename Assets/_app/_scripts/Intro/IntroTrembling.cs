@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace EA4S.Intro
+namespace Antura.Intro
 {
     // TODO refactor: could not find any reference to this script in the Intro scene
     public class IntroTrembling : MonoBehaviour
@@ -44,7 +44,8 @@ namespace EA4S.Intro
             Vector3 noise = new Vector3(
                 tremblingAmountX * Mathf.Cos(Mathf.Repeat(Time.realtimeSinceStartup * tremblingSpeedX, 2 * Mathf.PI)),
                 tremblingAmountY * Mathf.Cos(Mathf.Repeat(Time.realtimeSinceStartup * tremblingSpeedY, 2 * Mathf.PI)),
-                tremblingAmountZ * Mathf.Cos(Mathf.Repeat(Time.realtimeSinceStartup * tremblingSpeedZ, 2 * Mathf.PI)));
+                tremblingAmountZ * Mathf.Cos(Mathf.Repeat(Time.realtimeSinceStartup * tremblingSpeedZ, 2 * Mathf.PI))
+            );
 
             tremblingOffset = Vector3.Lerp(tremblingOffset, noise, 40.0f * Time.deltaTime);
 

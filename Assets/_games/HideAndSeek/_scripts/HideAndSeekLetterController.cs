@@ -1,8 +1,8 @@
-﻿using UnityEngine;
+﻿using Antura.LivingLetters;
+using UnityEngine;
 using DG.Tweening;
-using EA4S.LivingLetters;
 
-namespace EA4S.Minigames.HideAndSeek
+namespace Antura.Minigames.HideAndSeek
 {
     public enum MovementType
     {
@@ -150,7 +150,7 @@ namespace EA4S.Minigames.HideAndSeek
             if (isClickable && onLetterTouched != null)
             {
                 HideAndSeekConfiguration.Instance.Context.GetAudioManager().PlaySound(Sfx.Blip);
-                HideAndSeekConfiguration.Instance.Context.GetAudioManager().PlayLetterData(view.Data);
+                HideAndSeekConfiguration.Instance.Context.GetAudioManager().PlayVocabularyData(view.Data);
                 isClickable = false;
                 onLetterTouched(id);
             }

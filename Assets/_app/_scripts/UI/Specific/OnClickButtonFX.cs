@@ -1,8 +1,8 @@
-﻿using EA4S.Audio;
+﻿using Antura.Audio;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace EA4S.UI
+namespace Antura.UI
 {
     /// <summary>
     /// Chose and play sound effect on button click.
@@ -10,7 +10,6 @@ namespace EA4S.UI
     [RequireComponent(typeof(Button))]
     public class OnClickButtonFX : MonoBehaviour
     {
-
         public Sfx SfxOnClick = Sfx.UIPopup;
 
         void OnEnable()

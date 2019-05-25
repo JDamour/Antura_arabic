@@ -1,13 +1,12 @@
-﻿using UnityEngine;
+﻿using Antura.Audio;
+using Antura.Database;
+using Antura.UI;
+using Antura.Core;
 using System.Collections.Generic;
-using EA4S.Audio;
-using EA4S.Core;
-using EA4S.Database;
-using EA4S.UI;
+using UnityEngine;
 
-namespace EA4S.Book
+namespace Antura.Book
 {
-
     /// <summary>
     /// Displays information on all learning items the player has unlocked.
     /// </summary>
@@ -15,10 +14,12 @@ namespace EA4S.Book
     {
         [Header("Prefabs")]
         public GameObject CategoryItemPrefab;
+
         public GameObject LearningBlockItemPrefab;
 
         [Header("References")]
         public GameObject DetailPanel;
+
         public GameObject Submenu;
         public GameObject SubmenuContainer;
         public GameObject ListPanel;
@@ -30,9 +31,9 @@ namespace EA4S.Book
         public TextRender DetailDescriptionAr;
         public TextRender ScoreText;
 
-        int currentStage;
-        GameObject btnGO;
-        LearningBlockInfo currentLearningBlock;
+        private int currentStage;
+        private GameObject btnGO;
+        private LearningBlockInfo currentLearningBlock;
 
         void Start()
         {
@@ -76,7 +77,8 @@ namespace EA4S.Book
                 btnGO.transform.SetParent(SubmenuContainer.transform, false);
                 btnGO.GetComponent<MenuItemCategory>().Init(
                     this,
-                    new GenericCategoryData {
+                    new GenericCategoryData
+                    {
                         area = VocabularyChapter.LearningBlock,
                         Id = stage.Id,
                         Title = stage.Id,
@@ -85,7 +87,6 @@ namespace EA4S.Book
                     int.Parse(stage.Id) == currentStage
                 );
             }
-
         }
 
         public void SelectSubCategory(GenericCategoryData _stage)
@@ -97,7 +98,7 @@ namespace EA4S.Book
         {
             currentLearningBlock = _currentLearningBlock;
             DetailPanel.SetActive(true);
-            AudioManager.I.PlayDialogue(currentLearningBlock.data.GetTitleSoundFilename());
+            AudioManager.I.PlayLearningBlock(currentLearningBlock.data.AudioFile);
 
             DetailCodeText.text = currentLearningBlock.data.Id;
             DetailTitleText.text = currentLearningBlock.data.Title_Ar;
@@ -127,6 +128,5 @@ namespace EA4S.Book
                 t.GetComponent<ItemLearningBlock>().Select(id);
             }
         }
-
     }
 }

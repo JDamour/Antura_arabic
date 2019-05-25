@@ -1,9 +1,9 @@
-﻿using EA4S.MinigamesAPI;
-using EA4S.MinigamesCommon;
+﻿using Antura.LivingLetters;
+using Antura.Minigames;
 
-namespace EA4S.Minigames.FastCrowd
+namespace Antura.Minigames.FastCrowd
 {
-    public class FastCrowdPlayState : IState
+    public class FastCrowdPlayState : FSM.IState
     {
         CountdownTimer gameTime;
         FastCrowdGame game;
@@ -72,6 +72,8 @@ namespace EA4S.Minigames.FastCrowd
             game.Context.GetOverlayWidget().SetClockTime(gameTime.Time);
 
             StopAntura();
+
+            game.QuestionManager.wordComposer.gameObject.SetActive(FastCrowdConfiguration.Instance.NeedsWordComposer);
         }
 
         public void ExitState()
@@ -82,19 +84,19 @@ namespace EA4S.Minigames.FastCrowd
             game.QuestionManager.OnCompleted -= OnQuestionCompleted;
             game.QuestionManager.OnDropped -= OnAnswerDropped;
             game.QuestionManager.Clean();
+            game.QuestionManager.wordComposer.gameObject.SetActive(false);
         }
 
         void OnQuestionCompleted()
         {
-            if (FastCrowdConfiguration.Instance.Variation == FastCrowdVariation.Spelling ||
-                  FastCrowdConfiguration.Instance.Variation == FastCrowdVariation.Letter)
+            if (FastCrowdConfiguration.Instance.NeedsFullQuestionCompleted)
             {
                 // In spelling and letter, increment score only when the full question is completed
                 for (int i = 0; i < game.CurrentChallenge.Count; ++i)
                     game.IncrementScore();
             }
 
-            if (FastCrowdConfiguration.Instance.Variation == FastCrowdVariation.Spelling)
+            if (FastCrowdConfiguration.Instance.Variation == FastCrowdVariation.BuildWord)
             {
                 var question = game.CurrentQuestion;
 
@@ -109,9 +111,7 @@ namespace EA4S.Minigames.FastCrowd
         {
             game.Context.GetCheckmarkWidget().Show(result);
 
-            if ((FastCrowdConfiguration.Instance.Variation != FastCrowdVariation.Spelling &&
-                FastCrowdConfiguration.Instance.Variation != FastCrowdVariation.Letter)
-                )
+            if (!FastCrowdConfiguration.Instance.NeedsFullQuestionCompleted)
             {
                 if (result)
                 {
@@ -123,6 +123,9 @@ namespace EA4S.Minigames.FastCrowd
             }
 
             game.Context.GetAudioManager().PlaySound(result ? Sfx.OK : Sfx.KO);
+
+            if (result && (FastCrowdConfiguration.Instance.Variation == FastCrowdVariation.Counting || FastCrowdConfiguration.Instance.Variation == FastCrowdVariation.Word))
+                game.Context.GetAudioManager().PlayVocabularyData(data);
 
             if (game.CurrentStars == 3)
                 game.SetCurrentState(game.EndState);

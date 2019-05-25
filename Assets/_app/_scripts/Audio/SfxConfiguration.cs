@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace EA4S.Audio
+namespace Antura.Audio
 {
     [System.Serializable]
     public class SfxConfiguration
@@ -10,6 +10,5 @@ namespace EA4S.Audio
         public List<AudioClip> clips = new List<AudioClip>();
         public float volume = 1;
         public float randomPitchOffset = 0;
-
     }
 }

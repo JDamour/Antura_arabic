@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace EA4S.CameraControl
+namespace Antura.CameraControl
 {
     public class CameraMouseOrbit : MonoBehaviour
     {
@@ -20,6 +20,7 @@ namespace EA4S.CameraControl
 
         [Space(20)]
         public bool autoMovement = false;
+
         public float autoSpeedX = 0.2f;
         public float autoSpeedY = 0.1f;
         public float autoSpeedDistance = -0.1f;
@@ -72,10 +73,12 @@ namespace EA4S.CameraControl
 
         public static float ClampAngle(float angle, float min, float max)
         {
-            if (angle < -360F)
+            if (angle < -360F) {
                 angle += 360F;
-            if (angle > 360F)
+            }
+            if (angle > 360F) {
                 angle -= 360F;
+            }
             return Mathf.Clamp(angle, min, max);
         }
     }

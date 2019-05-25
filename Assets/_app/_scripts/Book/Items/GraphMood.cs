@@ -1,7 +1,7 @@
-﻿using EA4S.Core;
+using Antura.Core;
 using UnityEngine;
 
-namespace EA4S.Book
+namespace Antura.Book
 {
     /// <summary>
     /// Shows a graph with the history of moods of the player. 
@@ -15,7 +15,7 @@ namespace EA4S.Book
             int nMoods = 10;
             var latestMoods = AppManager.I.Teacher.GetLastMoodData(nMoods);
             float[] moodValues = latestMoods.ConvertAll(x => x.MoodValue).ToArray();
-            Graph.SetValues(nMoods, AppConstants.MaximumMoodValue, moodValues);
+            Graph.SetValues(nMoods, AppConfig.MaxMoodValue, moodValues);
         }
     }
 }

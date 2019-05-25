@@ -1,8 +1,8 @@
-using EA4S.MinigamesCommon;
+using Antura.Minigames;
 
-namespace EA4S.Assessment
+namespace Antura.Assessment
 {
-    public interface IAssessmentConfiguration: IGameConfiguration
+    public interface IAssessmentConfiguration : IGameConfiguration
     {
         int NumberOfRounds { get; set; }
 

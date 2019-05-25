@@ -1,4 +1,4 @@
-namespace EA4S.Assessment
+namespace Antura.Assessment
 {
     public class DragNDropPlaceholder : IPlaceholder
     {
@@ -9,7 +9,7 @@ namespace EA4S.Assessment
         }
 
         // Question not setted
-        public void SetQuestion( IQuestion question)
+        public void SetQuestion(IQuestion question)
         {
             this.question = question;
         }

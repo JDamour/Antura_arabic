@@ -1,27 +1,27 @@
 ﻿using UnityEngine;
 
-namespace EA4S.Minigames.Maze
+namespace Antura.Minigames.Maze
 {
-	public class MazeDot : MonoBehaviour {
+    public class MazeDot : MonoBehaviour
+    {
 
-		public MazeCharacter character;
-		public bool isClicked = false;
-		// Use this for initialization
-		void Start () {
-		
-		}
-		
-		// Update is called once per frame
-		void Update () {
-		
-		}
+        public MazeCharacter character;
+        public bool isClicked = false;
 
-		void OnMouseDown()
-		{
-			isClicked = true;
-			MazeGame.instance.timer.StopTimer ();
-			MazeGame.instance.currentTutorial.stopCurrentTutorial ();
-			character.setClickedDot ();
-		}
-	}
+        void Start()
+        {
+        }
+
+        void Update()
+        {
+        }
+
+        void OnMouseDown()
+        {
+            isClicked = true;
+            MazeGame.instance.timer.StopTimer();
+            MazeGame.instance.currentTutorial.stopCurrentTutorial();
+            character.setClickedDot();
+        }
+    }
 }

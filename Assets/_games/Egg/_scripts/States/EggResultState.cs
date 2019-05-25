@@ -1,8 +1,9 @@
-﻿using EA4S.MinigamesCommon;
+using Antura.Minigames;
+using UnityEngine;
 
-namespace EA4S.Minigames.Egg
+namespace Antura.Minigames.Egg
 {
-    public class EggResultState : IState
+    public class EggResultState : FSM.IState
     {
         EggGame game;
 
@@ -19,14 +20,11 @@ namespace EA4S.Minigames.Egg
             nextStateTimer = 2f;
             toNextState = false;
 
-            if (game.stagePositiveResult)
-            {
+            if (game.stagePositiveResult) {
                 game.Context.GetAudioManager().PlaySound(Sfx.Win);
-                game.Context.GetCheckmarkWidget().Show(true);
+                game.Context.GetCheckmarkWidget().Show(true, new Vector2(0, 250));
                 toNextState = true;
-            }
-            else
-            {
+            } else {
                 game.Context.GetAudioManager().PlaySound(Sfx.Lose);
                 game.Context.GetCheckmarkWidget().Show(false);
                 toNextState = true;
@@ -37,24 +35,19 @@ namespace EA4S.Minigames.Egg
 
         public void Update(float delta)
         {
-            if (toNextState)
-            {
+            if (toNextState) {
                 nextStateTimer -= delta;
 
-                if (nextStateTimer <= 0f)
-                {
+                if (nextStateTimer <= 0f) {
                     toNextState = false;
 
-                    if (game.currentStage >= EggGame.numberOfStage)
-                    {
+                    if (game.currentStage >= EggGame.numberOfStage) {
                         game.eggController.Reset();
                         game.runLettersBox.RemoveAllRunLetters();
                         game.eggButtonBox.RemoveButtons();
                         game.Context.GetAudioManager().PlayMusic(Music.Relax);
                         game.EndGame(game.CurrentStars, game.correctStages);
-                    }
-                    else
-                    {
+                    } else {
                         game.SetCurrentState(game.QuestionState);
                     }
                 }

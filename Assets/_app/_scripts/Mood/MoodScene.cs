@@ -1,16 +1,16 @@
-﻿using EA4S.Audio;
-using EA4S.Core;
-using EA4S.UI;
+﻿using Antura.Audio;
+using Antura.Core;
+using Antura.Keeper;
+using Antura.UI;
 using UnityEngine;
 
-namespace EA4S.Scenes
+namespace Antura.Scenes
 {
     /// <summary>
     /// Manager for the Mood scene.
     /// </summary>
     public class MoodScene : SceneBase
     {
-
         protected override void Start()
         {
             base.Start();

@@ -1,5 +1,4 @@
-﻿using EA4S.Core;
-using UnityEngine;
+using Antura.Core;
 using SQLite;
 using System;
 using System.Collections;
@@ -7,8 +6,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq.Expressions;
+using UnityEngine;
 
-namespace EA4S.Database
+namespace Antura.Database
 {
     /// <summary>
     /// Service that connects to SQLite.
@@ -17,6 +17,8 @@ namespace EA4S.Database
     /// </summary>
     public class DBService
     {
+        SQLiteConnection _connection;
+
         #region Paths
 
         public static string GetDatabaseFilePath(string fileName, string dirName)
@@ -33,10 +35,12 @@ namespace EA4S.Database
 
         #region Factory Methods
 
-        public static DBService OpenFromFileName(bool createIfNotFound, string fileName, string dirName = AppConstants.DbPlayersFolder)
+        public static DBService OpenFromDirectoryAndFilename(bool createIfNotFound, string fileName, string dirName = AppConfig.DbPlayersFolder)
         {
             var dirPath = GetDatabaseDirectoryPath(dirName);
-            if (!Directory.Exists(dirPath)) Directory.CreateDirectory(dirPath);
+            if (!Directory.Exists(dirPath)) {
+                Directory.CreateDirectory(dirPath);
+            }
 
             var dbPath = GetDatabaseFilePath(fileName, dirName);
             return new DBService(createIfNotFound, dbPath);
@@ -47,41 +51,48 @@ namespace EA4S.Database
             return new DBService(createIfNotFound, filePath);
         }
 
-        public static DBService OpenFromPlayerUUID(bool createIfNotFound, string playerUuid, string fileName = "", string dirName = AppConstants.DbPlayersFolder)
+        public static DBService OpenFromPlayerUUID(bool createIfNotFound, string playerUuid, string fileName = "",
+            string dirName = AppConfig.DbPlayersFolder)
         {
-            if (fileName == "") fileName = AppConstants.GetPlayerDatabaseFilename(playerUuid);
+            if (fileName == "") {
+                fileName = AppConfig.GetPlayerDatabaseFilename(playerUuid);
+            }
             var dirPath = GetDatabaseDirectoryPath(dirName);
-            if (!Directory.Exists(dirPath)) Directory.CreateDirectory(dirPath);
+            if (!Directory.Exists(dirPath)) {
+                Directory.CreateDirectory(dirPath);
+            }
 
             var dbPath = GetDatabaseFilePath(fileName, dirName);
             return new DBService(createIfNotFound, dbPath);
         }
 
-        public static DBService ExportAndOpenFromPlayerUUID(string playerUuid, string fileName = "", string dirName = AppConstants.DbPlayersFolder)
+        public static DBService ExportFromPlayerUUIDAndReopen(string playerUuid, string fileName = "",
+            string dirName = AppConfig.DbPlayersFolder)
         {
-            if (fileName == "") fileName = AppConstants.GetPlayerDatabaseFilename(playerUuid);
+            if (fileName == "") {
+                fileName = AppConfig.GetPlayerDatabaseFilename(playerUuid);
+            }
             ExportFromPlayerUUID(playerUuid, fileName, dirName);
-            return OpenFromPlayerUUID(false, playerUuid, AppConstants.GetPlayerDatabaseFilenameForExport(playerUuid), AppConstants.DbExportFolder);
+            return OpenFromPlayerUUID(false, playerUuid, AppConfig.GetPlayerDatabaseFilenameForExport(playerUuid),
+                AppConfig.DbExportFolder);
         }
 
         public static void ExportFromPlayerUUID(string playerUuid, string fileName, string dirName)
         {
             var dbPath = GetDatabaseFilePath(fileName, dirName);
 
-            if (!File.Exists(dbPath))
-            {
+            if (!File.Exists(dbPath)) {
                 Debug.LogError("Could not find database for export at path: " + dbPath);
                 return;
             }
 
-            var dirNameExport = AppConstants.DbExportFolder;
+            var dirNameExport = AppConfig.DbExportFolder;
             var dirPathExport = GetDatabaseDirectoryPath(dirNameExport);
-            if (!Directory.Exists(dirPathExport))
-            {
+            if (!Directory.Exists(dirPathExport)) {
                 Directory.CreateDirectory(dirPathExport);
             }
 
-            var dbNameExport = AppConstants.GetPlayerDatabaseFilenameForExport(playerUuid);
+            var dbNameExport = AppConfig.GetPlayerDatabaseFilenameForExport(playerUuid);
             var dbPathExport = GetDatabaseFilePath(dbNameExport, dirNameExport);
 
             File.Copy(dbPath, dbPathExport);
@@ -89,7 +100,6 @@ namespace EA4S.Database
 
         #endregion
 
-        SQLiteConnection _connection;
 
         private DBService(bool createIfNotFound, string dbPath)
         {
@@ -100,32 +110,25 @@ namespace EA4S.Database
             try {
                 _connection = new SQLiteConnection(dbPath, SQLiteOpenFlags.ReadWrite);
             } catch {
-                if (createIfNotFound)
-                {
+                if (createIfNotFound) {
                     _connection = new SQLiteConnection(dbPath, SQLiteOpenFlags.ReadWrite | SQLiteOpenFlags.Create);
                     RegenerateDatabase();
-                }
-                else
-                {
+                } else {
                     Debug.LogWarning("Could not find database at: " + dbPath);
                 }
             }
 
-            if (_connection != null)
-            {
+            if (_connection != null) {
                 // Check that the DB version is correct, otherwise recreate the tables
                 GenerateTable<DatabaseInfoData>(true, false); // Makes sure that the database info data table exists
                 var info = _connection.Find<DatabaseInfoData>(1);
-                if (info == null || info.DynamicDbVersion != AppConstants.DynamicDbSchemeVersion)
-                {
+                if (info == null || info.DynamicDbVersion != AppConfig.DynamicDbSchemeVersion) {
                     var lastVersion = info != null ? info.DynamicDbVersion : "NONE";
-                    Debug.LogWarning("SQL database at path " + dbPath + " is outdated. Recreating it (from " +
-                                     lastVersion + " to " + AppConstants.DynamicDbSchemeVersion + ")");
-                    RegenerateDatabase();
+                    Debug.LogWarning("SQL DB outdated. Updating it (from " + lastVersion + " to " + AppConfig.DynamicDbSchemeVersion + ") Path: " + dbPath);
+                    MigrateDatabase();
                 }
                 //Debug.Log("Database ready at path " + dbPath + "   Version: " + (info != null ? info.DynamicDbVersion : "NONE"));
             }
-
         }
 
         #region Creation
@@ -134,7 +137,14 @@ namespace EA4S.Database
         {
             RecreateAllTables();
 
-            _connection.Insert(new DatabaseInfoData(AppConstants.DynamicDbSchemeVersion, AppConstants.StaticDbSchemeVersion));
+            _connection.Insert(new DatabaseInfoData(AppConfig.DynamicDbSchemeVersion, AppConfig.StaticDbSchemeVersion));
+        }
+
+        private void MigrateDatabase()
+        {
+            MigrateAllTables();
+
+            _connection.InsertOrReplace(new DatabaseInfoData(AppConfig.DynamicDbSchemeVersion, AppConfig.StaticDbSchemeVersion));
         }
 
         public void GenerateTables(bool create, bool drop)
@@ -159,21 +169,32 @@ namespace EA4S.Database
 
         private void GenerateTable<T>(bool create, bool drop, string customTableName = "")
         {
-            if (drop) _connection.DropTable<T>();
-            if (create) _connection.CreateTable<T>(customTableName: customTableName);
+            if (drop) {
+                _connection.DropTable<T>();
+            }
+            if (create) {
+                _connection.CreateTable<T>(customTableName: customTableName);
+            }
         }
 
         public void CreateAllTables()
         {
             GenerateTables(true, false);
         }
+
         public void DropAllTables()
         {
             GenerateTables(false, true);
         }
+
         public void RecreateAllTables()
         {
             GenerateTables(true, true);
+        }
+
+        public void MigrateAllTables()
+        {
+            GenerateTables(true, false);
         }
 
         #endregion
@@ -192,39 +213,47 @@ namespace EA4S.Database
 
         public void Insert<T>(T data) where T : IData, new()
         {
-            if (AppConstants.DebugLogInserts)
+            if (AppConfig.DebugLogDbInserts) {
                 Debug.Log("DB Insert: " + data);
+            }
             _connection.Insert(data);
         }
 
         public void InsertOrReplace<T>(T data) where T : IData, new()
         {
-            if (AppConstants.DebugLogInserts)
+            if (AppConfig.DebugLogDbInserts) {
                 Debug.Log("DB Insert: " + data);
+            }
             _connection.InsertOrReplace(data);
         }
 
         public void InsertAll<T>(IEnumerable<T> objects) where T : IData, new()
         {
-            if (AppConstants.DebugLogInserts)
-                foreach (var obj in objects)
+            if (AppConfig.DebugLogDbInserts) {
+                foreach (var obj in objects) {
                     Debug.Log("DB Insert: " + obj);
+                }
+            }
             _connection.InsertAll(objects);
         }
 
-        public void InsertAllObjects(IEnumerable objects) 
+        public void InsertAllObjects(IEnumerable objects)
         {
-            if (AppConstants.DebugLogInserts)
-                foreach (var obj in objects)
+            if (AppConfig.DebugLogDbInserts) {
+                foreach (var obj in objects) {
                     Debug.Log("DB Insert: " + obj);
+                }
+            }
             _connection.InsertAll(objects);
         }
 
         public void InsertOrReplaceAll<T>(IEnumerable<T> objects) where T : IData, new()
         {
-            if (AppConstants.DebugLogInserts)
-                foreach (var obj in objects)
+            if (AppConfig.DebugLogDbInserts) {
+                foreach (var obj in objects) {
                     Debug.Log("DB Insert: " + obj);
+                }
+            }
             _connection.InsertAll(objects, "OR REPLACE");
         }
 
@@ -347,24 +376,16 @@ namespace EA4S.Database
         public class EnumContainerData<T> : IData where T : struct, IConvertible
         {
             [PrimaryKey]
-            public int Value
-            {
-                get;
-                set;
-            }
-
+            public int Value { get; set; }
             public string Name { get; set; }
 
             public EnumContainerData()
             {
-
             }
 
             public void Set(T enumValue)
             {
-                if (!typeof(T).IsEnum) {
-                    throw new ArgumentException("T must be an enumerated type");
-                }
+                if (!typeof(T).IsEnum) { throw new ArgumentException("T must be an enumerated type"); }
 
                 Name = enumValue.ToString(CultureInfo.InvariantCulture);
                 Value = Convert.ToInt32(enumValue);
@@ -375,7 +396,7 @@ namespace EA4S.Database
                 return Value.ToString();
             }
         }
+
         #endregion
     }
-
 }

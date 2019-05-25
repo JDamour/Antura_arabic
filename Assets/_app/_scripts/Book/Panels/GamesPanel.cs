@@ -1,11 +1,12 @@
-﻿using UnityEngine;
+﻿using Antura.Audio;
+using Antura.Core;
+using Antura.Database;
+using Antura.Minigames;
+using Antura.UI;
+using UnityEngine;
 using UnityEngine.UI;
-using EA4S.Audio;
-using EA4S.Core;
-using EA4S.Database;
-using EA4S.UI;
 
-namespace EA4S.Book
+namespace Antura.Book
 {
     /// <summary>
     /// Displays information on minigames that the player has unlocked.
@@ -13,14 +14,17 @@ namespace EA4S.Book
     public class GamesPanel : MonoBehaviour
     {
         [Header("Prefabs")]
-        public GameObject MinigameItemPrefab;
+        public GameObject MainMiniGameItemPrefab;
+        public GameObject VariationsContainer;
+        public GameObject MiniGameItemPrefab;
 
         [Header("References")]
         public GameObject DetailPanel;
+
         public GameObject ElementsContainer;
         public TextRender ArabicText;
         public TextRender EnglishText;
-        public TextRender ScoreText;
+        //public TextRender ScoreText;
         public Image MiniGameLogoImage;
         public Image MiniGameBadgeImage;
         public Button LaunchGameButton;
@@ -47,47 +51,65 @@ namespace EA4S.Book
         void activatePanel(BookArea panel, bool status)
         {
             switch (panel) {
-
                 case BookArea.MiniGames:
                     //AudioManager.I.PlayDialog("Book_Games");
-                    MinigamesPanel();
+                    MiniGamesPanel();
                     break;
             }
         }
 
-        void MinigamesPanel()
+        void MiniGamesPanel()
         {
             emptyContainer(ElementsContainer);
 
             var mainMiniGamesList = MiniGamesUtilities.GetMainMiniGameList();
             foreach (var game in mainMiniGamesList) {
-                btnGO = Instantiate(MinigameItemPrefab);
+                btnGO = Instantiate(MainMiniGameItemPrefab);
                 btnGO.transform.SetParent(ElementsContainer.transform, false);
+                btnGO.transform.SetAsFirstSibling();
                 btnGO.GetComponent<ItemMainMiniGame>().Init(this, game);
             }
+            DetailMainMiniGame(null);
             DetailMiniGame(null);
+        }
+
+        public void DetailMainMiniGame(MainMiniGame selectedMainMiniGame)
+        {
+            emptyContainer(VariationsContainer);
+
+            if (selectedMainMiniGame == null) {
+                return;
+            }
+
+            //Debug.Log("DetailMainMiniGame(): " + selectedMainMiniGame.MainId);
+            foreach (var gameVariation in selectedMainMiniGame.variations) {
+                btnGO = Instantiate(MiniGameItemPrefab);
+                btnGO.transform.SetParent(VariationsContainer.transform, false);
+                btnGO.GetComponent<ItemMiniGame>().Init(this, gameVariation);
+            }
+
+            ElementsContainer.BroadcastMessage("Select", selectedMainMiniGame, SendMessageOptions.DontRequireReceiver);
+            DetailMiniGame(selectedMainMiniGame.variations[0]);
         }
 
         public void DetailMiniGame(MiniGameInfo selectedGameInfo)
         {
-            //foreach (Transform t in ElementsContainer.transform) {
-            //    t.GetComponent<ItemMainMiniGame>().Select(selectedGameInfo);
-            //}
-
             if (selectedGameInfo == null) {
                 currentMiniGame = null;
                 ArabicText.text = "";
                 EnglishText.text = "";
-                ScoreText.text = "";
+                //ScoreText.text = "";
                 MiniGameLogoImage.enabled = false;
                 MiniGameBadgeImage.enabled = false;
                 LaunchGameButton.gameObject.SetActive(false);
                 DetailPanel.SetActive(false);
                 return;
             }
+
             DetailPanel.SetActive(true);
             currentMiniGame = selectedGameInfo.data;
-            ElementsContainer.BroadcastMessage("Select", selectedGameInfo, SendMessageOptions.DontRequireReceiver);
+            VariationsContainer.BroadcastMessage("Select", selectedGameInfo, SendMessageOptions.DontRequireReceiver);
+
             AudioManager.I.PlayDialogue(selectedGameInfo.data.GetTitleSoundFilename());
 
             ArabicText.text = selectedGameInfo.data.Title_Ar;
@@ -99,7 +121,8 @@ namespace EA4S.Book
             //ScoreText.text = Output;
 
             // Launch button
-            if (!AppManager.I.NavigationManager.PrevSceneIsReservedArea() && (selectedGameInfo.unlocked || AppManager.I.Player.IsDemoUser)) {
+            if (!AppManager.I.NavigationManager.PrevSceneIsReservedArea() &&
+                (selectedGameInfo.unlocked || AppManager.I.Player.IsDemoUser)) {
                 LaunchGameButton.gameObject.SetActive(true);
                 LaunchGameButton.interactable = true;
             } else {

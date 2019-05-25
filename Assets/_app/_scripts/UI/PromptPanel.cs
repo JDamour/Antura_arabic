@@ -1,12 +1,12 @@
-﻿using System;
+﻿using Antura.Audio;
+using Antura.Core;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
-using EA4S.Core;
-using EA4S.Audio;
 using DG.DeExtensions;
 using DG.Tweening;
 
-namespace EA4S.UI
+namespace Antura.UI
 {
     /// <summary>
     /// Shows an interactive YES/NO prompt panel.
@@ -20,11 +20,11 @@ namespace EA4S.UI
         public TextRender TfMessageEnglishFull;
         public UIButton BtYes, BtNo;
 
-        Action onYes, onNo;
-        Action onCloseAction;
-        float defYesX;
-        RectTransform btYesRT;
-        Tween showTween;
+        private Action onYes, onNo;
+        private Action onCloseAction;
+        private float defYesX;
+        private RectTransform btYesRT;
+        private Tween showTween;
 
         #region Unity
 
@@ -61,8 +61,7 @@ namespace EA4S.UI
         {
             var localizationData = LocalizationManager.GetLocalizationData(id);
             AudioManager.I.PlayDialogue(localizationData);
-            Show(LocalizationManager.GetTranslation(id),
-                localizationData.English, _onYes, _onNo);
+            Show(LocalizationManager.GetTranslation(id), localizationData.GetSubtitleTranslation(), _onYes, _onNo);
         }
 
         public void Show(string _messageAr, Action _onYes, Action _onNo)
@@ -99,16 +98,23 @@ namespace EA4S.UI
 
         void OnClick(UIButton _bt)
         {
-            if (showTween.IsBackwards()) return;
+            if (showTween.IsBackwards()) {
+                return;
+            }
 
-            if (_bt == BtYes && onYes != null) onCloseAction = onYes;
-            else if (_bt == BtNo && onNo != null) onCloseAction = onNo;
+            if (_bt == BtYes && onYes != null) {
+                onCloseAction = onYes;
+            } else if (_bt == BtNo && onNo != null) {
+                onCloseAction = onNo;
+            }
             Close();
         }
 
         void OnClose()
         {
-            if (onCloseAction != null) onCloseAction();
+            if (onCloseAction != null) {
+                onCloseAction();
+            }
             onCloseAction = null;
         }
 

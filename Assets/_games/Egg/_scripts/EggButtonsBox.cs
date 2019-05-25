@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using EA4S.MinigamesAPI;
-using EA4S.MinigamesCommon;
+using Antura.LivingLetters;
+using Antura.Minigames;
 using UnityEngine;
 
-namespace EA4S.Minigames.Egg
+namespace Antura.Minigames.Egg
 {
     public class EggButtonsBox : MonoBehaviour
     {
@@ -77,7 +77,9 @@ namespace EA4S.Minigames.Egg
                 if (predicate(eggButton.livingLetterData))
                 {
                     if (RemoveButton(eggButton.livingLetterData))
+                    {
                         --i;
+                    }
                 }
             }
         }
@@ -392,18 +394,29 @@ namespace EA4S.Minigames.Egg
             }
         }
 
-        public void PlayButtonsAudio(bool lightUp, bool inPositionOrder, float delay, Action endCallback, Action startCallback = null)
+        public void PlayButtonsAudio(ILivingLetterData playBefore, ILivingLetterData playAfter, bool lightUp, bool inPositionOrder, float delay, Action endCallback, Action startCallback = null)
         {
             List<EggButton> buttons = GetButtons(inPositionOrder);
 
             Action sCallback = null;
             Action eCallback = null;
 
+            if (playBefore != null)
+                delay += 0.5f + audioManager.PlayVocabularyData(playBefore).Duration;
+
             for (int i = 0; i < buttons.Count; i++)
             {
                 if (i == buttons.Count - 1)
                 {
-                    eCallback = endCallback;
+                    eCallback = () =>
+                    {
+                        if (playAfter != null)
+                            audioManager.PlayVocabularyData(playAfter);
+
+                        if (endCallback != null)
+                            endCallback();
+
+                    };
                 }
 
                 if (i == 0)

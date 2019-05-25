@@ -1,7 +1,7 @@
-﻿using UnityEngine;
-using EA4S.LivingLetters;
+using Antura.LivingLetters;
+using UnityEngine;
 
-namespace EA4S.Minigames.FastCrowd
+namespace Antura.Minigames.FastCrowd
 {
     /// <summary>
     /// This class manages the letters crowd
@@ -47,7 +47,7 @@ namespace EA4S.Minigames.FastCrowd
 
                 var data = dragging.GetComponent<LivingLetterController>().Data;
 
-                FastCrowdConfiguration.Instance.Context.GetAudioManager().PlayLetterData(data, true);
+                FastCrowdConfiguration.Instance.Context.GetAudioManager().PlayVocabularyData(data, true, soundType: FastCrowdConfiguration.Instance.GetVocabularySoundType());
             }
         }
 
@@ -57,7 +57,7 @@ namespace EA4S.Minigames.FastCrowd
                 dragging.EndDragging();
             dragging = null;
         }
-        
+
         protected override LivingLetterController SpawnLetter()
         {
             LivingLetterController l = base.SpawnLetter();

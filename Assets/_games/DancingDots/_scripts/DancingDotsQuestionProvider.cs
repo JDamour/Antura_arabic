@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
-using EA4S.Core;
-using EA4S.MinigamesAPI;
-using EA4S.MinigamesAPI.Sample;
+using Antura.LivingLetters;
+using Antura.LivingLetters.Sample;
+using Antura.Core;
 
-namespace EA4S.Minigames.DancingDots
+namespace Antura.Minigames.DancingDots
 {
     public class DancingDotsQuestionProvider : IQuestionProvider
 	{

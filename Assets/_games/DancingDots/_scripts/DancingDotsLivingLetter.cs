@@ -1,9 +1,9 @@
-﻿using UnityEngine;
-using EA4S.LivingLetters;
-using EA4S.MinigamesAPI;
+﻿using Antura.Core;
+using Antura.LivingLetters;
+using UnityEngine;
 using TMPro;
 
-namespace EA4S.Minigames.DancingDots
+namespace Antura.Minigames.DancingDots
 {
 
     public enum LivingLetterAnim {
@@ -54,13 +54,13 @@ namespace EA4S.Minigames.DancingDots
 		{
 			if (letterData != null)
             {
-                DancingDotsConfiguration.Instance.Context.GetAudioManager().PlayLetterData(letterData);
+                DancingDotsConfiguration.Instance.Context.GetAudioManager().PlayVocabularyData(letterData);
 			}
 		}
 
 		void GetDiacritic()
 		{
-			Debug.Log("DD Get Diacritics");
+			//Debug.Log("DD Get Diacritics");
 			char FATHA1 = (char) 1611;
 			char FATHA2 = (char) 1614;
 			char DAMAH = (char) 1615;
@@ -89,9 +89,10 @@ namespace EA4S.Minigames.DancingDots
 			else
 			{
 				game.letterDiacritic = DiacriticEnum.None;
-			}
+            }
+            //Debug.Log("DD found diacritic: " + game.letterDiacritic);
 
-			StartCoroutine(game.SetupDiacritic());
+            StartCoroutine(game.SetupDiacritic());
 
 			string output = "";
 			foreach (char c in game.currentLetter)
@@ -111,6 +112,8 @@ namespace EA4S.Minigames.DancingDots
 			game.currentLetter = letterData.TextForLivingLetter;
 
 			GetDiacritic();
+
+            /* HACK: removed DOTS handling
 
 			string lettersWithOneDot = "ج خ غ ف ض ب ن ز ذ ظ";
 			string lettersWithTwoDots = "ة ق ي ت";
@@ -132,16 +135,18 @@ namespace EA4S.Minigames.DancingDots
 			{
                 game.dotsCount = 0;
 			}
+            */
+		    game.dotsCount = 0; // HACK: forced dots count
 					
 			hintText.text = game.currentLetter;
 			ShowText(hintText, game.dotHintAlpha);
 			dotlessText.text = game.currentLetter;
 			fullText.text = game.currentLetter;
-			fullTextGO.SetActive(false);
 
-		}
+            //fullTextGO.SetActive(false); // HACK: forced full letter appearing
+        }
 
-		public void HideText(TextMeshPro tmp)
+        public void HideText(TextMeshPro tmp)
 		{
 			tmp.color = game.SetAlpha(tmp.color,0);
 		}
@@ -165,7 +170,7 @@ namespace EA4S.Minigames.DancingDots
 		{
 			if (letterData != null && !game.isTutRound)
             {
-                DancingDotsConfiguration.Instance.Context.GetAudioManager().PlayLetterData(letterData);
+                DancingDotsConfiguration.Instance.Context.GetAudioManager().PlayVocabularyData(letterData);
 			}
 		}
 

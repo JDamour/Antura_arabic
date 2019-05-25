@@ -1,9 +1,9 @@
-using EA4S.MinigamesAPI;
+using Antura.Core;
+using Antura.LivingLetters;
 using System;
-using EA4S.Core;
 using UnityEngine;
 
-namespace EA4S.Assessment
+namespace Antura.Assessment
 {
     public enum CategoryType
     {
@@ -27,7 +27,7 @@ namespace EA4S.Assessment
         CategoryType categoryType;
         ILivingLetterData sun;
         ILivingLetterData moon;
-        
+
         ILivingLetterData article;
         ILivingLetterData noArticle;
         ILivingLetterData singular;
@@ -56,69 +56,67 @@ namespace EA4S.Assessment
         const string twoString = "number_02";
         const string threeString = "number_03";
 
-        public ArabicCategoryProvider( CategoryType type)
+        public ArabicCategoryProvider(CategoryType type)
         {
             categoryType = type;
-            sun = GatherData( sunString);
-            moon = GatherData( moonString);
-            noArticle = GatherData( noArticleString);
-            article = GatherData( articleString);
-            singular = GatherData( singluarString);
-            dual = GatherData( dualString);
-            plural = GatherData( pluralString);
+            sun = GatherData(sunString);
+            moon = GatherData(moonString);
+            noArticle = GatherData(noArticleString);
+            article = GatherData(articleString);
+            singular = GatherData(singluarString);
+            dual = GatherData(dualString);
+            plural = GatherData(pluralString);
 
-            sunImage = GatherImage( sunString_Image);
-            moonImage = GatherImage( moonString_Image);
+            sunImage = GatherImage(sunString_Image);
+            moonImage = GatherImage(moonString_Image);
 
-            number1 = GatherNumber( oneString);
-            number2 = GatherNumber( twoString);
-            number3 = GatherNumber( threeString);
+            number1 = GatherNumber(oneString);
+            number2 = GatherNumber(twoString);
+            number3 = GatherNumber(threeString);
         }
 
-        private ILivingLetterData GatherData( string id)
+        private ILivingLetterData GatherData(string id)
         {
             var db = AppManager.I.DB;
-            return db.GetWordDataById( id).ConvertToLivingLetterData();
+            return db.GetWordDataById(id).ConvertToLivingLetterData();
         }
 
-        private ILivingLetterData GatherImage( string id)
+        private ILivingLetterData GatherImage(string id)
         {
             var db = AppManager.I.DB;
-            return new LL_ImageData( db.GetWordDataById( id));
+            return new LL_ImageData(db.GetWordDataById(id));
         }
 
-        private ILivingLetterData GatherNumber( string id)
+        private ILivingLetterData GatherNumber(string id)
         {
             var db = AppManager.I.DB;
-            return new LL_ImageData( db.GetWordDataById( id));
+            return new LL_ImageData(db.GetWordDataById(id));
         }
 
         //finally decouple showed images from values expected in question builders
         // (otherwise add to attach a different view for certain characters)
-        public bool Compare( int currentCategory, ILivingLetterData fromQuestionBuilder)
+        public bool Compare(int currentCategory, ILivingLetterData fromQuestionBuilder)
         {
-            switch (categoryType)
-            {
+            switch (categoryType) {
                 case CategoryType.SunMoon:
-                    if (currentCategory == 0)
-                        return fromQuestionBuilder.Equals( sun);
-                    else
-                        return fromQuestionBuilder.Equals( moon);
-
+                    if (currentCategory == 0) {
+                        return fromQuestionBuilder.Equals(sun);
+                    } else {
+                        return fromQuestionBuilder.Equals(moon);
+                    }
                 case CategoryType.SingularDualPlural:
-                    switch (currentCategory)
-                    {
-                        case 0: return fromQuestionBuilder.Equals( singular);
-                        case 1: return fromQuestionBuilder.Equals( dual);
-                        default: return fromQuestionBuilder.Equals( plural);
+                    switch (currentCategory) {
+                        case 0: return fromQuestionBuilder.Equals(singular);
+                        case 1: return fromQuestionBuilder.Equals(dual);
+                        default: return fromQuestionBuilder.Equals(plural);
                     }
 
                 case CategoryType.WithOrWithoutArticle:
-                    if (currentCategory == 0)
-                        return fromQuestionBuilder.Equals( article);
-                    else
-                        return fromQuestionBuilder.Equals( noArticle);
-
+                    if (currentCategory == 0) {
+                        return fromQuestionBuilder.Equals(article);
+                    } else {
+                        return fromQuestionBuilder.Equals(noArticle);
+                    }
                 default:
                     throw new NotImplementedException();
             }
@@ -126,8 +124,7 @@ namespace EA4S.Assessment
 
         public int GetCategories()
         {
-            switch (categoryType)
-            {
+            switch (categoryType) {
                 case CategoryType.SunMoon:
                     return 2;
                 case CategoryType.SingularDualPlural:
@@ -139,40 +136,37 @@ namespace EA4S.Assessment
             }
         }
 
-        private GameObject QuestionView( ILivingLetterData data)
+        private GameObject QuestionView(ILivingLetterData data)
         {
-            return ItemFactory.Instance.SpawnQuestion( data).gameObject;
+            return ItemFactory.Instance.SpawnQuestion(data).gameObject;
         }
 
-        public GameObject SpawnCustomObject( int currentCategory)
+        public GameObject SpawnCustomObject(int currentCategory)
         {
 
-            switch (categoryType)
-            {
+            switch (categoryType) {
                 case CategoryType.SunMoon:
-                    if (currentCategory == 0)
-                        return QuestionView( sunImage);
-                    else
-                        return QuestionView( moonImage);
-
+                    if (currentCategory == 0) {
+                        return QuestionView(sunImage);
+                    } else {
+                        return QuestionView(moonImage);
+                    }
                 case CategoryType.SingularDualPlural:
-                    switch (currentCategory)
-                    {
-                        case 0: return QuestionView( number1);
-                        case 1: return QuestionView( number2);
-                        default: return QuestionView( number3);
+                    switch (currentCategory) {
+                        case 0: return QuestionView(number1);
+                        case 1: return QuestionView(number2);
+                        default: return QuestionView(number3);
                     }
 
                 case CategoryType.WithOrWithoutArticle:
-                    if (currentCategory == 0)
-                        return QuestionView( article);
-                    else
-                        return QuestionView( noArticle);
-
+                    if (currentCategory == 0) {
+                        return QuestionView(article);
+                    } else {
+                        return QuestionView(noArticle);
+                    }
                 default:
                     throw new NotImplementedException();
             }
-
         }
     }
 }
